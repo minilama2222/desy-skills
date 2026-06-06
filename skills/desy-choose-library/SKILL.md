@@ -1,47 +1,56 @@
 ---
 name: desy-choose-library
-description: "Decide whether to use desy-html, desy-angular, or desy-ionic for a DESY project based on requirements. Use when starting a new project or evaluating library choice."
+description: "Decide whether to use desy-html, desy-angular, or desy-ionic for a DESY project. Use when starting a new project, evaluating a stack, or planning a migration to DESY."
 ---
 
 # desy-choose-library
 
-Ayuda a un equipo a decidir qué librería DESY usar para un proyecto nuevo o una migración.
+Ayuda a un equipo a decidir qué librería DESY usar para un proyecto nuevo, una migración, o una evaluación de stack. Considera el tipo de producto, el perfil del equipo, los requisitos no funcionales y la publicación objetivo.
 
 ## When to use this skill
 
 - El equipo va a empezar un proyecto con DESY y no sabe qué librería encaja
 - Hay que migrar código existente a DESY
 - Hay que evaluar pros/contras antes de comprometerse a un stack
+- El equipo duda entre dos librerías y necesita una decisión razonada
 
-## Decision framework
+## Decision framework (3 preguntas)
 
 ### Pregunta 1: ¿Qué tipo de producto?
 
 | Producto | Cabecera | Librería recomendada |
 |---|---|---|
-| Sitio web / portal (contenido público) | `header-advanced` (3 bandas) | **desy-html** |
-| Webapp (gestión, CRUD, datos) | `header` estándar | **desy-angular** o **desy-ionic** |
-| App móvil nativa iOS/Android | `header-mobile` | **desy-ionic** |
-| App híbrida (móvil + web con un solo codebase) | `header-mobile` + `header` | **desy-ionic** |
+| **Sitio web / portal** (contenido público, comunicación unidireccional) | `header-advanced` (3 bandas) | **desy-html** |
+| **Webapp** (CRUD, gestión, datos, autenticación) | `header` estándar (1 banda) | **desy-angular** o **desy-ionic** (móvil) |
+| **App móvil nativa iOS/Android** | `header-mobile` | **desy-ionic** |
+| **App híbrida** (móvil + web con un solo codebase) | `header-mobile` + `header` | **desy-ionic** |
 
-### Pregunta 2: ¿Equipo y stack?
+Las 3 librerías comparten la misma identidad visual DESY, pero cada una tiene propósito, stack y casos de uso óptimos.
+
+### Pregunta 2: ¿Cuál es el perfil del equipo y stack?
 
 | Perfil del equipo | Recomendación |
 |---|---|
-| Sin experiencia previa en frameworks JS, contenido estático | desy-html |
-| Equipo Angular sólido | desy-angular (reciente, Angular 19) |
-| Equipo Angular + quiere publicar en App Store / Play Store | desy-ionic |
-| Necesita migrar un proyecto legacy a DESY poco a poco | desy-html primero, desy-angular después |
+| Maquetadores con experiencia HTML/CSS, sin JS frameworks | **desy-html** |
+| Equipo con sólidos conocimientos de Angular 16+ | **desy-angular** (apunta a Angular 19 latest) |
+| Equipo con Angular + quiere publicar en App Store / Play Store | **desy-ionic** (incluye Capacitor para builds nativas) |
+| Stack legacy a migrar poco a poco (sitio estático, web components) | Empezar con **desy-html** |
+| Necesidad de mantener LTS en producción | **desy-angular v13** (Angular 16, solo bugfixes críticos) |
+
+**Relación entre las 3:** cada versión de `desy-angular` apunta a una versión específica de `desy-html` (ver [tabla de versiones](https://desy.aragon.es/desarrollo-versiones.html)). Los parámetros de config y el diseño de componentes nacen en `desy-html` y luego se traducen a `desy-angular`. `desy-ionic` añade los suyos propios para interacción táctil.
 
 ### Pregunta 3: ¿Requisitos no funcionales?
 
 | Requisito | Si sí | Si no |
 |---|---|---|
-| SEO crítico | desy-html (mejor para indexación) | da igual |
-| Carga en <1s en 3G | desy-html (más ligero) | da igual |
-| Autenticación centralizada (DIGA, MFE) | desy-angular o desy-ionic | desy-html |
-| Accesibilidad WCAG 2.1 AA obligatoria | las 3 lo cumplen, da igual | da igual |
-| Publicar en stores (iOS/Android) | desy-ionic (con Capacitor) | da igual |
+| **SEO crítico** (portales, webs públicas) | **desy-html** (mejor para indexación) | da igual |
+| **Carga rápida en 3G / SEO / Core Web Vitals** | **desy-html** (más ligero, sin runtime JS) | da igual |
+| **Autenticación centralizada** (DIGA, MFE en Gobierno de Aragón) | **desy-angular** o **desy-ionic** | desy-html vale |
+| **Accesibilidad WCAG 2.2 AA obligatoria** | Las 3 lo cumplen, da igual | da igual |
+| **Publicación en stores** (iOS / Android) | **desy-ionic** (con Capacitor) | da igual |
+| **Funciona offline / en avión** | **desy-ionic** (Capacitor + storage) | da igual |
+| **Gestión de contenido por personas no técnicas** | **desy-html** + Liferay/WordPress si aplica | depende |
+| **Interacción táctil rica** (gestos, swipe, vibración) | **desy-ionic** | desy-angular |
 
 ## Workflow
 
@@ -50,80 +59,189 @@ Ayuda a un equipo a decidir qué librería DESY usar para un proyecto nuevo o un
 3. **Aplica los requisitos no funcionales** (pregunta 3)
 4. **Recomienda** la librería
 5. **Documenta la decisión** y enlaza al starter correspondiente
+6. **Verifica** con el equipo la versión concreta a usar (latest vs LTS)
 
 ## Output esperado
 
 Una recomendación clara con:
-- Librería elegida
+- Librería elegida + versión (latest o LTS)
 - Starter de Bitbucket a usar
 - Comando de instalación inicial
-- Plantillas de DESY a considerar
+- Plantilla de DESY a considerar
+- Cabecera recomendada según tipo de producto
 - URLs a la documentación relevante
+- Próximos pasos (siguiente skill: `desy-scaffold-project`)
 
 ## Examples
 
-### Ejemplo 1: Portal web de información
+### Ejemplo 1: Portal web de información turística
 
-**Contexto:** Portal de información turística de Aragón, contenido público, necesita SEO, equipo de maquetadores que conocen HTML/CSS pero no Angular.
+**Contexto:**
+- Portal público del Gobierno de Aragón
+- SEO crítico, accesibilidad WCAG 2.1 AA
+- Equipo de 3 maquetadores con HTML/CSS pero sin Angular
+- Backend ya tiene WordPress/Liferay
+- Sin autenticación
 
-**Decisión:**
+**Decisión razonada:**
 - Pregunta 1 → Sitio web/portal → **desy-html**
-- Pregunta 2 → Sin Angular → confirma **desy-html**
-- Pregunta 3 → SEO crítico → confirma **desy-html**
+- Pregunta 2 → Sin Angular, equipo maquetador → confirma **desy-html**
+- Pregunta 3 → SEO crítico, accesibilidad, sin auth → confirma **desy-html**
 
 **Output:**
-- Librería: `desy-html`
-- Starter: https://bitbucket.org/sdaragon/desy-html-starter
-- Comandos:
-  ```bash
-  git clone https://bitbucket.org/sdaragon/desy-html-starter.git mi-portal
-  cd mi-portal
-  npm install
-  npm run dev
-  ```
-- Cabecera: `header-advanced` (3 bandas)
-- Plantilla: `plantillas-portal-p1.html`
+
+```yaml
+librería: desy-html (latest)
+starter: https://bitbucket.org/sdaragon/desy-html-starter
+cabecera: header-advanced (3 bandas)
+plantilla: plantillas-portal-p1.html
+
+setup:
+  - git clone https://bitbucket.org/sdaragon/desy-html-starter.git mi-portal
+  - cd mi-portal
+  - npm install
+  - npm run dev
+  - npm run build
+
+próximo_skill: desy-scaffold-project
+plantillas_a_revisar: [plantillas-portal-p1.html]
+```
+
+**Notas:**
+- El proyecto se integra con WordPress/Liferay para gestión de contenido. Si el equipo necesita maquetar desde CMS, desy-html permite incluir las plantillas DESY dentro del tema del CMS.
+- Accesibilidad: aplicar el checklist WCAG 2.2 AA (no saltarse). Revisar con el [libro de Olga Carreras](https://olgacarreras.blogspot.com/2024/02/libro-accesibilidad-web-wcag-22-de.html).
+- Mantenimiento: como la librería avanza, fijar versión específica en `package.json` y actualizar con cuidado.
 
 ### Ejemplo 2: Webapp de gestión de expedientes
 
-**Contexto:** Aplicación interna para funcionarios, con login, gestión CRUD, tablas grandes, integración con backend ya existente.
+**Contexto:**
+- Aplicación interna para funcionarios
+- Login con DIGA (MFE del Gobierno de Aragón)
+- Tablas con paginación, filtros, acciones en lote
+- CRUD sobre entidades (expedientes, documentos)
+- Equipo con Angular 16+, 4 devs
+- Backend REST ya existe
 
-**Decisión:**
+**Decisión razonada:**
 - Pregunta 1 → Webapp → **desy-angular**
 - Pregunta 2 → Equipo con Angular → confirma **desy-angular**
-- Pregunta 3 → Autenticación centralizada → confirma **desy-angular**
+- Pregunta 3 → Autenticación centralizada, CRUD complejo → confirma **desy-angular**
 
 **Output:**
-- Librería: `desy-angular` (Angular 19)
-- Starter: https://bitbucket.org/sdaragon/desy-angular-starter
-- Comandos:
-  ```bash
-  git clone https://bitbucket.org/sdaragon/desy-angular-starter.git mi-webapp
-  cd mi-webapp
-  # Renombrar ocurrencias de 'desy-angular-starter' por el nombre del proyecto
-  npm install --legacy-peer-deps
-  npm run dev
-  ```
-- Cabecera: `header` (estándar)
-- Plantilla: `plantillas-con-sesion-iniciada.html`
 
-### Ejemplo 3: App móvil para ciudadanía
+```yaml
+librería: desy-angular (latest, Angular 19)
+starter: https://bitbucket.org/sdaragon/desy-angular-starter
+cabecera: header estándar
+plantilla: plantillas-con-sesion-iniciada.html
+lts_alternativa: desy-angular v13 (Angular 16) si necesitas LTS
 
-**Contexto:** App que los ciudadanos se bajan del App Store, acceso a sus datos personales, formularios offline-friendly.
+setup:
+  - git clone https://bitbucket.org/sdaragon/desy-angular-starter.git mi-webapp
+  - cd mi-webapp
+  - # Renombrar ocurrencias de 'desy-angular-starter' por el nombre del proyecto
+  - # Archivos: angular.json, karma.conf.js, package.json, index.html
+  - npm install --legacy-peer-deps
+  - npm run dev
+  - npm run build-prod
+  - npm run e2e   # Playwright tests
 
-**Decisión:**
+próximo_skill: desy-scaffold-project
+componentes_clave:
+  - tabla avanzada (con filtros, ordenación, acciones en lote)
+  - input (autocomplete con datos de DIGA)
+  - modal (confirmaciones de acciones destructivas)
+  - notifcaciones (feedback de operaciones)
+  - paginación
+patrones_a_usar:
+  - acciones-de-tabla (acciones en lote)
+  - filtros (ordenación, búsqueda)
+  - paginación
+  - avanzar-retroceder (si hay wizards)
+```
+
+**Notas:**
+- Los patrones `acciones-de-tabla` y `filtros` son CRÍTICOS para la UX de una webapp con muchas filas. No reinventar.
+- La plantilla `plantillas-con-sesion-iniciada.html` da la estructura base de layout para apps autenticadas.
+- Si el equipo no está familiarizado con Tailwind dentro de Angular, hacer un training corto antes. La mayoría de los estilos en desy-angular son utility classes.
+
+### Ejemplo 3: App móvil nativa para ciudadanía
+
+**Contexto:**
+- App que los ciudadanos se bajan del App Store y Play Store
+- Acceso a sus datos personales (DNI, notificaciones)
+- Formularios offline-friendly (solicitudes desde el móvil)
+- Notificaciones push
+- Equipo con Angular, primer proyecto móvil
+
+**Decisión razonada:**
 - Pregunta 1 → App móvil → **desy-ionic**
 - Pregunta 2 → Equipo con Angular + quieren publicar → confirma **desy-ionic**
-- Pregunta 3 → Necesita publicación en stores → confirma **desy-ionic**
+- Pregunta 3 → Publicación en stores, offline, interacción táctil → confirma **desy-ionic**
 
 **Output:**
-- Librería: `desy-ionic`
-- Storybook: https://desy.aragon.es/desy-ionic
-- Stack: Ionic + Angular + Capacitor (iOS/Android)
+
+```yaml
+librería: desy-ionic (storybook en https://desy.aragon.es/desy-ionic)
+stack: Ionic + Angular + Capacitor (iOS/Android)
+cabecera: header-mobile
+plantilla: pending (desy-ionic tiene sus propias plantillas para móvil)
+figma: https://www.figma.com/community/file/1383376074462615538/desy-ionic
+
+setup:
+  - git clone https://bitbucket.org/sdaragon/desy-ionic.git mi-app
+  - cd mi-app
+  - npm install
+  - # Para builds nativas:
+  - npx cap add ios
+  - npx cap add android
+  - npm run build && npx cap sync
+  - npx cap open ios     # abre Xcode
+  - npx cap open android # abre Android Studio
+
+próximo_skill: desy-scaffold-project
+componentes_clave_movil:
+  - header-mobile (cabezera específica para móvil)
+  - action-sheet (menú contextual)
+  - list-mobile (listas con swipe)
+  - tabs (navegación inferior)
+  - pull-to-refresh
+consideraciones_especiales:
+  - gestos: usar directivas de Ionic
+  - accesibilidad táctil: target >= 44x44px
+  - notificaciones push: configurar Capacitor
+  - almacenamiento local: Capacitor Storage o SQLite
+```
+
+**Notas:**
+- desy-ionic es la única de las 3 librerías que tiene directrices específicas de móvil (gestos, vibración, target size).
+- Los storybooks (`/desy-ionic`) tienen demos interactivos — usarlos como referencia visual antes de empezar.
+- El equipo debe conocer Capacitor (que envuelve Cordova con mejor DX). Si no, training previo.
+
+## Anti-patterns (lo que NO hacer)
+
+- **No mezclar librerías en el mismo proyecto.** Si empiezas con desy-html, no añadas desy-angular para "complementar". Complica mantenimiento y versionado.
+- **No elegir desy-angular para un portal estático.** Overhead de Angular + mantenimiento de versiones para un sitio que no lo necesita.
+- **No elegir desy-html para una webapp con auth y CRUD.** Terminarás escribiendo tu propio framework encima de Nunjucks. Mal.
+- **No ignorar la tabla de versiones.** desy-angular v13 (Angular 16) no tiene las mismas features que desy-angular v19.
+- **No asumir que las 3 son intercambiables.** Visualmente similares, técnicamente muy distintas.
 
 ## Related
 
-- Skill: `desy-implement-component` (siguiente paso tras elegir librería)
-- Skill: `desy-scaffold-project` (scaffolding tras elegir)
-- Doc oficial: https://desy.aragon.es/como-empezar-tutorial.html
-- Tutorial para IA: https://desy.aragon.es/como-empezar-tutorial.html.md
+- **Skill: `desy-scaffold-project`** — siguiente paso, setup del proyecto
+- **Skill: `desy-implement-component`** — siguiente paso, generar código de un componente
+- **Doc oficial:** https://desy.aragon.es/como-empezar-tutorial.html.md
+- **Índice completo:** https://desy.aragon.es/llms.txt
+- **Mapa del ecosistema DESY:** [`/docs/ecosystem-map.md`](../../docs/ecosystem-map.md) (en este repo)
+- **Tabla de versiones:** https://desy.aragon.es/desarrollo-versiones.html
+- **Repos en Bitbucket:** https://bitbucket.org/sdaragon/
+
+## Si el resultado de la decisión no encaja en ninguna de las 3
+
+A veces la respuesta correcta es **no usar DESY**. Algunos casos donde conviene evaluar otras opciones:
+
+- Proyecto con animaciones pesadas o canvas/WebGL → evaluar frameworks especializados (Three.js, Pixi.js) con componentes DESY solo para chrome
+- Web con rendering en el servidor (SSR) para SEO extremo → Next.js o similar, no encaja con desy-html/angular/ionic
+- Landing pages one-shot con CMS sin maquetadores → consider solo CSS + Figma, sin librería
+
+**Pero:** casi siempre hay una forma de hacer el proyecto con DESY. Antes de descartar, consulta conmigo (minilama) o con el equipo de SDA en `https://www.aragon.es/`.
