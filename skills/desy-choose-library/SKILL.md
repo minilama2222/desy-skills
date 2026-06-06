@@ -1,6 +1,6 @@
 ---
 name: desy-choose-library
-description: "Decide whether to use desy-html, desy-angular, or desy-ionic for a DESY project. Use when starting a new project, evaluating a stack, or planning a migration to DESY."
+description: "Decide between desy-html, desy-angular, and desy-ionic. Use when starting or migrating a DESY project, or evaluating library choice."
 ---
 
 # desy-choose-library
@@ -225,6 +225,15 @@ consideraciones_especiales:
 - **No elegir desy-html para una webapp con auth y CRUD.** Terminarás escribiendo tu propio framework encima de Nunjucks. Mal.
 - **No ignorar la tabla de versiones.** desy-angular v13 (Angular 16) no tiene las mismas features que desy-angular v19.
 - **No asumir que las 3 son intercambiables.** Visualmente similares, técnicamente muy distintas.
+
+## Gotchas
+
+- **Pregunta 1 (tipo de producto) es la más importante.** El equipo muchas veces la salta y va directo a "¿cuál conozco mejor?" — eso es backwards. Empieza siempre por el tipo de producto.
+- **El equipo con Angular 16 NO equivale a equipo con desy-angular v13 LTS.** El LTS de DESY actualiza con menos frecuencia que Angular upstream. Verificar siempre la [tabla de versiones](https://desy.aragon.es/desarrollo-versiones.html).
+- **No recomendar desy-ionic si el equipo no va a publicar en stores.** El overhead de Capacitor, Xcode/Android Studio, y builds nativas no compensa si el deliverable es solo web.
+- **Si el equipo tiene "experiencia con HTML" pero no con Tailwind, desy-html puede ser duro al principio.** El starter ya tiene Tailwind pre-configurado pero requiere familiaridad. Ofrecer un quickstart de Tailwind si dudan.
+- **Para portales institucionales grandes, considera hosting y mantenimiento.** desy-html con Vite genera estáticos que se pueden servir desde cualquier CDN. desy-angular requiere Node en producción. La decisión afecta operaciones, no solo desarrollo.
+- **El starter de Bitbucket puede estar desactualizado respecto a la doc oficial.** Antes de empezar, comparar la versión del starter con la [tabla de versiones](https://desy.aragon.es/desarrollo-versiones.html).
 
 ## Related
 

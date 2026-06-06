@@ -1,6 +1,6 @@
 ---
 name: desy-implement-component
-description: "Generate copy-pasteable DESY component code in desy-html (Nunjucks), desy-angular (TS), or desy-ionic. Use when implementing a specific DESY component with given requirements, copying from official examples, or checking accessibility of a component."
+description: "Generate copy-pasteable DESY component code in desy-html, desy-angular, or desy-ionic. Use when implementing a specific component with given requirements."
 ---
 
 # desy-implement-component

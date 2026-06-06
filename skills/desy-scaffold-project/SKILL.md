@@ -1,6 +1,6 @@
 ---
 name: desy-scaffold-project
-description: "Scaffold a new DESY project with desy-html, desy-angular, or desy-ionic. Use after choosing a library, to clone the official starter, install dependencies with NVM, configure the project name, and verify the dev server runs."
+description: "Scaffold a DESY project with the chosen library. Clone official starter, install deps with NVM, rename, verify dev server. Use after choose-library."
 ---
 
 # desy-scaffold-project
@@ -300,6 +300,76 @@ API_KEY=
 3. Para cada componente, generar el código: `desy-implement-component`
 4. Validar accesibilidad de cada componente: `desy-validate-accessibility`
 5. Tests E2E con Playwright (incluido en desy-angular-starter)
+
+## Examples (resumen)
+
+### Ejemplo: Scaffold de un portal con desy-html
+
+```bash
+# 1. Decisión (desy-choose-library)
+# Portal web público, SEO crítico → desy-html
+
+# 2. Setup (desy-scaffold-project)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+nvm install --lts
+git clone https://bitbucket.org/sdaragon/desy-html-starter.git portal-aragon
+cd portal-aragon
+npm install
+npm run dev
+# http://localhost:5173 — listo para maquetar
+
+# 3. Implementar componentes
+# (desy-implement-component — generar cada componente)
+# Por ejemplo: Header-advanced, footer, cards, formularios
+
+# 4. Validar accesibilidad
+# (desy-validate-accessibility — axe-core + tests manuales)
+```
+
+### Ejemplo: Scaffold de una webapp con desy-angular
+
+```bash
+# 1. Decisión
+# Webapp de gestión, equipo Angular 19 → desy-angular latest
+
+# 2. Setup
+git clone https://bitbucket.org/sdaragon/desy-angular-starter.git webapp-expedientes
+cd webapp-expedientes
+find . -type f \( -name "*.json" -o -name "*.html" -o -name "*.ts" -o -name "*.md" \) -not -path "./node_modules/*" -not -path "./.git/*" -exec sed -i 's/desy-angular-starter/webapp-expedientes/g' {} \;
+npm install --legacy-peer-deps
+npm run dev
+# http://localhost:4200 — listo para maquetar
+
+# 3. Implementar
+# Tabla avanzada + acciones en lote, modal destructiva, paginación
+
+# 4. Validar
+# axe-core + tests de teclado + lector de pantalla
+```
+
+### Ejemplo: Scaffold de una app móvil con desy-ionic
+
+```bash
+# 1. Decisión
+# App para ciudadanía, iOS + Android → desy-ionic
+
+# 2. Setup
+git clone https://bitbucket.org/sdaragon/desy-ionic.git mi-app-ciudadana
+cd mi-app-ciudadana
+npm install
+npx cap add ios
+npx cap add android
+npm start
+# http://localhost:8100 — Ionic dev server
+npx cap open ios  # abre Xcode
+npx cap open android  # abre Android Studio
+
+# 3. Implementar
+# Tabs, action sheets, modales, gestos específicos móvil
+
+# 4. Validar
+# Accesibilidad táctil (44x44px), gestos, foco en navegación
+```
 
 ## Related
 

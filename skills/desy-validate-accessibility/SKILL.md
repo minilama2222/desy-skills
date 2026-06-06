@@ -1,6 +1,6 @@
 ---
 name: desy-validate-accessibility
-description: "Validate WCAG 2.2 AA accessibility of DESY components and pages. Use before merging any UI work, when reviewing accessibility, or when auditing existing code. Combines automated tools (axe, pa11y) with manual tests (keyboard, screen reader, contrast)."
+description: "Validate WCAG 2.2 AA accessibility of DESY components and pages. Use before merging UI, auditing, or reviewing accessibility. Combines automated + manual tests."
 ---
 
 # desy-validate-accessibility
@@ -302,6 +302,104 @@ Tras todos los tests, compila un reporte de accesibilidad:
 - **No usar tablas para layout.** Aunque "se vea bien", rompe la semántica de tablas.
 - **No saltarse tests de teclado después de añadir interactividad nueva.** El foco y los shortcuts de teclado se rompen fácil.
 - **No añadir iconos sin texto o aria-label.** Iconos sueltos son "elementos decorativos" para un lector de pantalla.
+
+## Examples (uso típico)
+
+### Ejemplo: Validar un componente Button antes de mergear
+
+**Contexto:** dev acaba de implementar un botón "Eliminar" con variante destructiva. Quiere mergear. Antes, valida accesibilidad.
+
+**Pasos con el skill:**
+
+1. **Scan automático con axe-core** (5 min):
+   ```bash
+   npx axe http://localhost:4200/mi-pantalla --exit
+   # Espera: 0 errores. Si hay, corregir antes de seguir.
+   ```
+
+2. **Test de teclado** (5 min):
+   - Tab → foco al botón, outline visible ✅
+   - Enter → activa la acción ✅
+   - Si hay confirmación, abre modal con foco en título ✅
+
+3. **Test con lector de pantalla** (5 min):
+   - Botón anuncia: "Eliminar, botón" (no "icono de papelera, botón")
+   - Si loading, anuncia: "Eliminando, por favor espere"
+
+4. **Checklist específica de Button** (ver arriba en "Checklist WCAG 2.2 AA por categoría"):
+   - ✅ Elemento `<button>` (no `<div>`)
+   - ✅ Texto claro ("Eliminar", verbo en infinitivo)
+   - ✅ Variante destructiva con color "alert" o "danger"
+   - ✅ Si loading, previene doble click
+   - ✅ Modal de confirmación posterior
+
+5. **Reporte**: sin issues detectados → puede mergear.
+
+### Ejemplo: Auditar accesibilidad de una página completa antes de release
+
+**Contexto:** la app está a punto de pasar a revisión oficial de accesibilidad (obligatoria por RD 1112/2018). Auditar toda la home y las 5 pantallas principales.
+
+**Pasos:**
+
+1. **Scan automático por página** (10 min total):
+   ```bash
+   for url in / /tramites /notificaciones /mis-datos /ayuda /aviso-legal; do
+     echo "--- $url ---"
+     npx axe http://localhost:4200$url --exit | tail -5
+   done
+   ```
+
+2. **Tests manuales por página** (10 min cada una = 60 min):
+   - Navegación con teclado: ¿skip-link, orden de foco, focus visible?
+   - Lector de pantalla: ¿landmarks, headings, labels correctos?
+   - Contraste: ¿texto sobre fondos en cada zona?
+   - Responsive: ¿móvil, tablet, desktop?
+
+3. **Generar reporte** (15 min):
+   - Una sección por página
+   - Issues por severidad
+   - Acciones correctivas con asignado y fecha
+   - Checklist WCAG 2.2 firmado
+
+4. **Pasar a revisión oficial**:
+   - Adjuntar el reporte
+   - Si hay issues altos, NO publicar hasta corregirlos
+   - Issues medios: corregir antes de próxima release
+   - Issues bajos: backlog
+
+### Ejemplo: Detección de issue específico (aria-invalid faltante)
+
+**Contexto:** el equipo hizo un formulario de login sin `aria-invalid` en los inputs con error.
+
+**Test:**
+- Submit con campo vacío
+- axe-core detecta: "Form elements must have labels" — falso positivo (label existe)
+- **Test manual con lector de pantalla:**
+  - Introduce email mal
+  - Submit → focus al error summary
+  - Lector lee: "Email, edición" — **NO dice "error"**
+- **Issue:** falta `aria-invalid=true` y `aria-errormessage` con id del mensaje de error
+
+**Fix** (en `componente-input-text-codigo.html`):
+```html
+<!-- ANTES -->
+<input type="email" id="email" name="email" />
+
+<!-- DESPUÉS -->
+<input
+  type="email"
+  id="email"
+  name="email"
+  aria-invalid="true"
+  aria-errormessage="email-error"
+/>
+<p id="email-error" class="text-alert-dark text-sm">
+  <span class="sr-only">Error:</span>
+  El formato del email no es válido
+</p>
+```
+
+**Re-test:** lector de pantalla ahora lee "Email, edición, error: el formato del email no es válido" ✅
 
 ## Recursos
 
