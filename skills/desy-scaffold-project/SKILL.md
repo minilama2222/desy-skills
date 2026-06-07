@@ -264,35 +264,59 @@ npm run build
 ls dist/  # o dist/mi-app/  # debe tener archivos compilados
 ```
 
-## Estructura de directorios del proyecto (convenciones de paths)
+## Estructura de directorios del proyecto (modelo librería/starter/build)
 
-Una vez clonado el starter, el proyecto tiene una estructura fija. **Usar siempre los paths reales del proyecto, no inventar rutas** (este fue un fallo real en benchmarks con IA: el agente inventó `/assets/css/main.css` cuando el path real es `src/css/styles.css`).
+**Diferencia crítica librería vs starter vs build (lección del benchmark 2026-06-07):**
+
+- **`desy-html`** es un **paquete npm** (`desy-html@16.x`, 4.7MB) que contiene los macros, los SVGs de la librería y los source CSS. Se instala como `devDependency`.
+- **`desy-html-starter`** es un **proyecto scaffolded** que importa la librería, compila Tailwind con las clases que USA el proyecto, y genera el sitio estático con Vite.
+- **El CSS que el navegador recibe** (`dist/assets/*.css` en producción, `src/css/styles.css` en dev) **es CSS compilado del proyecto**, no el CSS completo de la librería. Tailwind 4 escanea el proyecto y solo incluye las clases que aparecen en el código del proyecto. Si una clase no se usa, no está en el CSS compilado.
+
+Implicación operativa: **el output final del proyecto no es HTML estático, es HTML compilado por Vite a partir de Nunjucks + Tailwind.** Generar HTML a mano saltándose el build rompe el modelo y el resultado se ve "casi" pero inconsistente con un proyecto DESY real.
 
 ### desy-html-starter
 
 ```text
-desy-html-starter/
-├── public/                       # Servido tal cual en /assets/* en dev y prod
-│   └── images/                   # Imágenes estáticas (logos, iconos, ilustraciones)
+desy-html-starter/                        # PROYECTO CLONADO (no es la librería)
+├── public/                               # Servido tal cual por Vite (assets estáticos)
+│   └── images/                           # Imágenes del proyecto (logos, iconos)
 ├── src/
 │   ├── css/
-│   │   ├── styles.css            # Hoja de estilos principal de DESY (190KB, no modificar)
-│   │   └── custom.css            # Estilos personalizados del proyecto (override de styles.css)
+│   │   ├── styles.css                    # Source CSS (190KB) — incluye source de la librería
+│   │   └── custom.css                    # Override del proyecto (cargado después de styles.css)
 │   ├── js/
-│   │   └── index.js              # JavaScript de inicialización (componentes interactivos)
+│   │   └── index.js                      # JS de inicialización (componentes interactivos)
+│   ├── *.html                            # Páginas HTML estáticas de ejemplo
 │   └── templates/
-│       ├── pages/                # Páginas Nunjucks (.njk) — una por ruta
-│       └── components/           # Componentes reutilizables (.njk con su _macro.X.njk)
-├── vite.config.js                # Configuración de Vite (HMR, build, alias)
-└── package.json
+│       ├── pages/                        # Páginas Nunjucks (.njk) — una por ruta
+│       ├── components/                   # Macros Nunjucks reusables
+│       │   └── <componente>/
+│       │       ├── _macro.<componente>.njk   # Macro a importar con {% from %}
+│       │       └── *.njk                 # Otros archivos del componente
+│       └── includes/                     # Includes reutilizables
+├── vite.config.js                        # Compila Nunjucks + Tailwind 4, genera dist/
+├── package.json
+└── node_modules/
+    └── desy-html/                        # ← LA LIBRERÍA (importada como devDep)
+        ├── package.json
+        ├── branding/                     # Configs de branding
+        └── ...
 ```
 
+**Flujo de build (`npm run build` con Vite):**
+1. Vite lee `src/templates/pages/*.njk` (páginas Nunjucks)
+2. Los macros hacen `{% from "components/<x>/_macro.<x>.njk" import componentX %}` y llaman a `{{ componentX({...params}) }}`
+3. Vite + plugin procesa Nunjucks → HTML con HTML literal (resultado del macro)
+4. Vite + Tailwind 4 escanea el HTML resultante y compila solo las clases USADAS
+5. Resultado: `dist/<página>.html` + `dist/assets/index-<hash>.css` (compilado del proyecto) + `dist/assets/index-<hash>.js`
+6. **El CSS compilado es único del proyecto** — distinto del CSS de la librería (4.7MB) y distinto del CSS de otro proyecto (porque las clases usadas varían)
+
 **Paths que un agente NO debe inventar:**
-- CSS: importar desde `src/css/styles.css` (o `custom.css` para overrides), NUNCA `/assets/css/styles.css`
-- Imágenes: referenciar desde `public/images/...` o desde la doc oficial (logos suelen ir **inline SVG en el HTML**, no como archivo externo)
-- JS de inicialización: `src/js/index.js`
+- CSS: importar `src/css/styles.css` (no `/assets/css/main.css`)
+- Imágenes: referenciar `public/images/<archivo>` o inline SVG (raramente archivo externo)
 - Páginas Nunjucks: `src/templates/pages/<nombre>.njk`
-- Componentes: `src/templates/components/<componente>/_macro.<componente>.njk`
+- Componentes: `{% from "components/<x>/_macro.<x>.njk" import componentX %}` — el path es relativo a `src/templates/`
+- JS de inicialización: `src/js/index.js`
 
 ### desy-angular-starter
 
@@ -300,31 +324,36 @@ desy-html-starter/
 desy-angular-starter/
 ├── src/
 │   ├── app/
-│   │   ├── core/                 # Servicios core (auth, API, interceptors)
-│   │   ├── shared/               # Componentes compartidos (header, footer, layouts)
-│   │   └── features/             # Módulos de características (páginas de negocio)
-│   ├── assets/                   # Recursos estáticos (imágenes, iconos, i18n)
-│   └── environments/             # Configuración por entorno (dev, prod)
-├── angular.json                  # Configuración de Angular CLI
-├── tailwind.config.js            # Configuración de Tailwind CSS
-└── package.json
+│   │   ├── core/                         # Servicios core (auth, API, interceptors)
+│   │   ├── shared/                       # Componentes compartidos (header, footer, layouts)
+│   │   └── features/                     # Módulos de características (páginas de negocio)
+│   ├── assets/                           # Recursos estáticos (imágenes, iconos, i18n)
+│   └── environments/                     # Configuración por entorno (dev, prod)
+├── angular.json                          # Configuración de Angular CLI
+├── tailwind.config.js                    # Configuración de Tailwind CSS
+└── package.json                          # Incluye desy-angular como dep
 ```
+
+**Build:** `npm run build-prod` genera `dist/<nombre-app>/` con bundles optimizados por esbuild.
 
 ### desy-ionic
 
 ```text
 desy-ionic/
 ├── src/
-│   ├── app/                      # Páginas y providers de Ionic/Angular
-│   ├── assets/                   # Recursos estáticos
-│   ├── theme/                    # Variables SCSS de DESY (colores, tipografía)
+│   ├── app/                              # Páginas y providers de Ionic/Angular
+│   ├── assets/                           # Recursos estáticos
+│   ├── theme/                            # Variables SCSS de DESY (colores, tipografía)
 │   └── index.html
-├── capacitor.config.ts           # Configuración de Capacitor (iOS/Android)
-├── ionic.config.json             # Configuración de Ionic
+├── capacitor.config.ts                   # Configuración de Capacitor (iOS/Android)
+├── ionic.config.json                     # Configuración de Ionic
 └── package.json
 ```
 
-**Importante para todos los starters:** los logos y SVGs decorativos de DESY suelen ir **inline en el HTML/TSX**, no como archivos externos. Si necesitas un logo, búscalo en la doc oficial (`https://desy.aragon.es/componente-...-codigo.html.md`) o en el repo del starter; rara vez existe un archivo `.svg` separado para descargarlo.
+**Build nativo:**
+- Web: `npm run build` → `www/`
+- iOS: `npx cap add ios && npx cap sync && npx cap open ios` (Xcode)
+- Android: `npx cap add android && npx cap sync && npx cap open android` (Android Studio)
 
 ## Gotchas
 
