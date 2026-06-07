@@ -264,6 +264,30 @@ Después de traducir, valida con:
 
 1. **Cobertura incompleta:** 20+ de 57 componentes mapeados. Para los 37 restantes, **consulta el `angular-md/demo-X.md` correspondiente**.
 2. **No incluye desy-ionic** (móvil). La traducción a Ionic es distinta (Ionic usa `ion-*` y tiene su propio ciclo de vida).
+
+## Validación empírica realizada (2026-06-07)
+
+Tras la creación inicial del skill (2 componentes: button, table-advanced), Jesús pidió ampliar la cobertura. Leí 5 componentes más:
+
+| Componente | Categoría | Resultado | Notas |
+|---|---|---|---|
+| `button` | Trivial | ✅ Validado | Patrón 1:1 |
+| `table-advanced` | Conceptual (compuesto) | ✅ Validado | Dicts → sub-componentes + eventos |
+| `date-input` | Conceptual (form) | ✅ Validado | FormGroup + 3 patrones (ngModel, reactiveForm, ngModelGroup) |
+| `modal` | Conceptual (compuesto) | ✅ Validado | 6 sub-componentes + `caller: TemplateRef<any>` para contenido |
+| `accordion` | Conceptual (compuesto) | ✅ Validado | Items dict → `<desy-accordion-item>` + `<desy-accordion-header>` |
+| `input-group` | Conceptual (form + compuesto) | ✅ Validado | FormGroup + 4 sub-componentes + 3 patrones de form |
+| `pill` | Trivial (datos simple) | ✅ Validado | Variantes via `classes` (c-pill--primary/--warning/--success/--alert) |
+| `combobox` | (no existe demo) | ❌ Gap | 404 en `angular-md/demo-combobox.md` — la doc oficial no lo incluye |
+
+**Conclusiones tras la ampliación:**
+
+1. **El patrón "trivial" (macro → selector + [bindings]) funciona en ~30+ componentes** donde el HTML es markup y el Angular es equivalente directo.
+2. **El patrón "conceptual" (dicts → sub-componentes) es la norma para componentes compuestos** (~10-15: modal, accordion, input-group, table-advanced, date-input, fieldset, header-advanced, etc.).
+3. **Los sub-componentes en Angular son SIEMPRE explícitos** — no se usan dicts. La traducción es:
+   - `{{ componentX({items: [{...}]}) }}` (Nunjucks con dicts) → `<desy-x>...<desy-x-item .../>...</desy-x>` (Angular con sub-componentes)
+4. **3 patrones de form** (ngModel, reactiveForm, ngModelGroup) se repiten en date-input e input-group — el agente debe preguntar al usuario cuál prefiere.
+5. **Hay gaps en la doc oficial**: combobox no tiene demo Angular, posiblemente otros (componentes interactivos con estado interno). Para esos, **clonar `desy-angular-starter` y leer la implementación real**.
 3. **Composición (slots) no es traducción 1:1:**
    - **HTML (table-advanced):** macro con dicts `{{ componentTableAdvanced({rows: [...], head: [...]}) }}`
    - **Angular (table-advanced):** sub-componentes `<desy-table-advanced-row>`, `<desy-table-advanced-row-cell>`, etc.
