@@ -45,6 +45,39 @@ Antes de generar código, confirma con el equipo:
    - ¿Necesita preventDoubleClick?
    - ¿Es parte de un patrón conocido? (ej: acciones de tabla → ver `patrones-acciones-tabla`)
 
+## Clases tipográficas de DESY (usar SIEMPRE, nunca utility classes Tailwind)
+
+**Regla fundamental:** para tipografía en un proyecto DESY, usa las **clases semánticas de la librería**, NUNCA utility classes Tailwind como `text-3xl font-semibold` o `text-base leading-normal`. Las clases de la librería encapsulan el tipo, peso, tamaño, interlineado y color que el sistema de diseño ha definido como coherentes con el resto del proyecto.
+
+### Catálogo (verificado en `node_modules/desy-html/src/css/styles.css` y usado en plantillas oficiales)
+
+| Elemento | Clase | Notas |
+|---|---|---|
+| Título principal de página | `c-h1` | Una sola por página (el H1 visible). En otras plantillas, los H2 visuales también llevan `c-h1` (la jerarquía visual no siempre coincide con la jerarquía DOM) |
+| Subtítulo | `c-h2` | Para secciones de segundo nivel |
+| Encabezado menor | `c-h3` | Para sub-secciones |
+| Encabezado auxiliar | `c-h4` | Rara vez, para tarjetas o items |
+| Párrafo estándar | `c-paragraph-base` | El default para `<p>` |
+| Párrafo destacado (lead) | `c-paragraph-lead` | Para introductorio bajo el H1 |
+| Párrafo pequeño | `c-paragraph-sm` | Para notas, hints, metadatos |
+
+### Combinaciones habituales (vistas en `src/plantilla-editar-con-cabecera-fija-y-sidebar-sticky.html`)
+
+- `<h2 class="c-h1 c-anchor-scroll-edit">Sección</h2>` — H2 con estilo de H1 y ancla editable
+- `<p class="c-paragraph-base mb-0">` — párrafo estándar sin margen inferior
+- `<p class="c-paragraph-base">` — párrafo estándar con margen inferior
+
+### Reglas prácticas
+
+1. **Un H1 con `c-h1` por página** (o un H2 con `c-h1` si la jerarquía visual lo requiere)
+2. **Párrafos siempre con `c-paragraph-base`** o `c-paragraph-lead` si es intro
+3. **NO** usar `text-*`, `font-*`, `leading-*` para tipografía — son la antítesis del sistema de diseño
+4. **Excepción:** spacing (`mb-base`, `mt-sm`) y color contextual (`text-primary-base` para acentos) sí se pueden aplicar como utility classes encima de las `c-*`
+
+### Por qué importa (lección del benchmark 2026-06-07)
+
+Un agente que produce tipografía con utility classes Tailwind produce un output que **se ve coherente técnicamente** (estructura, ARIA, macros) pero **roto visualmente** — el h1 se ve más pequeño que el del gold, los párrafos tienen interlineado distinto, los acentos cromáticos no aparecen. La comparativa semántica pasa (es "Aceptable"), pero la visual falla.
+
 ## Workflow
 
 ### Paso 1: Identifica la URL del ejemplo "copia y pega"
