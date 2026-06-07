@@ -13,6 +13,8 @@ Genera código copy-pasteable para un componente DESY concreto en la librería a
 
 Razón: este skill trabaja **dentro** de un proyecto DESY (sobre la estructura de directorios, los macros de la librería, las convenciones de build del starter). Implementar componentes sin un starter DESY como base produce HTML/TSX/Angular que NO se compila con la toolchain oficial, NO usa los macros reales, y genera un output inconsistente con cualquier proyecto DESY real.
 
+**Antes de aplicar estilos visuales (colores, espaciado, tipografía), consulta también `desy-styles-reference`** para conocer los tokens del proyecto (`bg-primary-base`, `p-base`, `c-h1`, etc.) y evitar inventar utility classes con valores por defecto de Tailwind. La combinación de macros (este skill) + tokens (`desy-styles-reference`) es lo que produce un output visualmente fiel al gold.
+
 Si te piden "hazme una página X" y no estás en un starter DESY:
 1. Aplica primero `desy-scaffold-project` (clonar el starter adecuado, `npm install`)
 2. Verifica que `node_modules/<librería>` existe y que `npm run build` produce un `dist/`
