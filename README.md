@@ -14,6 +14,7 @@ Un equipo sin maquetadores puede partir de un mockup hecho con Figma, identifica
 | [`desy-scaffold-project`](./skills/desy-scaffold-project) | 28KB | Cómo clonar el starter, `npm install`, configurar build, documenta la regla "nunca uses la librería directamente, siempre el starter" |
 | [`desy-styles-reference`](./skills/desy-styles-reference) | 13.8KB | Catálogo de tokens visuales del proyecto: colores semánticos, espaciado (`p-base`, `mb-sm`), tipografía (`c-h1`, `c-paragraph-base`), sombras, radius, iconografía |
 | [`desy-implement-component`](./skills/desy-implement-component) | 28KB | Cómo usar los macros de la librería Nunjucks/Angular/Ionic, tipografía semántica, catálogo de las 16 plantillas oficiales del starter |
+| [`desy-angular-translator`](./skills/desy-angular-translator) | 14.7KB | Traduce código Nunjucks de desy-html a TypeScript + template de desy-angular. Patrón general + tabla de equivalencias para los 20+ componentes más comunes. Tabla de 'trivial vs conceptual' para que el agente sepa cuándo preguntar al usuario |
 | [`desy-validate-accessibility`](./skills/desy-validate-accessibility) | — | Checklist WCAG 2.2 AA para validar el output |
 | [`desy-component-recognizer`](./skills/desy-component-recognizer) | 12KB + 627KB catalog | Reconocer componentes DESY desde un mockup o screenshot, con 10 reglas críticas y un linter de validación post-reconocimiento |
 
