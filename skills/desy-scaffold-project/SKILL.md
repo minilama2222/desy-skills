@@ -264,6 +264,68 @@ npm run build
 ls dist/  # o dist/mi-app/  # debe tener archivos compilados
 ```
 
+## Estructura de directorios del proyecto (convenciones de paths)
+
+Una vez clonado el starter, el proyecto tiene una estructura fija. **Usar siempre los paths reales del proyecto, no inventar rutas** (este fue un fallo real en benchmarks con IA: el agente inventó `/assets/css/main.css` cuando el path real es `src/css/styles.css`).
+
+### desy-html-starter
+
+```text
+desy-html-starter/
+├── public/                       # Servido tal cual en /assets/* en dev y prod
+│   └── images/                   # Imágenes estáticas (logos, iconos, ilustraciones)
+├── src/
+│   ├── css/
+│   │   ├── styles.css            # Hoja de estilos principal de DESY (190KB, no modificar)
+│   │   └── custom.css            # Estilos personalizados del proyecto (override de styles.css)
+│   ├── js/
+│   │   └── index.js              # JavaScript de inicialización (componentes interactivos)
+│   └── templates/
+│       ├── pages/                # Páginas Nunjucks (.njk) — una por ruta
+│       └── components/           # Componentes reutilizables (.njk con su _macro.X.njk)
+├── vite.config.js                # Configuración de Vite (HMR, build, alias)
+└── package.json
+```
+
+**Paths que un agente NO debe inventar:**
+- CSS: importar desde `src/css/styles.css` (o `custom.css` para overrides), NUNCA `/assets/css/styles.css`
+- Imágenes: referenciar desde `public/images/...` o desde la doc oficial (logos suelen ir **inline SVG en el HTML**, no como archivo externo)
+- JS de inicialización: `src/js/index.js`
+- Páginas Nunjucks: `src/templates/pages/<nombre>.njk`
+- Componentes: `src/templates/components/<componente>/_macro.<componente>.njk`
+
+### desy-angular-starter
+
+```text
+desy-angular-starter/
+├── src/
+│   ├── app/
+│   │   ├── core/                 # Servicios core (auth, API, interceptors)
+│   │   ├── shared/               # Componentes compartidos (header, footer, layouts)
+│   │   └── features/             # Módulos de características (páginas de negocio)
+│   ├── assets/                   # Recursos estáticos (imágenes, iconos, i18n)
+│   └── environments/             # Configuración por entorno (dev, prod)
+├── angular.json                  # Configuración de Angular CLI
+├── tailwind.config.js            # Configuración de Tailwind CSS
+└── package.json
+```
+
+### desy-ionic
+
+```text
+desy-ionic/
+├── src/
+│   ├── app/                      # Páginas y providers de Ionic/Angular
+│   ├── assets/                   # Recursos estáticos
+│   ├── theme/                    # Variables SCSS de DESY (colores, tipografía)
+│   └── index.html
+├── capacitor.config.ts           # Configuración de Capacitor (iOS/Android)
+├── ionic.config.json             # Configuración de Ionic
+└── package.json
+```
+
+**Importante para todos los starters:** los logos y SVGs decorativos de DESY suelen ir **inline en el HTML/TSX**, no como archivos externos. Si necesitas un logo, búscalo en la doc oficial (`https://desy.aragon.es/componente-...-codigo.html.md`) o en el repo del starter; rara vez existe un archivo `.svg` separado para descargarlo.
+
 ## Gotchas
 
 - **No olvidar `.nvmrc`.** Sin él, cada dev instalará una versión distinta de Node y eso rompe builds.

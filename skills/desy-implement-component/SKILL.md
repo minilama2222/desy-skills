@@ -364,6 +364,7 @@ export class FormularioComponent {
 ## Gotchas
 
 - **No inventar nombres de props.** Si un prop no aparece en la tabla oficial, pregunta al equipo o consulta la URL de la demo. Un prop mal nombrado pasa el compile pero no funciona.
+- **Si te piden una PÁGINA COMPLETA (no un componente suelto), primero verifica la estructura del proyecto.** Las páginas se componen de múltiples componentes y el HTML debe respetar los paths reales del starter (CSS, imágenes, JS). Revisa la sección `## Estructura de directorios del proyecto` de `desy-scaffold-project` antes de generar. **Fallo real observado en benchmarks con IA:** inventar paths como `/assets/css/main.css` o `/assets/img/logo-X.svg` que no existen en el proyecto. El path real del CSS principal de `desy-html-starter` es `src/css/styles.css`; las imágenes están en `public/images/`; y los logos suelen ser **inline SVG en el HTML**, no archivos externos.
 - **No saltarse atributos ARIA.** DESY los incluye por defecto en sus ejemplos. Si los quitas, rompes accesibilidad.
 - **En Angular/Ionic, importar el componente.** Olvidar el import en `imports: []` es el error más común.
 - **En desy-html, usar `params.classes` del macro Nunjucks, no escribir `class="..."` en el HTML directamente.**
