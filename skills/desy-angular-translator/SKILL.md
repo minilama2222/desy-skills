@@ -260,6 +260,140 @@ Después de traducir, valida con:
 3. **Comparar con la doc oficial**: si tienes dudas sobre un parámetro, lee el `angular-md/demo-X.md`
 4. **WCAG 2.2 AA**: usa el skill `desy-validate-accessibility` después de traducir
 
+## Patrones del código real de la librería (validados leyendo `gorilas/desy-angular`)
+
+Tras clonar el repo `github.com/gorilas/desy-angular` (rama `feature/Version-18.1.1`, Angular 20.3 + desy-angular 18.1.x) y leer el código fuente de los componentes, hay varios patrones que la doc oficial NO documenta pero que el código real usa.
+
+### 1. `standalone: false` (no standalone components)
+
+Los componentes de `desy-angular` **no son standalone**. Forma parte de un NgModule.
+
+```typescript
+@Component({
+  selector: 'desy-button',
+  templateUrl: './button.component.html',
+  standalone: false,  // <-- SIEMPRE false
+})
+export class ButtonComponent { ... }
+```
+
+**Implicación para el agente:** NO generar `standalone: true`. Los componentes se registran en el NgModule del módulo que los importa (`DesyButtonsModule`, `DesyFormsModule`, etc.).
+
+### 2. Dos formas de proyectar contenido (dependiendo del componente)
+
+La doc oficial muestra solo `*desyCustomInnerContent`, pero el código usa **DOS directivas distintas**:
+
+**Forma A — `[desyInnerContent]` (binding, en button/pill):**
+
+```html
+<button
+  [desyInnerContent]="html ? html : text"
+  [isHtml]="isHtml"
+  [deleteContentIfEmpty]="false"
+  ...>
+  <ng-container *ngTemplateOutlet="contentTemplate"></ng-container>
+</button>
+```
+
+Usa el patrón de **template reference variable** (`<ng-template #contentTemplate>`) + `*ngTemplateOutlet` para proyección.
+
+**Forma B — `*desyCustomInnerContent` (structural, en dropdown/listbox/modal):**
+
+```html
+<ng-container *desyCustomInnerContent="{ html: html, text: text }"></ng-container>
+```
+
+Es una **structural directive** que toma un objeto `{html, text}` y renderiza el contenido apropiado.
+
+**Cuándo usar cada una:** la Forma A es para componentes que aceptan contenido simple (text o HTML) directamente en su template. La Forma B es para componentes que tienen proyección de contenido compleja (múltiples slots, sub-componentes, etc.).
+
+### 3. Sintaxis de control flow moderna (Angular 17+)
+
+El código usa `@if`/`@for`/`@switch`/`@case`, **NO** las directivas viejas `*ngIf`/`*ngFor`/`*ngSwitch`.
+
+```html
+@switch (getType()) {
+  @case (staticElementTypeA) {
+    <a ...>...</a>
+  }
+  @case (staticElementTypeButton) {
+    <button ...>...</button>
+  }
+}
+
+@if (routerLink) {
+  <a [routerLink]="...">...</a>
+} @else {
+  <a [href]="...">...</a>
+}
+
+@if (hiddenText) {
+  <span class="sr-only">{{ hiddenText }}</span>
+}
+```
+
+**Implicación:** usar la sintaxis nueva (Angular 17+) en lugar de directivas estructurales viejas.
+
+### 4. Directiva `desyAppAccessibility` (a11y automática)
+
+Los componentes aplican **automáticamente** atributos a11y al elemento host:
+
+```html
+<a
+  [desyAppAccessibility]="this"  <!-- pasa el componente TS como contexto -->
+  ...>
+```
+
+La directiva lee los `ariaLabel`, `ariaDescribedBy`, `ariaLabelledBy`, etc. del TS y los aplica al elemento. **NO hace falta** poner `[attr.aria-label]="ariaLabel"` manualmente — la directiva lo hace.
+
+### 5. Transformaciones automáticas de clases (ej: button → `c-button--disabled`)
+
+Algunos componentes transforman automáticamente los `classes` que pasas. Ejemplo en `button`:
+
+```typescript
+getClassNames(): string {
+  let classNames = 'c-button';
+  if (this.classes) {
+    classNames += ' ' + this.classes;
+  }
+  if (this.disabled) {
+    classNames += ' c-button--disabled';
+  }
+  return classNames;
+}
+```
+
+**Implicación:** si pasas `disabled: true` al button, NO necesitas añadir `c-button--disabled` a `classes` — el componente lo añade por ti. Esto simplifica la API.
+
+### 6. `getElement()` / `getType()` para selección dinámica de elemento
+
+Los componentes que pueden ser `<a>`, `<button>`, `<input>` o `<span>` tienen un getter que decide cuál usar:
+
+```typescript
+getElement(): string {
+  if (this.element) {
+    return this.element.toLocaleLowerCase();
+  }
+  if (this.href) {
+    return ELEMENT_A;  // 'a' por defecto si hay href
+  }
+  return ELEMENT_BUTTON;
+}
+```
+
+**Implicación:** pasar `element` solo si quieres forzar uno específico. Por defecto, el componente decide según las props.
+
+### 7. Posicionamiento de popups: `@floating-ui/dom`
+
+Los componentes interactivos (dropdown, listbox, modal) usan **Floating UI** para posicionar popups:
+
+```typescript
+import * as FloatingUI from '@floating-ui/dom';
+// ... lógica de auto-positioning con floating-ui
+```
+
+**Implicación:** el agente que genere dropdown/listbox no debe reinventar el positioning — `desy-angular` lo hace con Floating UI. Si el agente quiere un dropdown custom, debe usar las mismas dependencias.
+
 ## Limitaciones (validadas con table-advanced y date-input, 2026-06-07)
 
 1. **Cobertura incompleta:** 20+ de 57 componentes mapeados. Para los 37 restantes, **consulta el `angular-md/demo-X.md` correspondiente**.
@@ -271,14 +405,16 @@ Tras la creación inicial del skill (2 componentes: button, table-advanced), Jes
 
 | Componente | Categoría | Resultado | Notas |
 |---|---|---|---|
-| `button` | Trivial | ✅ Validado | Patrón 1:1 |
+| `button` | Trivial (valorado en código real) | ✅ Validado | 15 props + clickEvent; `standalone: false`; `[desyInnerContent]`; `getClassNames()` añade `c-button--disabled` |
+| `pill` | Trivial (valorado en código real) | ✅ Validado | TYPE_A/BUTTON/SPAN; `[desyInnerContent]`; `getClassNames()` |
 | `table-advanced` | Conceptual (compuesto) | ✅ Validado | Dicts → sub-componentes + eventos |
 | `date-input` | Conceptual (form) | ✅ Validado | FormGroup + 3 patrones (ngModel, reactiveForm, ngModelGroup) |
 | `modal` | Conceptual (compuesto) | ✅ Validado | 6 sub-componentes + `caller: TemplateRef<any>` para contenido |
 | `accordion` | Conceptual (compuesto) | ✅ Validado | Items dict → `<desy-accordion-item>` + `<desy-accordion-header>` |
 | `input-group` | Conceptual (form + compuesto) | ✅ Validado | FormGroup + 4 sub-componentes + 3 patrones de form |
-| `pill` | Trivial (datos simple) | ✅ Validado | Variantes via `classes` (c-pill--primary/--warning/--success/--alert) |
-| `combobox` | (no existe demo) | ❌ Gap | 404 en `angular-md/demo-combobox.md` — la doc oficial no lo incluye |
+| `listbox` | Conceptual (interactivo) | ✅ Validado | Sub-componentes `<desy-listbox-item>`/`<desy-listbox-label>`; usa `@floating-ui/dom` |
+| `dropdown` | Conceptual (interactivo + popup) | ✅ Validado (código real) | Usa `*desyCustomInnerContent` (no `[desyInnerContent]`); `@floating-ui/dom`; `aria-haspopup` |
+| `combobox` | (no existe demo en doc) | ❌ Gap | 404 en `angular-md/demo-combobox.md`. WIP commit visible en `gorilas/desy-angular` (rama develop) |
 
 **Conclusiones tras la ampliación:**
 
