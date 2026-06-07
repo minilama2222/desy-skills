@@ -279,33 +279,17 @@ export class ButtonComponent { ... }
 
 **Implicación para el agente:** NO generar `standalone: true`. Los componentes se registran en el NgModule del módulo que los importa (`DesyButtonsModule`, `DesyFormsModule`, etc.).
 
-### 2. Dos formas de proyectar contenido (dependiendo del componente)
+### 2. Proyección de contenido: SOLO la Forma B (de la doc oficial)
 
-La doc oficial muestra solo `*desyCustomInnerContent`, pero el código usa **DOS directivas distintas**:
-
-**Forma A — `[desyInnerContent]` (binding, en button/pill):**
-
-```html
-<button
-  [desyInnerContent]="html ? html : text"
-  [isHtml]="isHtml"
-  [deleteContentIfEmpty]="false"
-  ...>
-  <ng-container *ngTemplateOutlet="contentTemplate"></ng-container>
-</button>
-```
-
-Usa el patrón de **template reference variable** (`<ng-template #contentTemplate>`) + `*ngTemplateOutlet` para proyección.
-
-**Forma B — `*desyCustomInnerContent` (structural, en dropdown/listbox/modal):**
+**La doc oficial solo muestra `*desyCustomInnerContent`** (en `angular-md/demo-*.md`). Este es el patrón canónico:
 
 ```html
 <ng-container *desyCustomInnerContent="{ html: html, text: text }"></ng-container>
 ```
 
-Es una **structural directive** que toma un objeto `{html, text}` y renderiza el contenido apropiado.
+Es una **structural directive** que toma un objeto `{html, text}` y renderiza el contenido apropiado. Es la forma que debes usar al implementar páginas con desy-angular.
 
-**Cuándo usar cada una:** la Forma A es para componentes que aceptan contenido simple (text o HTML) directamente en su template. La Forma B es para componentes que tienen proyección de contenido compleja (múltiples slots, sub-componentes, etc.).
+> ⚠️ **Nota sobre inconsistencias doc vs código:** El código fuente de algunos componentes (button, pill) tiene una variante `[desyInnerContent]` con patrón `<ng-template #contentTemplate>` + `*ngTemplateOutlet`. Esto es implementación interna y NO se documenta en la doc oficial. **Usa siempre la Forma B (la documentada).** Si encuentras inconsistencias, quédate con la doc.
 
 ### 3. Sintaxis de control flow moderna (Angular 17+)
 
@@ -334,17 +318,21 @@ El código usa `@if`/`@for`/`@switch`/`@case`, **NO** las directivas viejas `*ng
 
 **Implicación:** usar la sintaxis nueva (Angular 17+) en lugar de directivas estructurales viejas.
 
-### 4. Directiva `desyAppAccessibility` (a11y automática)
+### 4. `desyAppAccessibility` (interno, no usar directamente)
 
-Los componentes aplican **automáticamente** atributos a11y al elemento host:
+La directiva `desyAppAccessibility` es un detalle interno de la librería. La doc oficial **no la muestra** en sus ejemplos. Los ejemplos de la doc usan el patrón estándar:
 
 ```html
-<a
-  [desyAppAccessibility]="this"  <!-- pasa el componente TS como contexto -->
+<desy-button
+  [attr.aria-label]="ariaLabel"
+  [attr.aria-describedby]="ariaDescribedBy"
+  [attr.aria-labelledby]="ariaLabelledby"
   ...>
+  ...
+</desy-button>
 ```
 
-La directiva lee los `ariaLabel`, `ariaDescribedBy`, `ariaLabelledBy`, etc. del TS y los aplica al elemento. **NO hace falta** poner `[attr.aria-label]="ariaLabel"` manualmente — la directiva lo hace.
+**Implicación:** al implementar páginas con desy-angular, **usa el patrón de la doc** (`[attr.aria-*]` explícitos), no la directiva interna. La directiva es solo un detalle de implementación de los componentes de la librería que tú no necesitas reproducir.
 
 ### 5. Transformaciones automáticas de clases (ej: button → `c-button--disabled`)
 
@@ -415,6 +403,14 @@ Tras la creación inicial del skill (2 componentes: button, table-advanced), Jes
 | `listbox` | Conceptual (interactivo) | ✅ Validado | Sub-componentes `<desy-listbox-item>`/`<desy-listbox-label>`; usa `@floating-ui/dom` |
 | `dropdown` | Conceptual (interactivo + popup) | ✅ Validado (código real) | Usa `*desyCustomInnerContent` (no `[desyInnerContent]`); `@floating-ui/dom`; `aria-haspopup` |
 | `combobox` | (no existe demo en doc) | ❌ Gap | 404 en `angular-md/demo-combobox.md`. WIP commit visible en `gorilas/desy-angular` (rama develop) |
+
+**Validación adicional con el starter de demo (`gorilas/desy-angular-starter` rama `feature/Version-18.1.0`, Angular 20.3 + desy-angular 18.1.0):**
+- 16+ plantillas de página (test, sitemap, accessibility, logged, etc.)
+- **Una sola página rica en componentes compuestos:** `page-example-organismos-lazy.component.html` (usa `<desy-modal>`, `<desy-dialog>`, `<desy-tree>`, `<desy-search-bar>`, `<desy-toggle>`, `<desy-spinner>`, `<desy-pill>`)
+- Las demás son páginas de contenido simple (sitemap, accessibility, logged)
+- **Confirma el patrón de sub-componentes** de mi skill (modal, dialog, tree, toggle, etc. son sub-componentes explícitos)
+- **Usa la sintaxis VIEJA de Angular** (`*ngFor`, `*ngIf`, `<ng-container>`) en lugar de la nueva (`@for`, `@if`) — **confirma la regla de Jesús: "quédate con la doc oficial, no con el código"**
+- El starter NO tiene páginas con `<desy-input>`, `<desy-table>`, `<desy-date-input>` — la validación de esos componentes sigue siendo SOLO por la doc oficial, no por el starter
 
 **Conclusiones tras la ampliación:**
 
