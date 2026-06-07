@@ -260,14 +260,51 @@ Después de traducir, valida con:
 3. **Comparar con la doc oficial**: si tienes dudas sobre un parámetro, lee el `angular-md/demo-X.md`
 4. **WCAG 2.2 AA**: usa el skill `desy-validate-accessibility` después de traducir
 
-## Limitaciones
+## Limitaciones (validadas con table-advanced y date-input, 2026-06-07)
 
 1. **Cobertura incompleta:** 20+ de 57 componentes mapeados. Para los 37 restantes, **consulta el `angular-md/demo-X.md` correspondiente**.
 2. **No incluye desy-ionic** (móvil). La traducción a Ionic es distinta (Ionic usa `ion-*` y tiene su propio ciclo de vida).
-3. **Patrones avanzados no cubiertos:** JS global (combo, listbox, menubar, table-advanced) puede requerir manejo especial de eventos.
-4. **Slots/transclusión:** el mapeo de `html` string → `<ng-container>` puede no ser 1:1 en componentes compuestos. Validar con la doc.
-5. **Componentes con estado interno:** datepicker, combo, listbox tienen estado interno que en HTML se maneja con JS, en Angular se maneja con servicios/inputs adicionales. Estos NO son traducción trivial.
-6. **No validado empíricamente** con build + comparación: el patrón general está validado con `button` y la tabla de equivalencias es por inspección de los `angular-md/demo-X.md`. Para validación completa, hay que clonar `desy-angular-starter`, hacer build, y comparar con la doc.
+3. **Composición (slots) no es traducción 1:1:**
+   - **HTML (table-advanced):** macro con dicts `{{ componentTableAdvanced({rows: [...], head: [...]}) }}`
+   - **Angular (table-advanced):** sub-componentes `<desy-table-advanced-row>`, `<desy-table-advanced-row-cell>`, etc.
+   - **Implicación:** la traducción es **conceptual**, no sintáctica. No es "sustituir macro por selector", es "rediseñar la estructura con sub-componentes".
+4. **Integración con formularios no es trivial:**
+   - **HTML (date-input):** markup estático
+   - **Angular (date-input):** `FormGroup`/`FormControl`/`[(ngModel)]` nativo de `@angular/forms`
+   - date-input tiene **3 patrones** documentados: ngModel, reactiveForm, ngModelGroup. El agente debe saber cuál elegir.
+5. **Eventos con tipos TS:**
+   - `rowsChecked: { [id: string]: boolean }` requiere definir interfaces TypeScript
+   - Angular requiere importar tipos del package: `RowData[]`, `HeadCellData[]`, `CellData`, `WrapperData`, `ItemDateInputData`, etc.
+6. **Componentes con estado interno:** datepicker, combo, listbox tienen estado interno que en HTML se maneja con JS, en Angular se maneja con servicios/inputs adicionales. Estos NO son traducción trivial.
+7. **JS global vs Reactive Forms:** HTML usa JS global (`data-module="c-combo"`) para combo/listbox/datepicker, Angular usa state management nativo.
+8. **No validado empíricamente** con build + comparación: el patrón general está validado con `button`, `table-advanced` y `date-input` (lectura de la doc), pero la tabla de equivalencias es por inspección de los `angular-md/demo-X.md`. Para validación completa, hay que clonar `desy-angular-starter`, hacer build, y comparar con la doc.
+
+## Componentes donde la traducción es trivial (patrón directo)
+
+- `button`, `button-loader`, `skip-link`, `header-mini`, `footer`, `pill`, `card`, `error-message`, `hint`, `error-summary`, `notification`, `alert`, `toggle`, `tooltip`, `details`, `pagination`, `breadcrumbs`, `searchbar`, `search-bar`, `media-object`, `spinner`, `modal`, `dialog`, `menubar`, `dropdown`, `list`, `status`, `status-item`, `description-list`, `tree`, `treegrid`
+
+Total: ~30+ componentes donde el patrón general (macro → selector + [bindings]) se aplica directamente.
+
+## Componentes donde la traducción es conceptual (no 1:1)
+
+- **`table-advanced`:** dicts `rows[]`/`head[]`/`foot[]` → sub-componentes `<desy-table-advanced-row>`/`<desy-table-advanced-cell>` + eventos complejos (`rowsChecked`, `recalculateTable`, `filterBy`, `sortBy`)
+- **`date-input`:** markup estático → FormGroup + [(ngModel)] (3 patrones de uso: ngModel, reactiveForm, ngModelGroup)
+- **`datepicker`:** botón + popup → componente con estado interno + servicio de fechas
+- **`combobox`:** input + datalist nativo → componente con filtrado + servicios de estado
+- **`listbox`:** select nativo → componente con multiselect + servicios
+- **`input-group`:** label + input + hint + error (composición HTML) → ng-content + binding de 4 sub-componentes
+- **`fieldset`:** fieldset + legend (HTML) → TemplateRef + componentes legend/hint/errorMessage
+- **`header-advanced`:** estructura HTML → sub-componentes para cada banda + nav con template
+
+**Implicación para el agente:** cuando traduces uno de estos, NO generes la versión 1:1 — tienes que decidir la arquitectura Angular apropiada (FormGroup vs ngModel, sub-componentes vs slots, etc.). **Pregunta al usuario qué patrón prefiere si hay ambigüedad.**
+
+## Validación empírica recomendada (no hecha aún)
+
+1. Clonar `desy-angular-starter` de bitbucket (`https://bitbucket.org/sdaragon/desy-angular-starter`)
+2. `npm install` + `npm run build-prod` para verificar que el setup funciona
+3. Para 3-5 componentes del grupo "trivial" (button, card, pill), generar un ejemplo mínimo con opencode + M3 y verificar que el build pasa
+4. Para 1-2 del grupo "conceptual" (table-advanced, date-input), generar un ejemplo y verificar que el build pasa
+5. Si falla, ajustar la skill
 
 ## Próximos pasos sugeridos (cuando haya tiempo)
 
