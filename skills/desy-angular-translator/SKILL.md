@@ -1,0 +1,287 @@
+---
+name: desy-angular-translator
+description: "Traduce código Nunjucks de desy-html a código Angular de desy-angular. Patrón general + tabla de equivalencias para los 15+ componentes más comunes. NO cubre los 57 — solo los que han sido validados."
+---
+
+# desy-angular-translator
+
+Traduce código Nunjucks de la librería `desy-html` a código TypeScript + template de la librería `desy-angular`. Útil cuando:
+
+- Tienes código `{{ componentX({...}) }}` que necesitas migrar a `<desy-x [prop]="value">`
+- Estás aprendiendo las convenciones de `desy-angular` partiendo de tu conocimiento de `desy-html`
+- Estás auditando código que mezcla ambos paradigmas
+
+## Fuente de verdad
+
+> "Normalmente, los parámetros de configuración y los diseños de componentes comienzan en desy-html y posteriormente se traducen a desy-angular. No obstante, desy-angular tiene algunos parámetros propios relativos a su implementación."
+> — `desy.aragon.es/desarrollo-desy-angular.html.md`
+
+**Implicación:** la traducción es la dirección canónica, no es 1:1.
+
+## When to use this skill
+
+- Tienes un fragmento de código `desy-html` (Nunjucks) y necesitas pasarlo a `desy-angular` (TS + template)
+- Estás generando un proyecto nuevo con `desy-angular-starter` y tienes código de referencia en `desy-html`
+- Estás documentando la equivalencia entre ambos
+
+**NO uses este skill si:**
+- Estás trabajando solo con `desy-html` (no necesitas Angular)
+- Estás en `desy-ionic` (móvil) — la traducción es distinta y este skill no la cubre
+- Necesitas la traducción **inversa** (Angular → HTML) — eso es otro flujo
+
+## Patrones generales de traducción
+
+| Concepto | desy-html (Nunjucks) | desy-angular (TS + template) |
+|---|---|---|
+| **Macro / selector** | `{{ componentX({...}) }}` (función) | `<desy-x [prop]="value">` (selector Angular) |
+| **Propiedades** | dict en el macro: `{text: "X", classes: "y"}` | Input TS: `text?: string;` + binding: `[text]="text"` |
+| **Variantes CSS** | `classes: "c-button--primary"` (mismo nombre) | `classes="c-button--primary"` (igual) |
+| **Slot / innerHTML** | `html: "<svg>...</svg>"` (string) | `text` simple o `<ng-container *appCustomInnerContent>` |
+| **href** | `href: "/url"` | `[href]="'/url'"` |
+| **Router interno** | NO existe (HTML server-side) | `[routerLink]="'/url'"` + `[routerLinkActiveClasses]="'active'"` |
+| **Eventos** | NO emite (HTML estático) | `(clickEvent)="handler($event)"` (Output TS) |
+| **Estado disabled** | `disabled: true` (bool en macro) | `[disabled]="true"` o `[disabled]="isDisabled"` |
+| **Atributos a11y** | Los pone automáticamente la macro | Inputs explícitos: `ariaLabel`, `ariaDescribedBy`, `ariaLabelledBy`, etc. |
+| **Aria/role/tabindex** | Implícitos en el HTML generado | Explícitos como inputs (más control, más verboso) |
+
+## Parámetros que SOLO existen en desy-angular (no en desy-html)
+
+| Parámetro | Función |
+|---|---|
+| `routerLink` | Ruta interna Angular (`/usuarios/1`) |
+| `routerLinkActiveClasses` | Clases CSS cuando la ruta está activa |
+| `fragment` | Fragmento de URL (`#seccion`) |
+| **Outputs / eventos** | `(clickEvent)`, `(change)`, etc. |
+| Atributos a11y explícitos | `ariaLabel`, `ariaDescribedBy`, `role`, `tabindex`, etc. |
+| `clickCount`, `clickName`, `clickValue` | Métricas de tracking de clicks (no en desy-html) |
+
+## Parámetros que están en AMBAS librerías (con la misma semántica)
+
+| Parámetro | Notas |
+|---|---|
+| `text` | Texto plano del contenido |
+| `html` | HTML del contenido (preferir slot en Angular) |
+| `classes` | Clases CSS modificadoras (`c-button--primary`, etc.) |
+| `id` | Identificador del DOM |
+| `name` | Atributo name (para form submit) |
+| `type` | Tipo (button/submit/reset) |
+| `value` | Valor del botón (form submit) |
+| `disabled` | Estado deshabilitado |
+| `href`, `target` | Para el elemento `a` |
+| `preventDoubleClick` | Evita doble submit |
+
+## Tabla de equivalencias por componente (15+ validados)
+
+| Componente (Angular) | Equivalente HTML | Notas |
+|---|---|---|
+| `<desy-button>` | `{{ componentButton({...}) }}` | Más inputs en Angular (a11y, router) |
+| `<desy-button-loader>` | `{{ componentButtonLoader({...}) }}` | Estado de carga explícito |
+| `<desy-header-advanced>` | `{{ componentHeaderAdvanced({...}) }}` | 3 bandas |
+| `<desy-header>` | `{{ componentHeader({...}) }}` | 1 banda (webapp) |
+| `<desy-header-mini>` | `{{ componentHeaderMini({...}) }}` | Solo logo |
+| `<desy-skip-link>` | `{{ componentSkipLink({...}) }}` | — |
+| `<desy-footer>` | `{{ componentFooter({...}) }}` | — |
+| `<desy-tree>` | `{{ componentTree({...}) }}` | Jerárquico |
+| `<desy-textarea>` | `{{ componentTextarea({...}) }}` | — |
+| `<desy-character-count>` | `{{ componentCharacterCount({...}) }}` | Contador |
+| `<desy-input-group>` | `{{ componentInputGroup({...}) }}` | Compuesto: label + input + hint + error |
+| `<desy-date-input>` | `{{ componentDateInput({...}) }}` | Fecha con validación |
+| `<desy-radios>` | `{{ componentRadios({...}) }}` | — |
+| `<desy-datepicker>` | `{{ componentDatepicker({...}) }}` | Calendario popup |
+| `<desy-file-upload>` | `{{ componentFileUpload({...}) }}` | — |
+| `<desy-checkboxes>` | `{{ componentCheckboxes({...}) }}` | — |
+| `<desy-input>` | `{{ componentInput({...}) }}` | Input atómico |
+| `<desy-fieldset>` | `{{ componentFieldset({...}) }}` | Agrupación de campos |
+| `<desy-select>` | `{{ componentSelect({...}) }}` | — |
+| `<desy-listbox>` | `{{ componentListbox({...}) }}` | Select accesible |
+
+**Total cubiertos: 20+ de 57** — la tabla NO es exhaustiva. Para los 37 restantes, **lee el `angular-md/demo-X.md` correspondiente** (patrón de URL: `https://desy.aragon.es/angular-md/demo-<componente>.md`).
+
+## Workflow de traducción
+
+### Paso 1: Identificar el componente
+
+Recibes código Nunjucks tipo `{{ componentButton({...}) }}`. Extrae:
+- Nombre del componente (`button` → `desy-button`)
+- Lista de propiedades y valores
+
+### Paso 2: Buscar el equivalente Angular
+
+- Consulta la tabla de equivalencias (arriba)
+- Si NO está en la tabla, busca el `angular-md/demo-X.md` correspondiente en la doc oficial
+- Si tampoco lo encuentras, es un componente no mapeado → **marca como pendiente**, no inventes
+
+### Paso 3: Generar la clase TypeScript
+
+Por cada propiedad del macro, crea un input en la clase:
+
+```typescript
+export class MyComponent {
+  // Propiedades de desy-html
+  text?: string;          // <-- de "text": "X"
+  classes?: string;       // <-- de "classes": "c-button--primary"
+  disabled: boolean = false;  // <-- de "disabled": true
+
+  // Outputs (Angular only)
+  onClick(event: any) { /* ... */ }
+}
+```
+
+### Paso 4: Generar el template HTML
+
+```html
+<desy-button
+  [text]="text"
+  [classes]="classes"
+  [disabled]="disabled"
+  (clickEvent)="onClick($event)"
+>
+  {{ text }}
+</desy-button>
+```
+
+### Paso 5: Añadir los inputs exclusivos de Angular que necesites
+
+```html
+<desy-button
+  ...
+  [routerLink]="'/url'"           <!-- solo si necesitas router interno -->
+  [routerLinkActiveClasses]="'active'"
+  ariaLabel="Click me"
+  role="button"
+  [tabindex]="0"
+>
+```
+
+### Paso 6: Verificar accesibilidad
+
+Angular hace explícitas las opciones a11y que HTML hace implícitas. Revisa:
+- `ariaLabel` vs `<label>`: en Angular se prefiere `ariaLabel` (es label interno del componente)
+- `ariaDescribedBy`: conecta con el id del elemento que describe
+- `ariaDisabled` vs `disabled`: el primero es semántico, el segundo es comportamiento
+
+## Ejemplo completo: button "Por defecto"
+
+**Input (Nunjucks):**
+```njk
+{{ componentButton({
+  "text": "Por defecto"
+}) }}
+```
+
+**Output (TypeScript):**
+```typescript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-my-button',
+  templateUrl: './my-button.component.html',
+})
+export class MyButtonComponent {
+  text?: string = 'Por defecto';
+}
+```
+
+**Output (template HTML):**
+```html
+<desy-button [text]="text">Por defecto</desy-button>
+```
+
+## Ejemplo: button con icono SVG
+
+**Input (Nunjucks):**
+```njk
+{{ componentButton({
+  "html": '<svg xmlns="..."><path .../></svg>'
+}) }}
+```
+
+**Output (TypeScript):**
+```typescript
+export class MyButtonComponent {
+  html: string = '<svg xmlns="..."><path .../></svg>';
+}
+```
+
+**Output (template HTML):**
+```html
+<desy-button [html]="html">
+  <ng-container *appCustomInnerContent="{ html: html }">
+    <svg xmlns="..."><path .../></svg>
+  </ng-container>
+</desy-button>
+```
+
+O más simple (sin directive):
+```html
+<desy-button>
+  <svg xmlns="..."><path .../></svg>
+</desy-button>
+```
+
+## Ejemplo: button con routerLink
+
+**Input (Nunjucks):**
+```njk
+{{ componentButton({
+  "text": "Ir a usuarios",
+  "href": "/usuarios",
+  "classes": "c-button--primary"
+}) }}
+```
+
+**Output (TypeScript):**
+```typescript
+export class MyButtonComponent {
+  text: string = 'Ir a usuarios';
+  routerLink: string = '/usuarios';
+  classes: string = 'c-button--primary';
+}
+```
+
+**Output (template HTML):**
+```html
+<desy-button
+  [text]="text"
+  [routerLink]="routerLink"
+  [routerLinkActiveClasses]="'active'"
+  [classes]="classes"
+>
+  Ir a usuarios
+</desy-button>
+```
+
+## Validación
+
+Después de traducir, valida con:
+
+1. **Build con Angular CLI** (`ng build` o `npm run build-prod`): debe compilar sin errores
+2. **Tests unitarios**: el agente puede usar el demo de `angular-md/demo-X.md` como referencia para tests
+3. **Comparar con la doc oficial**: si tienes dudas sobre un parámetro, lee el `angular-md/demo-X.md`
+4. **WCAG 2.2 AA**: usa el skill `desy-validate-accessibility` después de traducir
+
+## Limitaciones
+
+1. **Cobertura incompleta:** 20+ de 57 componentes mapeados. Para los 37 restantes, **consulta el `angular-md/demo-X.md` correspondiente**.
+2. **No incluye desy-ionic** (móvil). La traducción a Ionic es distinta (Ionic usa `ion-*` y tiene su propio ciclo de vida).
+3. **Patrones avanzados no cubiertos:** JS global (combo, listbox, menubar, table-advanced) puede requerir manejo especial de eventos.
+4. **Slots/transclusión:** el mapeo de `html` string → `<ng-container>` puede no ser 1:1 en componentes compuestos. Validar con la doc.
+5. **Componentes con estado interno:** datepicker, combo, listbox tienen estado interno que en HTML se maneja con JS, en Angular se maneja con servicios/inputs adicionales. Estos NO son traducción trivial.
+6. **No validado empíricamente** con build + comparación: el patrón general está validado con `button` y la tabla de equivalencias es por inspección de los `angular-md/demo-X.md`. Para validación completa, hay que clonar `desy-angular-starter`, hacer build, y comparar con la doc.
+
+## Próximos pasos sugeridos (cuando haya tiempo)
+
+1. Clonar `desy-angular-starter` de bitbucket (`https://bitbucket.org/sdaragon/desy-angular-starter`)
+2. `npm install` + `npm run build-prod` para verificar que el setup funciona
+3. Para cada componente de la tabla, generar un ejemplo mínimo con opencode + M3 y verificar que el build pasa
+4. Ampliar la tabla con los 37 componentes restantes
+5. Considerar un linter `lint-html-angular.py` que traduzca automáticamente fragmentos Nunjucks
+
+## Related
+
+- `desy-choose-library` — para decidir si usar este skill o no
+- `desy-implement-component` — genera código Nunjucks para desy-html
+- `desy-validate-accessibility` — para validar el output Angular (WCAG 2.2 AA)
+- `desy-component-recognizer` — para identificar componentes en un mockup
+- Doc oficial: `https://desy.aragon.es/desarrollo-desy-angular.html.md`
+- Patrones de URLs para demos: `https://desy.aragon.es/angular-md/demo-<componente>.md`
