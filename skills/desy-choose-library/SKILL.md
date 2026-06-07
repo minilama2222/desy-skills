@@ -7,6 +7,20 @@ description: "Decide between desy-html, desy-angular, and desy-ionic. Use when s
 
 Ayuda a un equipo a decidir qué librería DESY usar para un proyecto nuevo, una migración, o una evaluación de stack. Considera el tipo de producto, el perfil del equipo, los requisitos no funcionales y la publicación objetivo.
 
+## Regla fundamental (lee esto antes de recomendar)
+
+> **Nunca se usa la librería directamente. Siempre se parte del starter oficial, que la tiene como dependencia.**
+
+| Si el usuario dice... | Lo correcto es... | Lo incorrecto es... |
+|---|---|---|
+| "Quiero usar desy-html" | Clonar `desy-html-starter` de Bitbucket, `npm install`, personalizar | `npm install desy-html` en un proyecto vacío |
+| "Quiero usar desy-angular" | Clonar `desy-angular-starter` de Bitbucket, `npm install`, personalizar | `npm install desy-angular` en un proyecto vacío |
+| "Quiero usar desy-ionic" | Clonar `desy-ionic` de Bitbucket, `npm install`, personalizar | `npm install @ionic/angular` en un proyecto vacío |
+
+La razón: cada starter es un **proyecto scaffolded** con la toolchain ya configurada (Nunjucks+Vite, Angular CLI, Ionic CLI+Capacitor), la estructura de directorios correcta, y la convención de build probada. Instalar la librería directamente deja al agente (o al humano) re-implementando todo eso desde cero, con paths y builds que no van a funcionar. **El starter ES la forma de usar la librería.**
+
+El output esperado de cualquier proyecto DESY es siempre el `dist/` generado por el toolchain del starter correspondiente (`npm run build` con Vite para desy-html, `npm run build-prod` con Angular CLI para desy-angular, `npm run build` con Ionic CLI para desy-ionic).
+
 ## When to use this skill
 
 - El equipo va a empezar un proyecto con DESY y no sabe qué librería encaja

@@ -7,6 +7,18 @@ description: "Generate copy-pasteable DESY component code in desy-html, desy-ang
 
 Genera código copy-pasteable para un componente DESY concreto en la librería adecuada, con los parámetros que pida el equipo, garantizando accesibilidad WCAG 2.2 AA.
 
+## Regla fundamental (lee esto antes de implementar)
+
+> **Antes de generar ningún componente, confirma que el proyecto es un starter DESY clonado (`desy-html-starter`, `desy-angular-starter` o `desy-ionic`). Si no lo es, este skill no aplica — primero hay que aplicar `desy-scaffold-project` para clonar el starter y dejarlo listo.**
+
+Razón: este skill trabaja **dentro** de un proyecto DESY (sobre la estructura de directorios, los macros de la librería, las convenciones de build del starter). Implementar componentes sin un starter DESY como base produce HTML/TSX/Angular que NO se compila con la toolchain oficial, NO usa los macros reales, y genera un output inconsistente con cualquier proyecto DESY real.
+
+Si te piden "hazme una página X" y no estás en un starter DESY:
+1. Aplica primero `desy-scaffold-project` (clonar el starter adecuado, `npm install`)
+2. Verifica que `node_modules/<librería>` existe y que `npm run build` produce un `dist/`
+3. **Ahora** aplica este skill para generar el componente o página dentro de ese proyecto
+4. El output final debe ser el `dist/` compilado, no HTML suelto
+
 ## When to use this skill
 
 - El equipo sabe QUÉ componente necesita (ej: "un botón de enviar", "una tabla con paginación", "un modal de confirmación")
