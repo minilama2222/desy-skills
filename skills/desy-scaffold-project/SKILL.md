@@ -266,6 +266,12 @@ ls dist/  # o dist/mi-app/  # debe tener archivos compilados
 
 ## Estructura de directorios del proyecto (modelo librería/starter/build)
 
+**Regla de oro del scaffold (lección del benchmark 2026-06-07, aplicable a TODOS los starters DESY):**
+
+> Para crear un proyecto basado en `desy-html`, `desy-angular` o `desy-ionic` hay que **usar siempre el starter oficial correspondiente** (clonar de Bitbucket, instalar deps, personalizar). No se construye "desde cero" ni se inventa código: **se parte del starter y se personaliza**. El output de un proyecto DESY siempre es el resultado de `npm run build` del starter (Nunjucks+Vite, Angular CLI, o Ionic CLI+Capacitor), es decir, el `dist/` específico del proyecto. **El CSS que recibe el navegador es el CSS compilado del proyecto (Tailwind 4 + librería), NO el CSS de la librería.** Esto vale por igual para los 3 starters; la mecánica concreta (Nunjucks vs Angular components vs Ionic pages) difiere, pero el principio es el mismo.
+
+Implicación operativa para benchmarks o generación con IA: el output correcto de una tarea "hazme una página DESY de X" es **siempre el `dist/` del starter correspondiente**, nunca HTML estático suelto, nunca un proyecto sin el starter como base.
+
 **Diferencia crítica librería vs starter vs build (lección del benchmark 2026-06-07):**
 
 - **`desy-html`** es un **paquete npm** (`desy-html@16.x`, 4.7MB) que contiene los macros, los SVGs de la librería y los source CSS. Se instala como `devDependency`.
