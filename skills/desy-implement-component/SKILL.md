@@ -80,6 +80,57 @@ Antes de generar código, confirma con el equipo:
 
 Un agente que produce tipografía con utility classes Tailwind produce un output que **se ve coherente técnicamente** (estructura, ARIA, macros) pero **roto visualmente** — el h1 se ve más pequeño que el del gold, los párrafos tienen interlineado distinto, los acentos cromáticos no aparecen. La comparativa semántica pasa (es "Aceptable"), pero la visual falla.
 
+## Plantillas oficiales del starter (cuándo usar cada una)
+
+El proyecto `desy-html-starter` incluye **16 plantillas oficiales** (10 base + 6 spinners) en `src/`. Son el **punto de partida correcto** para cualquier página nueva — partir de una plantilla garantiza estructura, navegación, header, footer y patrones consistentes con el resto del sistema.
+
+### Plantillas base (10) — elige la que coincida con tu caso de uso
+
+| Plantilla | Tamaño | Tipo de página | Cuándo usarla |
+|---|---|---|---|
+| `plantilla-con-header-advanced.html` | 1.3KB | **Portal público** con header de 3 bandas | Landing, home de portal, páginas de información pública con megamenú. Cabecera: header-advanced (3 bandas) |
+| `plantilla-sin-loguear.html` | 1.3KB | **Pública minimalista** (sin sesión) | Login, acceso, error, página de aterrizaje sin navegación |
+| `plantilla-logueado-con-titulo-de-app.html` | 1.3KB | **Webapp con sesión**, cabecera simple | Home de webapp, listado, página de inicio post-login |
+| `plantilla-logueado-con-selector-de-app.html` | 1.3KB | **Webapp con selector de app** | Cuando el usuario puede cambiar entre aplicaciones del ecosistema |
+| `plantilla-logueado-con-selector-de-app-y-subheader.html` | 1.4KB | **Webapp con selector + subheader** | Cuando hay navegación secundaria bajo la cabecera |
+| `plantilla-logueado-con-selector-de-app-y-sidebar.html` | 8.7KB | **Webapp con sidebar lateral** | Listados con filtros en sidebar, navegación de secciones |
+| `plantilla-logueado-con-cabecera-fija.html` | 1.4KB | **Webapp con cabecera fija al scroll** | Páginas largas donde la navegación debe estar siempre visible |
+| `plantilla-logueado-con-cabecera-fija-headroom.html` | 1.5KB | **Webapp con cabecera inteligente** (aparece al scroll up) | Páginas muy largas, scroll denso |
+| `plantilla-editar-con-cabecera-fija.html` | 1.5KB | **CRUD con cabecera fija** | Formularios de edición con guardado rápido |
+| `plantilla-editar-con-cabecera-fija-y-sidebar-sticky.html` | 8.1KB | **CRUD con cabecera fija + sidebar sticky** | Edición de datos extensos, formularios largos con índice de secciones |
+
+### Spinners (6) — variantes con `c-spinner` para indicar carga
+
+| Plantilla | Tamaño | Descripción |
+|---|---|---|
+| `spinner-plantilla-sin-loguear.html` | 481B | Variante de `plantilla-sin-loguear` con spinner de carga |
+| `spinner-plantilla-con-header-advanced.html` | 151B | Variante con header-advanced + spinner |
+| `spinner-plantilla-logueado-con-titulo-de-app.html` | 145B | Variante con cabecera simple + spinner |
+| `spinner-plantilla-logueado-con-cabecera-fija.html` | 159B | Variante con cabecera fija + spinner |
+| `spinner-plantilla-logueado-con-selector-de-app-y-subheader.html` | 180B | Variante con selector + subheader + spinner |
+| `spinner-plantilla-editar-con-cabecera-fija.html` | 253B | Variante de edición con cabecera fija + spinner |
+
+### Cómo extender una plantilla
+
+Para crear una nueva página a partir de una plantilla oficial:
+
+1. **Lee la plantilla base** (`src/plantilla-X.html`) para entender su estructura: bloques, extends, includes
+2. **Copia la plantilla** a un nuevo archivo `src/<mi-pagina>.html`
+3. **Modifica solo el `contentBlock`** y los bloques específicos — NO toques header, footer, head, skip-link
+4. **Si necesitas una variante con carga**, parte del spinner correspondiente
+5. **Compila con `npm run build`** y verifica el output en `dist/`
+
+### Anti-patterns
+
+- ❌ Crear una página desde cero sin basarte en una plantilla oficial
+- ❌ Modificar el header o footer directamente en cada página (en lugar de extender el template correcto)
+- ❌ Usar una plantilla que no coincide con el caso de uso (ej: plantilla-sin-loguear para una webapp con sidebar)
+- ❌ Olvidar poner el spinner en una página que carga datos asíncronos
+
+### Catálogo visual de referencia
+
+Screenshots de las 5 plantillas más representativas (1280x2400px) están disponibles en `~/.openclaw/workspace/benchmark-screenshots/tpl-*.png`. Úsalas para verificar visualmente cómo se ve cada tipo de página antes de elegir.
+
 ## Workflow
 
 ### Paso 1: Identifica la URL del ejemplo "copia y pega"
