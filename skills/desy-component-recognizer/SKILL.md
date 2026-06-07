@@ -134,7 +134,22 @@ Si ves overlay oscuro cubriendo la página → modal o dialog. Si ves panel late
 - `table`: tabla HTML estándar con estilos DESY (`.c-table`)
 - `table-advanced`: tabla con paginación, búsqueda, selección múltiple, acciones en lote. Si ves filtros, checkboxes en header, paginación → `table-advanced`
 
-### 5. **"menu-horizontal" vs "menu-navigation" vs "menubar"**
+### 5. **header vs header-mini vs header-advanced**
+
+Distinguir los 3 tipos de header por la estructura visible:
+
+- **`header-mini`**: UNA sola banda muy fina. Solo el logo (típicamente el escudo de Aragón). Sin nav, sin perfil de usuario. Aparece en páginas minimalistas (login, error 404, mapa web, accesibilidad).
+- **`header`**: UNA sola banda con logo + (opcionalmente) nombre de la app + nav + perfil. Aparece en webapps con sesión iniciada.
+- **`header-advanced`**: TRES bandas visibles. Banda 1: branding institucional (logo Aragón). Banda 2: nombre del portal. Banda 3: nav principal con megamenú. Aparece en portales públicos (ej: "Portal de Salud").
+
+**Patrones visuales para distinguirlos:**
+- Si ves una sola franja fina con solo el logo → `header-mini`
+- Si ves una franja con logo + nombre de app + nav (todo en una línea) → `header`
+- Si ves 3 franjas apiladas (logo arriba, nombre del portal en medio con fondo oscuro, nav abajo) → `header-advanced`
+
+**Confusión típica:** a veces un header "normal" se confunde con header-advanced por tener subnav. La regla: header-advanced SIEMPRE tiene 3 bandas visualmente distintas. Header normal tiene 1 sola banda, aunque tenga subnav debajo.
+
+### 6. **menu-horizontal vs menu-navigation vs menubar**
 
 - `menu-horizontal`: barra de navegación horizontal simple, una sola línea
 - `menu-navigation`: navegación más completa, puede tener submenús, branding integrado
@@ -142,7 +157,31 @@ Si ves overlay oscuro cubriendo la página → modal o dialog. Si ves panel late
 
 **Si ves una nav horizontal en un header web** → `menu-navigation`. Si es una nav simple con 3-4 links sin submenús → `menu-horizontal`. Si parece un menú de aplicación tipo Word → `menubar`.
 
-### 6. **Ejemplos visualmente similares ≠ mismo componente**
+### 7. **`alert` MUESTRA un `notification` — identifica el notification, no el alert**
+
+**Regla crítica**: el componente `alert` (componentAlert) es un **wrapper/contenedor** que casi siempre renderiza un `notification` (componentNotification) DENTRO. El notification es lo que el usuario ve: icono + texto + botón X de cerrar. El alert es solo el rectángulo con borde/fondo que lo envuelve.
+
+- **Si ves un cuadro de aviso con icono + texto + botón cerrar:** es un `notification` (éxito, alerta, advertencia, o información). **No es alert.**
+- **Si ves el wrapper (borde y fondo) sin el notification dentro:** es `alert` solo.
+
+**Patrón de código típico:**
+```njk
+{{ componentAlert({
+  "type": "success",
+  "titleText": "...",
+  "content": ...  ← aquí va el componentNotification
+}) }}
+```
+
+**Variantes de notification que verás más frecuentemente:**
+- `éxito` (verde, icono de check) — "Te has identificado correctamente", "Operación completada"
+- `alerta` (rojo, icono de exclamación) — errores
+- `advertencia` (amarillo, icono de warning) — avisos
+- `información` (azul, icono de i) — información general
+
+**Falso positivo histórico:** en el mockup `patron-pagina-acceso-cargando`, M3 reconoció "alert" cuando en realidad era un `notification` (éxito) con el texto "Te has identificado correctamente".
+
+### 8. **Ejemplos visualmente similares ≠ mismo componente**
 
 Dos ejemplos pueden verse casi iguales pero diferir en:
 - **Parámetros** (ej: button con `text` distinto, no es otra variante — es la misma con otro label)
@@ -151,11 +190,11 @@ Dos ejemplos pueden verse casi iguales pero diferir en:
 
 **Si dos elementos se ven iguales y solo difiere el texto**, es el mismo componente, no es una variante nueva.
 
-### 7. **El "recuadro con border 1px" NO es parte del componente**
+### 9. **El "recuadro con border 1px" NO es parte del componente**
 
 En el catálogo de ejemplos (las páginas de `examples-X.html`), cada ejemplo está enmarcado por un `<div class="border border-neutral-base">` (la macro `componentExample` en `docs/_macro.component-example.njk`). **Este recuadro es del catálogo, no del componente.** Cuando analices una captura del catálogo, ignora el recuadro exterior.
 
-### 8. **Colores de marca vs colores de UI**
+### 10. **Colores de marca vs colores de UI**
 
 - **Azul petroléo/petróleo (#00607a)** = color primario, muchos componentes
 - **Verde, rojo, amarillo** = estados (success, alert, warning)
