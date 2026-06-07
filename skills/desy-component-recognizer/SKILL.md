@@ -247,6 +247,51 @@ Si tienes un screenshot gold oficial (ej: `https://desy.aragon.es/componente-X-c
 
 Las discrepancias en mocks rediseñados son SEÑALES de mejora (ej: el usuario migró de variant `default` a variant `primary`, eso es información valiosa).
 
+## Linter de variantes (post-reconocimiento)
+
+Después de hacer el matching, **valida tu output con el linter** en `assets/linter.py` (~80 líneas, sin deps externas).
+
+**Qué hace:**
+- ✅ **OK**: variante documentada en el catálogo (match exacto, substring, o fuzzy tras normalización español↔inglés)
+- 🟡 **COMPOSITION**: combinación no documentada, pero los modificadores atómicos sí existen (ej: "con múltiples links" sobre "por defecto")
+- 🟣 **CSS_CLASS**: rechazada porque parece una CLASE CSS (`c-link`, `ds-focus`, etc.), no una variante
+- 🟠 **SUSPICIOUS**: contiene `ds-focus` o `estado focus` — **clase demo, no de producción**
+- ⚠️ **WARNING**: variante no documentada — **decisión humana**
+- ❌ **UNKNOWN**: componente no existe en el catálogo
+
+**Uso:**
+```bash
+# 1. Tu output del recognizer (componente, variante) en JSON
+echo '[{"comp": "button", "var": "primario"}, ...]' > identificaciones.json
+# 2. Ejecuta el linter
+python3 assets/linter.py  # lee catalog.json automáticamente
+```
+
+**Reglas del linter (conservadoras):**
+1. **Sinónimo de componente** (`link` → `links-list`, `radio` → `radios`) — mapea antes de buscar
+2. **Match exacto** (normalizado) → OK
+3. **Substring** (query en variante, o viceversa) → OK
+4. **SequenceMatcher** (fuzzy ratio ≥ 0.65) → OK_FUZZY
+5. **ds-focus / estado focus** → SUSPICIOUS (clase demo)
+6. **Modificadores atómicos componibles** (≥ 2 mods, todos en variantes) → COMPOSED
+7. **Sin match** → WARNING (decisión humana, **no error**)
+
+**Insight clave:** El catálogo lista **ejemplos representativos**, NO exhaustivos. Una variante que no aparece como tal puede ser válida (combinación de modificadores). El linter marca "no documentado" como WARNING (no error) para que **tú decidas**.
+
+**Resultado típico en producción** (validado con 3 mockups re-validados):
+```
+✅ OK          : 31%  match exacto
+🟡 COMPOSITION : 46%  patrones CSS descriptivos
+🟣 CSS_CLASS   : 23%  clases CSS rechazadas (reconocer confunde)
+⚠️ WARNING    :  0%  (problemas reales)
+❌ UNKNOWN    :  0%  (componentes inexistentes)
+```
+
+**Cuándo ejecuta el linter:**
+- Después de obtener el JSON del recognizer
+- Antes de pasar la identificación a `desy-implement-component` (que usará esos componentes para generar código)
+- En CI si se automatiza el flujo (recomendado)
+
 ## Related
 
 - `desy-implement-component` — después de identificar, implementa con el componente correcto
