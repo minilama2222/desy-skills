@@ -131,6 +131,135 @@ Para crear una nueva página a partir de una plantilla oficial:
 
 Screenshots de las 5 plantillas más representativas (1280x2400px) están disponibles en `~/.openclaw/workspace/benchmark-screenshots/tpl-*.png`. Úsalas para verificar visualmente cómo se ve cada tipo de página antes de elegir.
 
+## Macros compuestos (input-group, fieldset, checkboxes, radios, table-advanced)
+
+**Hallazgo del benchmark 2026-06-07 (test end-to-end de `paso-3-direccion-postal`):** varios macros de desy-html son **compuestos** — esperan un array `items: []` con sub-ítems, no parámetros directos. Si pasas params de un input atómico (`{id, name, type, label}`), el macro no renderiza nada o renderiza un shell vacío.
+
+**Regla general:** si el macro termina en `-group`, `-list`, o tiene un sufijo que sugiere composición (`input-group`, `checkboxes`, `radios`, `fieldset`, `table-advanced`), probablemente espera `items: []` o estructura anidada.
+
+### `componentInputGroup` — el más usado
+
+❌ **No funciona** (lo que yo hice en el benchmark):
+```njk
+{{ componentInputGroup({
+  "id": "via",
+  "name": "via",
+  "type": "text",
+  "label": "Vía"
+}) }}
+```
+
+✅ **Correcto** (estructura real):
+```njk
+{{ componentInputGroup({
+  "id": "direccion-via",
+  "namePrefix": "direccion",
+  "fieldset": {
+    "legend": { "text": "Dirección" }
+  },
+  "items": [
+    {
+      "name": "tipo-via",
+      "label": { "text": "Tipo de vía" },
+      "isSelect": true,
+      "selectItems": [
+        { "value": "calle", "text": "Calle", "selected": true },
+        { "value": "avenida", "text": "Avenida" }
+      ]
+    },
+    {
+      "name": "via",
+      "label": { "text": "Vía" },
+      "type": "text",
+      "autocomplete": "address-line1",
+      "required": true,
+      "classes": "w-full lg:flex-1"
+    }
+  ]
+}) }}
+```
+
+**Estructura:**
+- `id` — id del grupo (no del input individual)
+- `namePrefix` — prefijo para los names de cada item (`namePrefix + '-' + item.name` = `direccion-tipo-via`)
+- `fieldset.legend.text` — texto del legend del fieldset que envuelve
+- `fieldset.legend.attributes.class` — para esconder visualmente con `sr-only` si solo es decorativo
+- `items` — ARRAY de inputs/selects del grupo
+  - `name` — nombre del input (sin prefijo)
+  - `label.text` — etiqueta del input
+  - `type` — `text`, `email`, `tel`, etc.
+  - `autocomplete` — valor estándar (`address-line1`, `postal-code`, etc.)
+  - `required` — boolean
+  - `isSelect` — true si es un select (en lugar de input)
+  - `selectItems` — array de opciones `{value, text, selected}` (solo si `isSelect: true`)
+  - `classes` — utility classes para ancho (`w-full`, `w-full lg:w-1/4`, etc.)
+
+### `componentCheckboxes` / `componentRadios` — similar a input-group
+
+```njk
+{{ componentCheckboxes({
+  "id": "privacidad",
+  "namePrefix": "privacidad",
+  "fieldset": {
+    "legend": { "text": "Acepto la", "attributes": { "class": "sr-only" } }
+  },
+  "items": [
+    {
+      "name": "acepta-privacidad",
+      "value": "si",
+      "label": { "text": "Acepto la" },
+      "required": true
+    }
+  ]
+}) }}
+```
+
+### `componentFieldset` — agrupa elementos con un legend
+
+```njk
+{{ componentFieldset({
+  "id": "direccion-group",
+  "legend": { "text": "Datos de dirección" },
+  "classes": "mb-base"
+}) }}
+```
+
+### `componentTableAdvanced` — tabla con sub-componentes
+
+```njk
+{{ componentTableAdvanced({
+  "id": "expedientes",
+  "caption": "Lista de expedientes",
+  "head": [...],  // array de headers
+  "rows": [...],  // array de filas
+  "pagination": { "current": 1, "total": 10 }
+}) }}
+```
+
+### Macros atómicos (siguen el patrón directo)
+
+- `componentButton` — `{text, classes, href, type, disabled, ...}`
+- `componentInput` — `{id, name, type, label, autocomplete, ...}` (un input individual)
+- `componentSelect` — `{id, name, label, items: [{value, text}]}`
+- `componentLink` — **NO EXISTE como macro** — usa `<a class="c-link" href="...">...</a>`
+- `componentPill` — `{text, classes, type, href, ...}`
+- `componentCard` — patrón propio (ver ejemplo en `_examples.card.njk`)
+
+### Cómo encontrar la estructura correcta
+
+Para cualquier macro del que no estés seguro, **lee el `_examples.X.njk` correspondiente** en `node_modules/desy-html/src/templates/components/<X>/`. Esos ejemplos SIEMPRE muestran la estructura correcta de `data` para cada variante documentada.
+
+**Comando para explorar:**
+```bash
+ls node_modules/desy-html/src/templates/components/
+# Para un macro específico:
+cat node_modules/desy-html/src/templates/components/input-group/_examples.input-group.njk
+```
+
+### Por qué este gap existía
+
+El catálogo extraído del repo `desy-html` (rama develop, 57 componentes) tiene los nombres de variantes pero NO la estructura detallada de cada macro. Esta sección se añadió tras descubrir el gap en el test end-to-end del 2026-06-07.
+
 ## Workflow
 
 ### Paso 1: Identifica la URL del ejemplo "copia y pega"
