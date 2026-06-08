@@ -1,6 +1,6 @@
 ---
 name: desy-styles-reference
-description: "Reference of the DESY design tokens (colors, spacing, typography, shadows) extracted from desy-html library. Use when implementing any visual aspect of a DESY page to pick the right token instead of inventing Tailwind utilities."
+description: "Reference of the DESY design tokens (colors, spacing, typography, shadows) extracted from desy-html library. Invoke when the user asks which utility class to use (e.g. `p-base` vs `p-4`?, `mb-lg` vs `mb-7`?, `text-primary` vs `text-blue-700`?), when reviewing existing code for token compliance, or when Tailwind defaults conflict with the design system. Covers the 8/16/28/32px canonical spacing scale, the primary/neutral/warning/success/info/alert color families with light/base/dark variants, and typography classes (`c-h1`/`c-paragraph-base`/etc.)."
 ---
 
 # desy-styles-reference
