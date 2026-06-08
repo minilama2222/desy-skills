@@ -49,9 +49,9 @@ Cuando recibas una imagen (vía `image` tool, anexo en chat, o ruta en disco):
 1. **Si la imagen es grande (>2000px de alto)**, divídela mentalmente por zonas (header, sidebar, main, footer)
 2. **Detecta si es pantalla completa** (mobile, tablet, desktop) — el layout y la visibilidad de elementos cambia
 
-### Paso 2: Análisis visual con M3 multimodal
+### Paso 2: Análisis visual con un LLM con capacidad de visión
 
-Usa la herramienta `image` (que es M3 multimodal) con el prompt:
+Usa la herramienta de visión del LLM que tengas disponible (e.g. `image` en OpenClaw, o equivalente en otros entornos) con el prompt:
 
 ```
 Analiza esta imagen y lista TODOS los elementos UI visibles. Para cada elemento indica:
@@ -179,7 +179,7 @@ Distinguir los 3 tipos de header por la estructura visible:
 - `advertencia` (amarillo, icono de warning) — avisos
 - `información` (azul, icono de i) — información general
 
-**Falso positivo histórico:** en el mockup `patron-pagina-acceso-cargando`, M3 reconoció "alert" cuando en realidad era un `notification` (éxito) con el texto "Te has identificado correctamente".
+**Falso positivo histórico:** en el mockup `patron-pagina-acceso-cargando`, el LLM con visión reconoció "alert" cuando en realidad era un `notification` (éxito) con el texto "Te has identificado correctamente".
 
 ### 8. **Ejemplos visualmente similares ≠ mismo componente**
 

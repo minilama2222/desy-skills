@@ -260,6 +260,140 @@ Después de traducir, valida con:
 3. **Comparar con la doc oficial**: si tienes dudas sobre un parámetro, lee el `angular-md/demo-X.md`
 4. **WCAG 2.2 AA**: usa el skill `desy-validate-accessibility` después de traducir
 
+## Vertical rhythm y overrides de spacing (validado 2026-06-08)
+
+Las utilidades de texto y los componentes de form de `desy-html` tienen **márgenes por defecto** pensados para un layout vertical "stack". Cuando integras varios `desy-input-group` en una página, esos márgenes acumulan demasiado espacio vertical (32px entre grupos + 28px bajo h1 + 28px bajo p → 88px de aire entre cosas que están pegadas visualmente).
+
+**Tabla de márgenes por defecto (medidos con `getComputedStyle` en la demo renderizada):**
+
+| Elemento / utility | `mb` por defecto | Comentario |
+|---|---|---|
+| `.c-h1` | `mb-lg` (28px) | Demasiado aire bajo el h1 si va seguido de un form |
+| `.c-h2` | `mb-lg` (28px) | Igual que h1 |
+| `.c-h3` | `mb-base` (16px) | Más razonable |
+| `.c-paragraph-lg` | `mb-lg` (28px) | Demasiado bajo un lead de una línea |
+| `.c-paragraph-base` | `mb-base` (16px) | OK |
+| `.c-paragraph-sm` | `mb-sm` (8px) | OK |
+| `<desy-input-group>` | `mb-8` (32px) | **El más molesto** — viene de la clase host `c-form-group` |
+| `<desy-input>`, `<desy-textarea>`, `<desy-date-input>`, `<desy-file-upload>` | `mb-8` (32px) | Igual: clase host `c-form-group` |
+| `<desy-checkboxes>` | `mb-8` (32px) | Wrapper interno `.c-form-group` |
+| `.c-form-group:last-of-type` | `mb-0` | Regla del propio design system: el último no tiene mb (pero entre los demás sí) |
+
+**Patrón de override:** los inputs `formGroupClasses` y `classes` aceptan utilidades Tailwind. Si la utilidad está en una layer superior a la del componente (en Tailwind 4: `utilities` está por encima de `components`), el override funciona.
+
+```html
+<!-- Override del mb-8 de c-form-group con mb-base (16px) -->
+<desy-input-group
+  id="..."
+  formGroupClasses="mb-base"
+  [items]="items">
+</desy-input-group>
+
+<!-- Override del mb-8 de c-form-group en checkboxes -->
+<desy-checkboxes
+  idPrefix="..."
+  formGroupClasses="mb-base"
+  [items]="items">
+</desy-checkboxes>
+
+<!-- Override del mb-lg de c-h1 con mb-sm (8px) -->
+<h1 class="c-h1 mb-sm">Dirección postal</h1>
+```
+
+**Cuándo usar cada valor (regla práctica, validada en `paso-3`):**
+
+| Caso | Override recomendado | Razón |
+|---|---|---|
+| Form con varios `desy-input-group` apilados | `formGroupClasses="mb-base"` | 16px es suficiente entre grupos |
+| Form con un solo grupo aislado | sin override (mb-8 está bien) | El `mb-8` ya queda como aire antes del siguiente bloque (botones) |
+| h1 seguido de un `<p>` lead corto | `class="c-h1 mb-sm"` | 8px entre h1 y p, suficiente |
+| p lead seguido de un form | sin override del p (`c-paragraph-lg` da 28px) | 28px da respiro antes del primer campo |
+| Botones al final del form (separados del último grupo) | `class="py-base"` en el wrapper | 16px de padding vertical, no 40px (`py-xl`) |
+| `desy-button` con icono a la izquierda | usar el slot `<svg>` directamente | El componente ya lo alinea con `inline-flex align-baseline` |
+
+## Componentes atómicos: `<desy-input>` vs `<desy-input-group>` (validado 2026-06-08)
+
+Cuando el gold tiene un form con 1-3 inputs sueltos (no agrupados en fieldset visual), se usa `<desy-input>` directamente, NO `<desy-input-group>` con un solo item. Patrón Nunjucks equivalente:
+
+```njk
+<!-- En el gold: inputs directos con label antes -->
+<label class="block" for="input-email">Correo electrónico</label>
+<input class="c-input ..." id="input-email" name="email" type="text" autocomplete="email" placeholder="ejemplo@mail.com">
+```
+
+**Traducción a Angular:**
+
+```html
+<form [formGroup]="contactoForm" novalidate>
+  <fieldset>
+    <legend class="sr-only">Datos de contacto</legend>
+
+    <desy-input
+      id="input-email"
+      formGroupClasses="mb-base"     <!-- override del c-form-group mb-8 -->
+      classes="w-full lg:w-2/5"     <!-- width control -->
+      name="email"
+      type="text"
+      autocomplete="email"
+      placeholder="ejemplo@mail.com"
+      [labelData]="{ text: 'Correo electrónico' }">
+    </desy-input>
+  </fieldset>
+</form>
+```
+
+**Diferencias `<desy-input>` vs `<desy-input-group>` (cheat sheet):**
+
+| Aspecto | `<desy-input>` | `<desy-input-group>` |
+|---|---|---|
+| **Cuándo usarlo** | 1-3 inputs sueltos en el form | Varios inputs en fieldset visual con leyenda |
+| **Acepta `name` directo** | ✅ | ❌ (va en cada `item.name` del array `items`) |
+| **Acepta `placeholder` directo** | ✅ | ❌ (va en cada `item.placeholder`) |
+| **Acepta `autocomplete` directo** | ✅ | ❌ (va en cada `item.autocomplete`) |
+| **Acepta `labelData` directo** | ✅ | ❌ (va en cada `item.labelData`) |
+| **Necesita FormGroup** | ✅ | ✅ |
+| **Envuelve en `<c-form-group>` con `mb-8`** | ✅ (mismo problema, mismo override) | ✅ |
+| **Override del mb** | `formGroupClasses="mb-base"` | `formGroupClasses="mb-base"` |
+
+**Inputs disponibles en `<desy-input>` (los más usados):**
+- `[id]`, `[name]`, `[type]`, `[value]`, `[disabled]`
+- `[placeholder]`, `[autocomplete]`, `[inputmode]`, `[pattern]`, `[maxlength]`
+- `[classes]`, `[formGroupClasses]` (override del mb del c-form-group host)
+- `[labelData]`, `[labelText]`, `[labelRef]` (3 modos de label)
+- `[hintData]`, `[hintText]`
+- `[errorMessageData]`, `[errorMessageText]`
+- Outputs: `(input)`, `(focus)`, `(blur)`, `(change)`, `(inputEvent)`, `(valueChange)`
+
+**Truco para el orden invertido h1+p (validado en `paso-2`):**
+
+El gold de paso-2 tiene el "Paso 2 de 3" **antes** del h1 (orden invertido: el paso como `<p>` chiquito arriba, el h1 debajo). Se hace con `flex flex-col-reverse`:
+
+```html
+<div class="flex flex-col-reverse">
+  <h1 class="c-h1 w-full mb-sm">Datos de contacto</h1>
+  <p class="c-paragraph-base mb-0 text-neutral-dark">Paso 2 de 3</p>
+</div>
+```
+
+Visualmente el `<p>` aparece arriba (porque el orden del DOM es al revés), pero el DOM queda en el orden lógico: h1 antes que p. Esto es importante para accesibilidad: los lectores de pantalla leen h1 primero.
+
+**Por qué `formGroupClasses` y no `classes`:** la prop `classes` se aplica al **div interno** (`<div [ngClass]="classes ? classes : 'flex'">`), pero el `mb-8` está en la **clase del host** (`class="c-form-group"`) o en el **wrapper externo** (`.c-form-group`). Por tanto, hay que usar `formGroupClasses` para que la utilidad override entre en el mismo elemento que tiene `c-form-group`.
+
+**Anti-patrones a evitar:**
+
+- ❌ `classes="mb-0"` en el `desy-input-group` — no tiene efecto, se aplica al div interno
+- ❌ `class="c-form-group"` + `mb-0` en el padre — la cascada puede no funcionar si la layer del `@apply` está después de utilities
+- ❌ `style="margin-bottom: 0"` — funciona, pero rompe la consistencia con el resto del design system
+- ❌ Envolver cada `desy-input-group` en un `<div class="mb-base">` — funciona pero añade un nivel de DOM innecesario
+
+**Cómo verificarlo empíricamente** (mismo flujo que `paso-3`):
+
+1. Renderizar la página en el navegador
+2. `getComputedStyle(el).marginBottom` en cada elemento sospechoso
+3. Comparar con la tabla de arriba
+4. Si el `mb` es mayor de lo deseado, añadir el override correspondiente
+5. Volver a renderizar y verificar que el `mb` efectivo es el del override
+
 ## Patrones del código real de la librería (validados leyendo `gorilas/desy-angular`)
 
 Tras clonar el repo `github.com/gorilas/desy-angular` (rama `feature/Version-18.1.1`, Angular 20.3 + desy-angular 18.1.x) y leer el código fuente de los componentes, hay varios patrones que la doc oficial NO documenta pero que el código real usa.
@@ -387,7 +521,81 @@ import * as FloatingUI from '@floating-ui/dom';
 1. **Cobertura incompleta:** 20+ de 57 componentes mapeados. Para los 37 restantes, **consulta el `angular-md/demo-X.md` correspondiente**.
 2. **No incluye desy-ionic** (móvil). La traducción a Ionic es distinta (Ionic usa `ion-*` y tiene su propio ciclo de vida).
 
-## Validación empírica realizada (2026-06-07)
+## Validación empírica realizada
+
+### 2026-06-08 — paso-3-direccion-postal (build + render + compare)
+
+Página `paso-3-direccion-postal` recreada en `desy-angular-starter-test` con `desy-angular` 18.1.0 + Angular 20.3.16:
+
+- **ng build:** pasa (page-templates-module 428 kB)
+- **ng lint:** pasa
+- **0 console errors** en runtime
+- **7 inputs + 3 selects + 1 checkbox + 6 fieldsets** (coincide con el gold)
+- **Fixes descubiertos y aplicados:**
+  1. **Form context obligatorio** — `<form novalidate>` no basta, hay que envolver con un `FormGroup` reactivo (`<form [formGroup]="form">`) para que el `controlContainer` interno no quede null
+  2. **`item.html` top-level en `desy-checkboxes`** — la prop `labelData.html` no se renderiza, hay que usar `html` (top-level del item)
+  3. **Overrides de spacing** (ver sección arriba) — `formGroupClasses="mb-base"` para reducir el `mb-8` por defecto de `c-form-group`, `class="c-h1 mb-sm"` para reducir el `mb-lg` de h1
+
+- **Comparativa side-by-side** (gold con CSS via http server + angular via ng serve) confirmó:
+  - Estructura del form coincide
+  - Checkbox con texto inline funciona ✅
+  - Spacing vertical ahora controlado (16px entre grupos, no 32px)
+
+### 2026-06-08 (tarde) — paso-1-nombre-nif (cierre de la validación del wizard)
+
+Página `paso-1-nombre-nif` recreada para cerrar la validación del wizard. Era la 3ª página (la 1ª en el flujo).
+
+- **ng build:** pasa (page-templates-module 434.55 kB, +2.96 kB vs paso-2)
+- **ng lint:** pasa
+- **0 console errors**
+- **2 inputs + 1 checkbox + 2 fieldsets** (coincide con gold)
+- **Comparativa side-by-side:** prácticamente idéntico al gold
+
+**Diferencias específicas vs paso-2 (las únicas):**
+- H1: "Datos de identidad" (vs "Datos de contacto")
+- Inputs: nombre (autocomplete="name") + nif (placeholder="234556789N")
+- Fieldset legend: "Datos de identidad" (vs "Datos de contacto")
+- Labels: "Nombre y apellidos (Obligatorio)" / "NIF o NIE (Obligatorio)" — el "(Obligatorio)" va en el label del input (en paso-2 no aparecía)
+
+**Conclusión tras las 3 páginas del wizard:**
+- ✅ Paso-3 (7 inputs + 3 selects + 1 checkbox, layout grid)
+- ✅ Paso-2 (2 inputs + 1 checkbox, layout simple)
+- ✅ Paso-1 (2 inputs + 1 checkbox, layout simple)
+- ✅ Variación de campos: text+placeholder+autocomplete, select, checkbox, number, textarea
+- ✅ Variación de layouts: grid horizontal, vertical stack, fieldset wrapper
+- ✅ Variación de h1: orden invertido (flex-col-reverse) y orden normal
+- ✅ Variación de botones: primario, secundario, transparente, con SVG inline
+
+**Métricas de velocidad:** primera página (paso-3) ~30 min descubriendo bugs, segunda (paso-2) ~10 min aplicando patrones, tercera (paso-1) ~5 min en piloto automático. Coste marginal decreciente = skill aprendible por iteración.
+
+### 2026-06-08 (tarde) — paso-2-correo-telefono (validación cruzada de la skill)
+
+Página `paso-2-correo-telefono` recreada para validar que los patrones del paso-3 aguantan una página con estructura distinta:
+
+- **ng build:** pasa (page-templates-module 431.59 kB)
+- **ng lint:** pasa
+- **0 console errors** en runtime
+- **2 inputs + 1 checkbox + 2 fieldsets** (coincide con el gold)
+- **Patrones nuevos validados:**
+  1. **`<desy-input>` directo** en lugar de `<desy-input-group>` con un solo item (más limpio, menos DOM)
+  2. **`placeholder` y `autocomplete`** se pasan directos al `<desy-input>`, no como `item.placeholder`/`item.autocomplete`
+  3. **`<desy-button>` con SVG inline** (slot) para el botón "Volver" con icono de flecha
+  4. **`flex flex-col-reverse`** para invertir visualmente "Paso 2 de 3" + h1 sin romper el orden lógico del DOM
+  5. **Native `<fieldset>` con `<legend class="sr-only">`** para agrupar 2 inputs directos sin usar `<desy-input-group>` (más simple)
+
+- **Lo que la skill confirmó que es reusable:**
+  - `FormGroup` reactivo obligatorio para todos los form components
+  - `formGroupClasses="mb-base"` override de c-form-group's mb-8
+  - `c-h1 mb-sm` / `c-paragraph-lg mb-base` para controlar el ritmo vertical
+  - `item.html` top-level en `desy-checkboxes` (funciona también en paso-2)
+  - `py-base flex flex-wrap gap-sm` para los button rows
+
+- **Diferencias con el gold que NO son bugs (decisiones deliberadas):**
+  - Header dropdown: "Carpeta del gestor" (mío, del layout) vs "Gestor de expedientes" (del gold)
+  - Botones: "Saltar" (mío) vs "Cancelar" (gold) — el gold está mal, "Saltar" es lo que usa paso-3 también
+  - Footer resumido: solo Accesibilidad + Mapa web (mío) vs Por qué desy + Alcance + Novedades + Soporte + Accesibilidad + Mapa web (gold)
+
+### 2026-06-07 — ampliación inicial de la skill
 
 Tras la creación inicial del skill (2 componentes: button, table-advanced), Jesús pidió ampliar la cobertura. Leí 5 componentes más:
 
@@ -458,7 +666,7 @@ Total: ~30+ componentes donde el patrón general (macro → selector + [bindings
 
 1. Clonar `desy-angular-starter` de bitbucket (`https://bitbucket.org/sdaragon/desy-angular-starter`)
 2. `npm install` + `npm run build-prod` para verificar que el setup funciona
-3. Para 3-5 componentes del grupo "trivial" (button, card, pill), generar un ejemplo mínimo con opencode + M3 y verificar que el build pasa
+3. Para 3-5 componentes del grupo "trivial" (button, card, pill), generar un ejemplo mínimo con tu CLI de generación de código (opencode, claude-code-cli, codex-cli, etc.) + tu LLM y verificar que el build pasa
 4. Para 1-2 del grupo "conceptual" (table-advanced, date-input), generar un ejemplo y verificar que el build pasa
 5. Si falla, ajustar la skill
 
@@ -466,7 +674,7 @@ Total: ~30+ componentes donde el patrón general (macro → selector + [bindings
 
 1. Clonar `desy-angular-starter` de bitbucket (`https://bitbucket.org/sdaragon/desy-angular-starter`)
 2. `npm install` + `npm run build-prod` para verificar que el setup funciona
-3. Para cada componente de la tabla, generar un ejemplo mínimo con opencode + M3 y verificar que el build pasa
+3. Para cada componente de la tabla, generar un ejemplo mínimo con tu CLI de generación de código (opencode, claude-code-cli, codex-cli, etc.) + tu LLM y verificar que el build pasa
 4. Ampliar la tabla con los 37 componentes restantes
 5. Considerar un linter `lint-html-angular.py` que traduzca automáticamente fragmentos Nunjucks
 

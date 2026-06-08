@@ -129,7 +129,7 @@ Para crear una nueva página a partir de una plantilla oficial:
 
 ### Catálogo visual de referencia
 
-Screenshots de las 5 plantillas más representativas (1280x2400px) están disponibles en `~/.openclaw/workspace/benchmark-screenshots/tpl-*.png`. Úsalas para verificar visualmente cómo se ve cada tipo de página antes de elegir.
+Screenshots de las 5 plantillas más representativas (1280x2400px) están disponibles en el directorio de assets/screenshots de tu proyecto (e.g. `~/.openclaw/workspace/benchmark-screenshots/tpl-*.png` en OpenClaw, o equivalente en otros entornos). Úsalas para verificar visualmente cómo se ve cada tipo de página antes de elegir.
 
 ## Macros compuestos (input-group, fieldset, checkboxes, radios, table-advanced)
 
