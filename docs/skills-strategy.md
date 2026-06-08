@@ -8,8 +8,12 @@
 |---|---|---|
 | 1 | `desy-choose-library` | Decidir qué librería DESY usar |
 | 2 | `desy-scaffold-project` | Montar el esqueleto del proyecto |
-| 3 | `desy-implement-component` | Generar código de un componente concreto |
-| 4 | `desy-validate-accessibility` | Validar WCAG 2.2 AA antes de mergear |
+| 3 | `desy-styles-reference` | Consultar tokens del design system (colores, espaciado, tipografía, sombras) |
+| 4 | `desy-component-recognizer` | Identificar componentes DESY desde un mockup/screenshot |
+| 5 | `desy-implement-component` | Generar código de un componente concreto (Nunjucks/Angular/Ionic) |
+| 6 | `desy-angular-translator` | Traducir código Nunjucks a Angular (TypeScript + template) |
+| 7 | `desy-design-match` | Verificar fidelidad visual vs imagen de referencia tras 1ª pasada |
+| 8 | `desy-validate-accessibility` | Validar WCAG 2.2 AA antes de mergear |
 
 ## 🗺️ Flujo del desarrollador (cuándo usar cada skill)
 
@@ -22,13 +26,25 @@
    │ 2. desy-scaffold-project│  ← Tienes librería elegida, necesitas arrancar
    └────────────┬────────────┘
                 ▼
-   ┌─────────────────────────┐
-   │3. desy-implement-component│  ← Tienes que implementar un componente
-   └────────────┬────────────┘
+   ┌────────────────────────────────────────┐
+   │3. desy-component-recognizer  (opcional)│  ← Tienes un mockup, identifica componentes
+   └────────────┬───────────────────────────┘
                 ▼
-   ┌─────────────────────────┐
-   │4. desy-validate-accessibility│  ← Antes de mergear
-   └─────────────────────────┘
+   ┌────────────────────────────────────────┐
+   │4. desy-implement-component    (Nunjucks) │  ← Genera código de cada componente
+   └────────────┬───────────────────────────┘
+                ▼
+   ┌────────────────────────────────────────┐
+   │5. desy-angular-translator    (si aplica) │  ← Si target es Angular, traduce Nunjucks → Angular
+   └────────────┬───────────────────────────┘
+                ▼
+   ┌────────────────────────────────────────┐
+   │6. desy-design-match     (iterativo)    │  ← 1ª pasada → captura → medir → esperar OK → fix
+   └────────────┬───────────────────────────┘
+                ▼
+   ┌────────────────────────────────────────┐
+   │7. desy-validate-accessibility  (a11y)   │  ← Antes de mergear
+   └────────────────────────────────────────┘
 ```
 
 Cada skill tiene un output concreto que el siguiente puede consumir.
@@ -105,6 +121,77 @@ Cada skill tiene un output concreto que el siguiente puede consumir.
 
 **Tiempo típico:** 30-60 minutos por página completa (15 min scan automático + 30-45 min tests manuales).
 
+### 3. `desy-styles-reference` (soporte transversal)
+
+**Cuándo usarla:**
+- Necesitas saber el nombre de un token (color, espaciado, tipografía) y no quieres inventar una utility Tailwind por defecto
+- Aplicas color, fondo, borde, margin, padding, gap, tipografía
+- Quieres verificar que un color tiene el contraste correcto según WCAG
+
+**Cuándo NO usarla:**
+- Para saber QUÉ librería usar (eso es `desy-choose-library`)
+- Para saber CÓMO usar un componente concreto (eso es `desy-implement-component`)
+
+**Inputs necesarios:** nombre aproximado del token (e.g. "color primary", "spacing entre campos", "h1 font-size").
+
+**Output:** tabla de tokens relevantes + la utility class exacta del design system + nota sobre cuándo NO usar esa utility.
+
+**Tiempo típico:** <2 minutos (lookup puro).
+
+### 4. `desy-component-recognizer` (soporte transversal)
+
+**Cuándo usarla:**
+- Tienes un mockup de Figma o un screenshot de una página existente y necesitas saber qué componentes DESY usar
+- Estás auditando un mockup para identificar inconsistencias con el design system
+- Quieres validar que un componente que ya implementaste es el correcto
+
+**Cuándo NO usarla:**
+- Ya tienes la lista de componentes que necesitas (salta a `desy-implement-component`)
+- Estás generando un mockup desde cero (no tienes qué reconocer)
+
+**Inputs necesarios:** imagen del mockup o screenshot (idealmente 1280×2400px).
+
+**Output:** lista de componentes DESY identificados, con su variante exacta + linter que valida contra el catálogo.
+
+**Tiempo típico:** 5-15 minutos por mockup (con verificación del linter).
+
+### 6. `desy-angular-translator` (soporte transversal)
+
+**Cuándo usarla:**
+- Tienes código Nunjucks de `desy-html` y necesitas pasarlo a TypeScript + template de `desy-angular`
+- Estás aprendiendo las convenciones de `desy-angular` partiendo de tu conocimiento de `desy-html`
+- Estás auditando código que mezcla ambos paradigmas
+
+**Cuándo NO usarla:**
+- Estás trabajando solo con `desy-html` (no necesitas Angular)
+- Estás en `desy-ionic` (la traducción a Ionic es distinta)
+- Necesitas la traducción **inversa** (Angular → HTML)
+
+**Inputs necesarios:** fragmento de código Nunjucks (`{{ componentX({...}) }}`) + librería target.
+
+**Output:** componente Angular con clase TS, template HTML, y notas sobre convenciones que difieren entre Nunjucks y Angular.
+
+**Tiempo típico:** 5-10 minutos por componente (más si es conceptual: modal, table-advanced, date-input, input-group).
+
+### 7. `desy-design-match` (soporte transversal)
+
+**Cuándo usarla:**
+- Acabas de terminar la 1ª pasada estructural de una página y hay diferencias visibles con la imagen de referencia
+- El build pasa, los contadores coinciden, pero algo se ve "raro" (spacing, tipografía, layout)
+- Necesitas decidir si una discrepancia (4px, 8px, 28px) es ruido del navegador o merece un fix
+- El usuario reporta "esto se ve mal" sin más detalle
+
+**Cuándo NO usarla:**
+- Estás en la 1ª pasada (esqueleto) — preocúpate primero de la estructura y los bindings
+- Solo quieres consultar qué token usar → `desy-styles-reference`
+- La diferencia es funcional, no visual
+
+**Inputs necesarios:** URL de tu implementación + URL de la imagen de referencia (puede ser un gold HTML servido, una URL de Figma, o un PNG/mockup).
+
+**Output:** tabla de discrepancias con magnitud en px + clasificación (trivial/afinable/bloqueante) + fixes propuestos esperando tu OK.
+
+**Tiempo típico:** 10-30 minutos para afinado de 1 página (la 1ª pasada ya está hecha).
+
 ## 🎯 Casos de uso típicos
 
 ### Caso 1: "Soy nuevo en DESY, ¿por dónde empiezo?"
@@ -169,9 +256,23 @@ desy-scaffold-project input: librería = "desy-angular", nombre = "mi-app"
         ↓
 desy-scaffold-project output: "proyecto en http://localhost:4200"
         ↓
+desy-component-recognizer input: mockup.png (opcional, si tienes diseño)
+        ↓
+desy-component-recognizer output: [button primary, input email, ...]
+        ↓
+desy-styles-reference: lookup de tokens específicos (color, spacing) si dudas
+        ↓
 desy-implement-component input: componente = "button", librería = "desy-angular", params = {...}
         ↓
-desy-implement-component output: código copy-pasteable
+desy-implement-component output: código Nunjucks copy-pasteable
+        ↓
+desy-angular-translator input: código Nunjucks anterior (si target = Angular)
+        ↓
+desy-angular-translator output: componente Angular con TS + template
+        ↓
+desy-design-match input: URL implementación + URL gold
+        ↓
+desy-design-match output: tabla de discrepancias → fixes propuestos
         ↓
 desy-validate-accessibility input: URL = "http://localhost:4200/mi-pantalla"
         ↓
@@ -226,9 +327,10 @@ Para saber si los skills están ayudando:
 
 ## 🔄 Versionado
 
-- **v0.1** (actual): 4 skills MVP. Cubre los casos de uso más comunes.
-- **v0.2** (próxima): añadir skills específicos por dominio (ej: `desy-form-validation`, `desy-i18n`, `desy-graphs`)
-- **v1.0** (estabilidad): los 4 skills cubriendo el 90% de casos, sin cambios breaking
+- **v0.1** (inicial): 4 skills MVP — `choose-library`, `scaffold-project`, `implement-component`, `validate-accessibility`. Cubre los casos de uso más comunes.
+- **v0.2** (intermedia): +4 skills de soporte — `styles-reference` (catálogo de tokens), `component-recognizer` (reconocer desde mockup), `angular-translator` (Nunjucks → Angular), `design-match` (fidelidad visual). Cubre el ciclo completo de maquetación.
+- **v0.3** (actual): 8 skills. Validado con wizard de 3 pasos (paso-1, paso-2, paso-3) con fidelidad 100% al gold tras 1 fix.
+- **v1.0** (estabilidad): los 8 skills cubriendo el 90% de casos, sin cambios breaking.
 
 ## 🤝 Contribuir
 

@@ -6,7 +6,7 @@ Skills (procedimientos canónicos) para que agentes de IA y desarrolladores huma
 
 Un equipo sin maquetadores puede partir de un mockup hecho con Figma, identificar los componentes DESY que necesita, y generar el código correcto con la librería adecuada — sin tener que leer toda la documentación.
 
-## 📚 Skills disponibles (6)
+## 📚 Skills disponibles (8)
 
 | Skill | Tamaño | Función |
 |---|---:|---|
@@ -14,9 +14,10 @@ Un equipo sin maquetadores puede partir de un mockup hecho con Figma, identifica
 | [`desy-scaffold-project`](./skills/desy-scaffold-project) | 28KB | Cómo clonar el starter, `npm install`, configurar build, documenta la regla "nunca uses la librería directamente, siempre el starter" |
 | [`desy-styles-reference`](./skills/desy-styles-reference) | 13.8KB | Catálogo de tokens visuales del proyecto: colores semánticos, espaciado (`p-base`, `mb-sm`), tipografía (`c-h1`, `c-paragraph-base`), sombras, radius, iconografía |
 | [`desy-implement-component`](./skills/desy-implement-component) | 28KB | Cómo usar los macros de la librería Nunjucks/Angular/Ionic, tipografía semántica, catálogo de las 16 plantillas oficiales del starter |
-| [`desy-angular-translator`](./skills/desy-angular-translator) | 14.7KB | Traduce código Nunjucks de desy-html a TypeScript + template de desy-angular. Patrón general + tabla de equivalencias para los 20+ componentes más comunes. Tabla de 'trivial vs conceptual' para que el agente sepa cuándo preguntar al usuario |
-| [`desy-validate-accessibility`](./skills/desy-validate-accessibility) | — | Checklist WCAG 2.2 AA para validar el output |
+| [`desy-angular-translator`](./skills/desy-angular-translator) | 34.8KB | Traduce código Nunjucks de desy-html a TypeScript + template de desy-angular. Patrón general + tabla de equivalencias para los 20+ componentes más comunes. Tabla de 'trivial vs conceptual' para que el agente sepa cuándo preguntar al usuario |
+| [`desy-validate-accessibility`](./skills/desy-validate-accessibility) | 15.6KB | Checklist WCAG 2.2 AA para validar el output |
 | [`desy-component-recognizer`](./skills/desy-component-recognizer) | 12KB + 627KB catalog | Reconocer componentes DESY desde un mockup o screenshot, con 10 reglas críticas y un linter de validación post-reconocimiento |
+| [`desy-design-match`](./skills/desy-design-match) | 11.8KB | Workflow iterativo de fidelidad visual: cómo acercarse a una imagen de referencia (gold HTML, mockup, screenshot de Figma) tras la 1ª pasada estructural. Tabla de medidas canónicas del design system, 6 pasos iterativos, anti-patterns comunes |
 
 ## 🔧 Linter de variantes
 
@@ -47,12 +48,14 @@ desy-skills/
 ├── docs/                   ← documentación extendida, decisiones de diseño
 │   ├── ecosystem-map.md
 │   └── skills-strategy.md
-└── skills/                 ← 6 skills aprobados
+└── skills/                 ← 8 skills aprobados
     ├── desy-choose-library/SKILL.md
     ├── desy-scaffold-project/SKILL.md
     ├── desy-styles-reference/SKILL.md
     ├── desy-implement-component/SKILL.md
+    ├── desy-angular-translator/SKILL.md
     ├── desy-validate-accessibility/SKILL.md
+    ├── desy-design-match/SKILL.md
     └── desy-component-recognizer/
         ├── SKILL.md                            # 12KB orquestador
         └── assets/
@@ -63,16 +66,17 @@ desy-skills/
 
 ## 🪷 Cómo se usan estos skills
 
-**Por un agente de IA** (OpenClaw, Claude, etc.): el skill vive en el catálogo de skills del agente. Cuando el usuario hace una pregunta o tarea que matchea con la `description` del frontmatter, el agente lo invoca automáticamente. El **skill pack** completo (los 6 SKILL.md concatenados) tiene ~110KB y se carga como contexto cuando se necesita.
+**Por un agente de IA** (OpenClaw, Claude, etc.): el skill vive en el catálogo de skills del agente. Cuando el usuario hace una pregunta o tarea que matchea con la `description` del frontmatter, el agente lo invoca automáticamente. El **skill pack** completo (los 8 SKILL.md concatenados) tiene ~165KB y se carga como contexto cuando se necesita.
 
 **Por un humano:** cada `SKILL.md` es Markdown legible. Se puede leer directamente en GitHub o clonar y usar como referencia.
 
 ## 📊 Estado del proyecto
 
-- **6 skills aprobados** (commits `482c96e` → `05f28eb`)
+- **8 skills aprobados** (commits `482c96e` → `dd9a2f4`)
 - **Catálogo:** 57 componentes, 653 ejemplos extraídos del repo `desy-html` (develop branch)
 - **Benchmark de capacidad:** 5/5 patrones de "Páginas y flujos" validados con opencode + M3, todos ACEPTABLE+
 - **Validación del recognizer:** 21 mockups de la doc oficial analizados
+- **Validación del design-match:** wizard de 3 pasos (paso-1, paso-2, paso-3) con Δ=0 en tipografía y spacing tras 1 fix
 - **Linter:** 100% de los reconocimientos procesables (0% WARNING real en los 3 mockups re-validados)
 
 ## 🤝 Cómo contribuir
