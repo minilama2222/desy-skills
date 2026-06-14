@@ -7,6 +7,8 @@ description: "Validate WCAG 2.2 AA accessibility of DESY components and pages. U
 
 Valida la accesibilidad WCAG 2.2 AA de componentes o páginas implementadas con DESY. Combina herramientas automáticas con tests manuales (teclado, lector de pantalla, contraste).
 
+> ⚠️ **Para el agente (importante):** los bloques bash de esta skill son **REFERENCE TEMPLATES** que el usuario o el equipo ejecuta en su propio proyecto (`npm install --save-dev @axe-core/cli`, `npx axe http://localhost:...`, etc.). **NO los ejecutes automáticamente** sin confirmación explícita — el `npm install --save-dev` modifica `package.json` del proyecto del usuario y el scan contra `localhost` asume que hay un dev server corriendo. Si el usuario pide "valida accesibilidad", explica los pasos y deja que él los corra, o pídele permiso explícito antes de cada uno.
+
 ## When to use this skill
 
 - Antes de mergear cualquier PR con UI nueva

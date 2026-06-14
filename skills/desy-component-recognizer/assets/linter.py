@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Linter v6 — translate() con match de frase multi-palabra + tokens."""
 import json, re, unicodedata
+from pathlib import Path
 
-CATALOG = json.load(open('/root/desy-skills/skills/desy-component-recognizer/assets/catalog.json'))
+# Catalog path resolved relative to this script so the linter stays portable
+# (works regardless of where the skill is installed in the filesystem).
+CATALOG = json.load(open(Path(__file__).parent / 'catalog.json'))
 COMPONENT_SYNONYMS = {'link': 'links-list', 'c-link': 'links-list', 'radio': 'radios', 'checkbox': 'checkboxes'}
 
 # Traducciones: keys pueden ser multi-palabra. Ordenar por longitud descendente para matchear frases largas primero.

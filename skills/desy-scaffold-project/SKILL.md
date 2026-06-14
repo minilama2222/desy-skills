@@ -7,6 +7,8 @@ description: "Scaffold a DESY project with the chosen library. Clone official st
 
 Crea el esqueleto de un proyecto nuevo con la librería DESY elegida: clona el starter oficial de Bitbucket, configura NVM, instala dependencias, renombra el proyecto y verifica que arranca.
 
+> ⚠️ **Para el agente (importante):** los bloques bash de esta skill son **REFERENCE TEMPLATES** que el usuario copia y ejecuta en su propia máquina. **NO los ejecutes automáticamente.** Si el usuario pide "hazme el scaffold", explica los pasos uno a uno y pídele que los corra él. Esto aplica especialmente a `curl | bash` (NVM), `find ... -exec sed -i ...` (rename), `npm install --legacy-peer-deps` y `npx cap add ios/android` — son operaciones pesadas y/o destructivas que el usuario debe confirmar.
+
 ## When to use this skill
 
 - Acabas de decidir qué librería usar (`desy-choose-library`) y necesitas arrancar
