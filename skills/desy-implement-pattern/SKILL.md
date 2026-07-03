@@ -1,6 +1,6 @@
 ---
 name: desy-implement-pattern
-description: Apply one of 55 DESY patterns (atomic business patterns beyond components): cards, FAQs, errors, actions, headers, listados, megamenu, soporte, cookies, pagination, etc. Use when you need a recognized DESY pattern, or to tune a similar one as starting point for a new page.
+description: Apply one of 55 DESY atomic patterns: cards, FAQs, errors, headers, listados, megamenu, soporte, cookies. Or tune a similar one for a new page.
 ---
 
 # desy-implement-pattern
