@@ -180,6 +180,26 @@ Cuando el form tiene varias secciones (Datos personales, Domicilio, Ubicación, 
 
 **Regla:** aplica estos márgenes solo a los HIJOS del form (no al form raíz). El form raíz usa `my-base` o similar como separador con el resto de la página.
 
+## Cuándo `lg:mt-0 lg:mb-0` SÍ y cuándo NO
+
+El patrón `mt-base mb-base lg:mt-0 lg:mb-0` solo aplica cuando los inputs están **dentro de UN SOLO `<desy-input-group>` con fieldset padre** que envuelve varios grupos semánticos con grids internos (como el código oficial del Paso 3 — Domicilio). En ese caso, los grids comparten el mismo form-group padre y `lg:mt-0` en cada grid interno no afecta la separación entre grupos.
+
+**NO apliques `lg:mt-0 lg:mb-0` cuando cada grupo semántico es su PROPIO `<desy-input-group>` separado.** En ese caso, `lg:mt-0` quita la separación visual entre los grupos en desktop y los inputs quedan pegados al input anterior.
+
+### Cómo decidir
+
+| Situación | ¿`lg:mt-0 lg:mb-0`? |
+|---|---|
+| **Un solo `<desy-input-group>`** con fieldset padre y grids internos | ✅ SÍ (el `lg:mt-0` no afecta entre grupos porque comparten form-group) |
+| **Múltiples `<desy-input-group>` separados** (uno por grupo semántico) | ❌ NO — deja solo `mt-base mb-base` |
+| **`<section>` de acciones al final del form** | ✅ SÍ — viene después del último grupo de inputs, no necesita margen extra |
+
+### Anti-pattern
+
+❌ Poner `lg:mt-0 lg:mb-0` en cada `<desy-input-group>` cuando son independientes. Resultado: en desktop, los labels del segundo grupo (Número, Código postal, Provincia...) quedan pegados al último input del grupo anterior, con 0px de separación visible.
+
+❌ Asumir que `lg:mt-0` siempre es "mejor" porque "menos es más". En este contexto, separar `mt-base` (8px) entre grupos es la legibilidad correcta.
+
 ## Putting it together: estructura de wizard step
 
 ```html
