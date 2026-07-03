@@ -301,7 +301,7 @@ Si el campo tiene longitud fija o casi fija, **`size` es más limpio** que `w-44
 
 Patrón verificado en el Paso 3 (Dirección postal) del wizard oficial: inputs `Vía`, `Número`, `Escalera`, `Piso`, `Puerta` llevan `w-full`; el CP lleva `w-44 lg:w-full`; selects `Provincia`/`Municipio` llevan `lg:w-full`.
 
-Para el patrón de AGRUPACIÓN en grid (fieldset+legend sr-only, `lg:grid-cols-4 gap-x-4`, grid anidado, acciones en `<section>`) consulta el nuevo skill **`desy-implement-form-patterns`** (PR paralelo).
+Para el patrón de AGRUPACIÓN en grid (fieldset+legend sr-only, `lg:grid-cols-4 gap-x-4`, grid anidado, acciones en `<section>`) consulta el nuevo skill **`desy-implement-layout-patterns`** (PR paralelo).
 
 ## Workflow
 
