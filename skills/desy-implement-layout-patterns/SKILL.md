@@ -1,17 +1,21 @@
 ---
-name: desy-implement-form-patterns
-description: DESY form grouping patterns: fieldset+legend, responsive grids, action sections. Use for wizard steps or multi-section forms.
+name: desy-implement-layout-patterns
+description: DESY structural layout patterns: fieldset+legend, responsive grids, action sections, header with skip-link. Use for any page section that needs grouping, grid layout, or action area (forms, cards, lists, headers).
 ---
 
-# desy-implement-form-patterns
+# desy-implement-layout-patterns
 
-Patrones estructurales para montar formularios DESY: agrupación semántica (`fieldset`+`legend`), grids responsivos para campos, acciones de página, spacing contextual. Complementa a `desy-implement-component` (que cubre componentes individuales).
+Patrones estructurales de maquetación DESY para agrupar, grid-ear y disponer acciones al final de cualquier sección de página (forms, cards, listados, cabeceras, FAQs, errores). Complementa a `desy-implement-component` (que cubre componentes individuales) y a `desy-implement-pattern` (que cubre patrones de negocio como datos-identidad, domicilio-postal, FAQs).
+
+**Origen del nombre:** antes `desy-implement-form-patterns`, renombrado en 2026-07-03 porque su contenido (fieldset, grids responsive, section+ul, spacing) aplica a cualquier tipo de sección de página, no solo a forms.
 
 **Hallazgo 2026-07-03 (test del wizard Paso 3 - Dirección postal):** El output del skill `desy-implement-component` por sí solo produce inputs coherentes pero sin agrupación semántica ni estructura responsive de grid. Este skill añade la capa estructural que falta.
 
+**Hallazgo 2026-07-03 (acceso al repo `gorilas/desy.aragon.es`):** Estos patterns son transversales en el sitio oficial. Se aplican también a cards (`cards-misma-altura`), cabeceras (`cabecera-editar`), errores (`errores-estaticos`), notificaciones, FAQs, listados, etc.
+
 ## When to use this skill
 
-- Te piden una página de formulario completa (wizard, formulario de edición, alta de datos)
+- Te piden una página con un form (wizard, formulario de edición, alta de datos)
 - Vas a montar varios inputs en una grid y necesitas saber qué grid usar
 - Necesitas agrupar inputs por sección semántica (Domicilio, Ubicación, etc.) con fieldset+legend
 - Tienes acciones al final del form (Siguiente, Atrás, Saltar, etc.) y necesitas el patrón de section+ul

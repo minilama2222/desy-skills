@@ -19,7 +19,7 @@ Implementa uno o más patrones atómicos de DESY cuando necesitas construir secc
 
 * Componente suelto (un solo botón, un input, una card) → `desy-implement-component`.
 * Página completa con plantilla (header + footer + skip-link + el patrón dentro) → `desy-scaffold-project` para crear la página y luego vuelve aquí para implementar el patrón dentro.
-* Estructuras de agrupación de form (fieldset+legend sr-only, grid responsive, acciones en section+ul) → `desy-implement-form-patterns` (complementario).
+* Estructuras de agrupación de form (fieldset+legend sr-only, grid responsive, acciones en section+ul) → `desy-implement-layout-patterns` (complementario).
 
 ## Los 19 patrones atómicos
 
@@ -100,7 +100,7 @@ Cambia según necesidad:
   * CP cortos: `w-44 lg:w-full`.
   * NIF muy fijos: `attributes.size: "19"` (sin `w-full`).
 * `formGroup.classes` — `lg:col-span-N` para items anidados en la grid.
-* **Fieldset+legend sr-only** — SIEMPRE (patrón del skill `desy-implement-form-patterns`).
+* **Fieldset+legend sr-only** — SIEMPRE (patrón del skill `desy-implement-layout-patterns`).
 
 ### Paso 4: Renderiza
 
@@ -152,7 +152,7 @@ A veces lo que necesitas no es un patrón de los 19, pero está cerca. Por ejemp
 ## Related
 
 * **Skill: `desy-implement-component`** — para implementar componentes sueltos (no patrones completos).
-* **Skill: `desy-implement-form-patterns`** — para patrones estructurales de forms (fieldset+legend sr-only, grid responsive, acciones en section+ul). Complementario: este skill (patterns) usa los patrones de agrupación del otro.
+* **Skill: `desy-implement-layout-patterns`** — para patrones estructurales de forms (fieldset+legend sr-only, grid responsive, acciones en section+ul). Complementario: este skill (patterns) usa los patrones de agrupación del otro.
 * **Skill: `desy-scaffold-project`** — para crear la página que contendrá los patrones.
 * **Skill: `desy-component-recognizer`** — para identificar el patrón visualmente desde un screenshot.
 * **Catálogo oficial:** `https://desy.aragon.es/patrones.html.md`
