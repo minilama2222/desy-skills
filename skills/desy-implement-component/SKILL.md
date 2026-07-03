@@ -260,6 +260,49 @@ cat node_modules/desy-html/src/templates/components/input-group/_examples.input-
 
 El catálogo extraído del repo `desy-html` (rama develop, 57 componentes) tiene los nombres de variantes pero NO la estructura detallada de cada macro. Esta sección se añadió tras descubrir el gap en el test end-to-end del 2026-06-07.
 
+## Ancho de inputs, selects y textareas en grid (patrón w-full)
+
+**Hallazgo 2026-07-03:** los componentes atómicos de DESY (`componentInput`, `componentSelect`, `componentTextarea`) **NO llevan `w-full` por defecto**. Cuando se colocan dentro de una grid, hay que aplicar la clase explícitamente; si no, el input se queda con su ancho intrínseco y rompe el layout del formulario.
+
+Verificado en el ejemplo oficial: https://desy.aragon.es/componente-input-text-codigo.html.md — el HTML renderizado del input por defecto no tiene `w-full`, solo `block` y utilities de estilo. El `w-full` lo aplica el agente/componente a nivel del item del grid donde se monta.
+
+### Los 4 patrones de ancho
+
+| Componente | Mobile | Desktop | Cómo aplicarlo | Cuándo usarlo |
+|---|---|---|---|---|
+| Input normal | `w-full` | `w-full` | `classes: "w-full"` | Inputs variables (nombre, apellidos, dirección, observaciones) |
+| Select | intrínseco | `lg:w-full` | `classes: "lg:w-full"` | Selects (en mobile respeta ancho del navegador) |
+| Campo corto con control responsive | `w-44` (o el ancho) | `lg:w-full` | `classes: "w-44 lg:w-full"` | Código postal, importes, edad, fechas cortas |
+| Campo muy fijo (NIF, NIE) | intrínseco | intrínseco | `attributes.size: "19"` | NIF, NIE, teléfono corto |
+
+**Por qué 4 patrones y no uno:** cada componente de DESY tiene un comportamiento de ancho distinto por defecto. Intentar aplicar `w-full` a un NIF descolocaría el form porque obligaría a llenar la columna de un campo que semánticamente debe ser estrecho. Cada patrón resuelve un caso distinto.
+
+### Valores típicos para `attributes.size` (campos muy fijos)
+
+| Campo | Tamaño | Razón |
+|---|---|---|
+| NIF | `size: "19"` | 8 dígitos + letra + separadores |
+| NIE | `size: "19"` | X/Y/Z + 7 dígitos + letra |
+| Teléfono | `size: "12"` | Con prefijo internacional |
+| Código postal — variante `size` | `size: "8"` | CP español (5 dígitos + espacio + 2 dígitos) |
+| Cantidad/importe — variante `size` | `size: "10"` | Con decimales |
+| Edad | `size: "3"` | 2-3 caracteres |
+
+Si el campo tiene longitud fija o casi fija, **`size` es más limpio** que `w-44`. Si el campo es corto pero variable (CP con o sin dígitos extra, importe variable), **`w-44 lg:w-full` da control responsive**.
+
+### Anti-patterns
+
+- ❌ Aplicar `w-full` a un campo que debería tener longitud fija (lo ensancha inútilmente)
+- ❌ Aplicar `attributes.size` a un campo variable (lo corta siempre)
+- ❌ No aplicar NADA (deja el ancho intrínseco que rompe la grid)
+- ❌ Mezclar `w-full` y `attributes.size` en el mismo input (confunde los dos mecanismos)
+
+### Referencia
+
+Patrón verificado en el Paso 3 (Dirección postal) del wizard oficial: inputs `Vía`, `Número`, `Escalera`, `Piso`, `Puerta` llevan `w-full`; el CP lleva `w-44 lg:w-full`; selects `Provincia`/`Municipio` llevan `lg:w-full`.
+
+Para el patrón de AGRUPACIÓN en grid (fieldset+legend sr-only, `lg:grid-cols-4 gap-x-4`, grid anidado, acciones en `<section>`) consulta el nuevo skill **`desy-implement-form-patterns`** (PR paralelo).
+
 ## Workflow
 
 ### Paso 1: Identifica la URL del ejemplo "copia y pega"
