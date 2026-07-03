@@ -1,6 +1,6 @@
 ---
 name: desy-implement-layout-patterns
-description: DESY structural layout patterns: fieldset+legend, responsive grids, action sections, header with skip-link. Use for any page section that needs grouping, grid layout, or action area (forms, cards, lists, headers).
+description: DESY structural patterns: fieldset+legend, grids, action sections, header with skip-link. Use for any page section that groups or grids content.
 ---
 
 # desy-implement-layout-patterns
@@ -274,9 +274,238 @@ El patrón `mt-base mb-base lg:mt-0 lg:mb-0` solo aplica cuando los inputs está
 - Los headings (H1, H2) dentro de grid también llevan `w-full`.
 - Los párrafos intro pueden usar `col-span-*` para indicar columnas a ocupar en lugar de `w-full`.
 
+## Otros patrones estructurales (no son forms)
+
+Los patrones estructurales de maquetación aplican también a cards, cabeceras, listados, FAQs, errores, notificaciones. El skill `desy-implement-pattern` documenta **qué patrón de negocio** usar; este skill documenta **cómo estructurar la maquetación** cuando esos patrones se renderizan.
+
+### Cabecera con skip-link (header pattern)
+
+Convención oficial de DESY (ver `_pattern.cabecera-editar.njk` y `_pattern.cabecera-item.njk`):
+
+```html
+<header class="z-40 bg-white border-b border-neutral-base">
+  <div class="container mx-auto px-base">
+    <!-- headerSkipLinkBlock — SIEMPRE primero para accesibilidad -->
+    <a href="#content" class="c-skip-link">Saltar al contenido principal</a>
+    <!-- /headerSkipLinkBlock -->
+    <div class="lg:flex lg:flex-wrap lg:w-full py-base">
+      <div class="flex-1 mb-base lg:mb-0">
+        <!-- headerTitleBlock -->
+        <h1 class="c-h1">Título de la página</h1>
+        <!-- /headerTitleBlock -->
+      </div>
+      <!-- headerActionsBlock -->
+      <section aria-labelledby="acciones-de-cabecera">
+        <h2 id="acciones-de-cabecera" class="sr-only">Menú de acciones</h2>
+        <ul class="flex flex-wrap flex-col-reverse lg:flex-row-reverse gap-sm lg:items-center lg:ml-auto lg:pl-base">
+          <li><button class="c-button c-button--primary c-button--sm">Guardar y salir</button></li>
+          <li><button class="c-button c-button--sm">Guardar</button></li>
+          <li><button class="c-button c-button--sm">Salir</button></li>
+        </ul>
+      </section>
+      <!-- /headerActionsBlock -->
+    </div>
+  </div>
+</header>
+```
+
+**Reglas:**
+
+* `z-40` para que el header quede por encima del contenido scrollable.
+* `border-b border-neutral-base` separa visualmente del main.
+* `container mx-auto px-base` alinea el contenido al ancho del container de DESY.
+* Skip-link **SIEMPRE PRIMERO** dentro del header (accesibilidad WCAG 2.4.1).
+* Acciones a la derecha en desktop con `lg:ml-auto lg:pl-base`.
+
+### Cards grid (misma altura)
+
+Convención oficial de DESY (ver `_pattern.cards-misma-altura.njk`):
+
+```html
+<ul class="grid grid-cols-2 lg:grid-cols-4 content-stretch gap-base">
+  <li>
+    <article class="h-full p-base border border-neutral-base rounded-sm relative hover:bg-neutral-light">
+      <h3 id="titulo-card-1" class="c-h3">
+        <a href="#" class="c-link c-link--full">Servicios sociales</a>
+      </h3>
+      <div class="prose max-w-none mb-base">
+        <p>Información de discapacidad, dependencia y hogares.</p>
+      </div>
+    </article>
+  </li>
+  <li>
+    <article class="h-full p-base border border-neutral-base rounded-sm relative hover:bg-neutral-light">
+      <h3 id="titulo-card-2" class="c-h3">
+        <a href="#" class="c-link c-link--full">Oposiciones</a>
+      </h3>
+      <div class="prose max-w-none mb-base">
+        <p>Consulta las próximas oposiciones.</p>
+      </div>
+    </article>
+  </li>
+  <!-- ... más cards ... -->
+</ul>
+```
+
+**Reglas:**
+
+* `<ul>` con `<li>` por cada card (semántica de lista).
+* `grid-cols-2 lg:grid-cols-4` (mobile 2 cols, desktop 4 cols).
+* `content-stretch gap-base` — `content-stretch` hace que los items del grid tengan la misma altura; `gap-base` separa las celdas.
+* `h-full` en cada `<article>` para que el contenido crezca dentro del item.
+* `border border-neutral-base rounded-sm` para card con borde sutil.
+* `hover:bg-neutral-light` para feedback visual al pasar el ratón.
+* `c-link c-link--full` en el `<a>` del título para que TODO el card sea clickable (no solo el texto).
+* `prose max-w-none` para contenido con tipografía enriquecida.
+
+### Error message (role="alert")
+
+Convención oficial de DESY (ver `_pattern.errores-estaticos.njk` y `_pattern.errores-javascript.njk`):
+
+```html
+<div role="alert" class="border border-error-base bg-error-lighter rounded-sm p-base mb-base">
+  <div class="flex items-start">
+    <svg class="w-5 h-5 text-error-base mr-base flex-shrink-0" aria-label="Error" viewBox="0 0 140 140">
+      <!-- icono de error (X o triángulo) -->
+    </svg>
+    <div class="flex-1">
+      <h3 class="c-h3 text-error-base">Ha ocurrido un error</h3>
+      <p class="c-paragraph-base mt-xs">No se ha podido procesar la solicitud. Inténtalo de nuevo.</p>
+      <button class="c-button c-button--primary mt-base">Reintentar</button>
+    </div>
+  </div>
+</div>
+```
+
+**Reglas:**
+
+* `role="alert"` es **obligatorio** (live region — los screen readers lo anuncian automáticamente).
+* `aria-labelledby` o `aria-label` en el icono SVG para accesibilidad.
+* Color semántico: `text-error-base` y `bg-error-lighter` (o `bg-warning-lighter` para warnings).
+* Icono + mensaje + acción correctiva (botón Reintentar, enlace Reportar error, etc.).
+
+### Notification / toast (role="status")
+
+Convención oficial de DESY (ver `_pattern.notificacion-identificado.njk`):
+
+```html
+<div class="c-notification c-notification--success mt-base" role="status" aria-live="polite">
+  <div class="h-full mr-base">
+    <svg class="w-5 h-5 text-success-dark" aria-label="Éxito" viewBox="0 0 140 140">
+      <!-- icono de check -->
+    </svg>
+  </div>
+  <div class="lg:flex flex-1 self-center">
+    <div class="lg:flex-1 lg:self-center">
+      <p id="notif-success-title" class="font-bold pr-base focus:outline-hidden focus:underline" tabindex="-1">
+        El documento se ha cargado correctamente
+      </p>
+    </div>
+    <div class="absolute top-0 right-0 p-sm">
+      <button type="button" class="c-notification-button__close p-sm focus:bg-warning-base focus:border-warning-base focus:shadow-outline-black focus:text-black focus:outline-hidden" aria-label="Cerrar notificación">
+        <svg class="w-4 h-4 pointer-events-none" viewBox="0 0 140 140" aria-hidden="true" role="presentation">
+          <!-- icono de X -->
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+```
+
+**Reglas:**
+
+* `role="status" aria-live="polite"` para notificaciones de éxito (no interrumpe al screen reader).
+* `role="alert"` SOLO para errores que requieren atención inmediata.
+* `c-notification c-notification--success` (o `--error`, `--warning`, `--info`) para variante visual.
+* Botón de cerrar con `aria-label="Cerrar notificación"`.
+* `tabindex="-1"` en el título para que screen readers puedan enfocarlo programáticamente.
+
+### FAQs acordeón
+
+Convención oficial de DESY (ver `_pattern.faqs-acordeon.njk`):
+
+```html
+<h2 class="c-h3">Preguntas frecuentes</h2>
+<div class="c-accordion" data-module="c-accordion">
+  <details>
+    <summary>
+      <h3 class="c-h4 flex-1">¿Qué hacer si surge un error?</h3>
+      <svg class="w-4 h-4" aria-hidden="true"><!-- chevron --></svg>
+    </summary>
+    <div class="py-base">
+      <p class="c-paragraph-base">Respuesta de la FAQ...</p>
+    </div>
+  </details>
+  <details>
+    <summary>
+      <h3 class="c-h4 flex-1">¿Cómo dar permisos a una persona?</h3>
+      <svg class="w-4 h-4" aria-hidden="true"><!-- chevron --></svg>
+    </summary>
+    <div class="py-base">
+      <p class="c-paragraph-base">Otra respuesta...</p>
+    </div>
+  </details>
+</div>
+```
+
+**Reglas:**
+
+* Usar `<details>` + `<summary>` HTML nativo (sin JavaScript).
+* `<h3>` dentro del `<summary>` para que screen readers anuncien correctamente.
+* Chevron (SVG) al final del `<summary>` con `aria-hidden="true"` (decorativo).
+* `allowMultiple` solo si la pregunta del usuario lo requiere (normalmente un solo acordeón abierto a la vez).
+* Si necesitas un comportamiento más complejo (e.g. analítica de apertura), usa `componentAccordion` con JS.
+
+## Convención de bloques `<!-- blockName -->`
+
+En las páginas oficiales del sitio DESY, las secciones dentro de `<form>` o del layout principal están delimitadas por comentarios HTML con el formato `<!-- blockName -->` y `<!-- /blockName -->`. Esta convención es usada por el `markdown-generator` (script de `markdown-generator.config.js`) para extraer secciones al generar la documentación.
+
+```html
+<form>
+  <!-- notificationHeaderBlock -->
+  <!-- /notificationHeaderBlock -->
+
+  <!-- contentBlock -->
+  <fieldset>
+    <legend class="sr-only">Datos de identidad</legend>
+    <!-- contenido del grupo -->
+  </fieldset>
+  <!-- /contentBlock -->
+
+  <!-- notificationFooterBlock -->
+  <!-- /notificationFooterBlock -->
+</form>
+```
+
+**Reglas:**
+
+* Comentarios `<!-- blockName -->` y `<!-- /blockName -->` son **exactamente simétricos** (mismo `blockName`).
+* El `blockName` sigue convención `kebab-case` y empieza con la categoría (e.g. `header`, `content`, `notification`, `actions`).
+* Los bloques se usan para delimitar secciones que el markdown-generator puede extraer y documentar.
+* Si tu proyecto no usa markdown-generator, la convención sigue siendo útil para organizar el HTML y hacer bloques claramente identificables.
+
+## Anti-patterns estructurales (adicionales)
+
+Además de los anti-patterns ya documentados al inicio:
+
+❌ **`flex-column-reverse` (con guion).** Esta clase NO existe en Tailwind. Es un bug del repo oficial `gorilas/desy.aragon.es` presente en 5 archivos (e.g. `_pattern.acciones-de-cabecera.njk`). La clase correcta es `flex-col-reverse`. Si copias el código del repo tal cual, el patrón de acciones no funcionará en mobile. **Siempre reemplaza `flex-column-reverse` por `flex-col-reverse`** al implementar.
+
+❌ **`<div>` con `role="group"` en lugar de `<fieldset>`.** Para agrupar inputs relacionados semánticamente, usa `<fieldset><legend>` (con legend sr-only si no debe verse). `role="group"` no es estándar y no lo reconoce screen readers consistentemente.
+
+❌ **Skip-link fuera del header o como `<button>`.** Debe ser `<a href="#content">` dentro del `<header>` (o antes del `<main>`). Como `<button>` no funciona porque no tiene href.
+
+❌ **Cards con altura fija (`height: 200px`) en lugar de `h-full`.** Las cards en grid deben tener `h-full` para que igualen altura con las demás. Altura fija rompe en mobile y con contenido variable.
+
+❌ **Notificaciones sin `role="status"` o `role="alert"`.** Sin live region, los screen readers no anuncian el cambio. Errores usan `role="alert"`, éxitos/información usan `role="status"`.
+
+❌ **Botón cerrar notificación sin `aria-label`.** El botón X debe tener `aria-label="Cerrar notificación"` porque solo tiene icono (sin texto).
+
+❌ **Cards grid usando `<div>` en lugar de `<ul>/<li>`.** La semántica de lista es importante para screen readers y navegación por items. Usa `<ul>` para el contenedor y `<li>` para cada card.
+
 ## Related
 
 - **Skill: `desy-implement-component`** — sección "Ancho de inputs, selects y textareas en grid (patrón w-full)" para los 4 patrones de ancho que aplican aquí
+- **Skill: `desy-implement-pattern`** — para implementar uno de los 55 patrones de negocio (cards, FAQs, errores, headers, listados, megamenu, soporte, cookies, pagination). Complementario: este skill (layout-patterns) define las convenciones ESTRUCTURALES que esos patrones usan.
 - **Skill: `desy-validate-accessibility`** — para auditar el fieldset+legend sr-only, los landmarks y la jerarquía de headings tras aplicar estos patrones
 - **Skill: `desy-styles-reference`** — para tokens concretos (`mt-base`, `mb-base`, `gap-x-4`, `lg:grid-cols-4`)
 - **Skill: `desy-scaffold-project`** — para crear el proyecto donde va este form (paso previo)
