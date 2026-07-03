@@ -1,6 +1,6 @@
 ---
 name: desy-implement-pattern
-description: Apply DESY patterns: identify one of 19 atomic patterns from .md, adapt props, tune, and combine to build forms/lists/sections.
+description: Apply DESY patterns: pick one of 19 atomic patterns from .md, or start from a similar pattern and tune it to build forms/lists/sections.
 ---
 
 # desy-implement-pattern
