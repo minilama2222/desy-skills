@@ -95,9 +95,17 @@ chromium --headless --no-sandbox --disable-gpu --hide-scrollbars \
 ```
 
 Alternativas equivalentes según el entorno:
+- **agent-browser** (skill `browser-automation`): setear viewport con `agent-browser viewport 1280 900` antes de capturar, o usar `agent-browser screenshot <url> <output.png>`. **Cuidado**: el viewport por defecto de agent-browser puede quedar por debajo de 1024px (ej. 1265×...) y desactivar media queries `lg:`. Verificar siempre el viewport con el checklist de abajo.
 - **Playwright/Puppeteer**: `await page.screenshot({ fullPage: true })` con viewport `{ width: 1280 }` (altura auto).
 - **Selenium + Chrome**: `driver.get_screenshot_as_png()` después de `set_window_size(1280, 4000)`.
 - **Firefox headless**: `--screenshot=<file> --window-size=1280,4000`.
+
+**Checklist rápido al elegir método de captura:**
+1. ¿El método permite especificar viewport explícitamente? Si no (ej. captura del SO, recorte manual), desconfiar.
+2. ¿El viewport aplicado es ≥ 1024px (breakpoint `lg:`)?
+3. ¿La captura incluye el footer completo (si la página tiene)?
+4. Si el método es agent-browser, ¿se seteó `viewport 1280` antes de capturar?
+5. ¿Las dos capturas (gold y built) se hicieron con el MISMO método y MISMO viewport?
 
 **Checklist de verificación antes de comparar footer:**
 1. ¿La captura muestra el footer completo (links, textos, logos)?
