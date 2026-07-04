@@ -74,6 +74,46 @@ Construye un HTML side-by-side con la implementación a la izquierda y la refere
 
 **Si agent-browser devuelve un viewport extraño** (ej. 1265×... cuando pediste 1280×900), desconfía. Re-captura con `chromium --headless --window-size=1280,900` directamente. La diferencia entre 1265 y 1280 es de 15px pero suficiente para activar/desactivar media queries si hay rounding.
 
+#### ⚠️ Lección crítica (2026-07-04): viewport altura adaptativa para incluir footer
+
+**Problema encontrado:** el viewport estándar 1280×900 **corta el footer fuera de pantalla** en la mayoría de páginas. Al capturar con `--window-size=1280,900`, el footer (links "Por qué desy / Alcance / ...", textos "Creado por SDA", logos EU) no aparece en la captura. Esto provoca comparativas sesgadas y percepción de "inconsistencias" que en realidad no existen.
+
+**Síntoma típico:** capturas gold vs built al viewport 1280×900 muestran "diferencias en el footer" que desaparecen al capturar full-page. El diff métrico baja de 7-8% a <3% al incluir el footer.
+
+**Regla:** **el viewport debe incluir todo el contenido de la página (header + contenido + footer).** Ancho fijo 1280px (para que aplique `lg:` correctamente). Altura adaptativa: usar `--window-size=1280,4000` (suficiente para la mayoría de páginas) y recortar con cualquier herramienta de imagen al `scrollHeight` real del contenido, eliminando zonas vacías al final.
+
+**Método portable** (cualquier entorno con chromium + Python + PIL):
+```bash
+chromium --headless --no-sandbox --disable-gpu --hide-scrollbars \
+  --user-data-dir=$(mktemp -d) \
+  --window-size=1280,4000 \
+  --screenshot=/tmp/capture.png \
+  <url>
+
+# Recortar al alto real con Python+PIL (o ImageMagick, sharp, etc.):
+# detectar la última fila con contenido no-blanca y recortar ahí + 20px margen
+```
+
+Alternativas equivalentes según el entorno:
+- **agent-browser** (skill `browser-automation`): setear viewport con `agent-browser viewport 1280 900` antes de capturar, o usar `agent-browser screenshot <url> <output.png>`. **Cuidado**: el viewport por defecto de agent-browser puede quedar por debajo de 1024px (ej. 1265×...) y desactivar media queries `lg:`. Verificar siempre el viewport con el checklist de abajo.
+- **Playwright/Puppeteer**: `await page.screenshot({ fullPage: true })` con viewport `{ width: 1280 }` (altura auto).
+- **Selenium + Chrome**: `driver.get_screenshot_as_png()` después de `set_window_size(1280, 4000)`.
+- **Firefox headless**: `--screenshot=<file> --window-size=1280,4000`.
+
+**Checklist rápido al elegir método de captura:**
+1. ¿El método permite especificar viewport explícitamente? Si no (ej. captura del SO, recorte manual), desconfiar.
+2. ¿El viewport aplicado es ≥ 1024px (breakpoint `lg:`)?
+3. ¿La captura incluye el footer completo (si la página tiene)?
+4. Si el método es agent-browser, ¿se seteó `viewport 1280` antes de capturar?
+5. ¿Las dos capturas (gold y built) se hicieron con el MISMO método y MISMO viewport?
+
+**Checklist de verificación antes de comparar footer:**
+1. ¿La captura muestra el footer completo (links, textos, logos)?
+2. ¿La altura del viewport es ≥ 1500px (suficiente para incluir el footer)?
+3. Si la página es muy larga, ¿se ha capturado con `--window-size=1280,4000` o más?
+
+**Caso real (2026-07-04):** se observó inconsistencia en items del footer entre gold y built. Tras capturar full-page, el footer es **idéntico** (mismos 6 links, mismos textos, mismos logos). La "inconsistencia" era un artefacto del viewport 1280×900 que cortaba el footer fuera de pantalla.
+
 ### Paso 3 — Mide y reporta discrepancias
 
 Para cada elemento clave (h1, primer párrafo, primer input, último form group, botones), captura en ambas páginas:
@@ -141,6 +181,18 @@ Cuando no hay HTML fuente, tienes que **leer el screenshot con la gramática del
 | Bloque con icono + texto | icono + label | `_pattern.X` específico |
 
 **Caso real (2026-07-04):** tenía `<h1 class="c-h0">` "para que destaque" en `manual-con-faqs`. El gold mostraba un h1 grande-mediano pero no el más grande del sistema. Inféralo: `<h1>` plano hereda `prose h1` (30px). Corregir a `<h1>` plano dio fidelidad 100% al gold. **Anti-pattern**: usar `c-h0` por defecto "para que destaque más". El sistema tiene rangos, no siempre el máximo.
+
+#### ⚠️ Trampa: CSS precompilado del catálogo vs CSS dinámico de Vite
+
+El **CSS precompilado de desy-html** (`dist/css/styles.css` ~146KB) puede **NO incluir** todas las utilities estándar de Tailwind v4 (p.ej. `lg:grid-cols-5` no estaba, aunque es estándar). Esto es porque Tailwind v4 al compilar solo incluye las utilities que vio en los HTMLs escaneados. **No es un gap del catálogo — es comportamiento normal de Tailwind v4**.
+
+En modo dev con **Vite** (`http://127.0.0.1:5173/`), Tailwind v4 escanea los HTMLs en tiempo real y genera las utilities on-demand. El CSS servido por Vite pesa ~187KB (vs 146KB del precompilado) e incluye utilities que el precompilado no tenía.
+
+**Regla para validar renders**: **usar SIEMPRE Vite (modo dev)** o regenerar el CSS con Tailwind CLI scaneando los HTMLs. **NO** usar `python -m http.server` ni el CSS precompilado directamente, porque parecerá que faltan utilities que en realidad sí existen con Vite.
+
+**Caso real (2026-07-04)**: el patrón `_pattern.formularios-direccion-postal` usa `lg:grid-cols-5` con `input(1 col) + select(col-span-2) + select(col-span-2) = 5 cols`. Al servir el built con `python -m http.server`, la fila CP/Provincia/Municipio colapsaba en filas separadas (parecía que faltaba la utility). Al servir el mismo HTML con Vite, la fila se mostraba correctamente — la utility SÍ existe, solo la genera Tailwind v4 en modo dev.
+
+**Anti-pattern**: diagnosticar "el catálogo no tiene X" cuando en realidad es que el CSS precompilado se compiló sin esa utility. Probar con Vite antes de concluir que es un gap.
 
 ### HTML servible (cuando SÍ lo tienes — bonus, no caso general)
 
