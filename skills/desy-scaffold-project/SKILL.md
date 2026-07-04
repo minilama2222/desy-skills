@@ -20,9 +20,10 @@ Crea el esqueleto de un proyecto nuevo con la librería DESY elegida: clona el s
 Antes de aplicar el skill, confirma con el equipo:
 
 1. **Librería elegida** (desy-html / desy-angular / desy-ionic)
-2. **Nombre del proyecto** (sin espacios, kebab-case: `mi-app-tramites`)
-3. **Node version target** (NVM, .nvmrc) — recomendado: LTS más reciente
-4. **¿LTS o latest?** Para desy-angular, hay LTS (v13 = Angular 16) o latest (v19)
+2. **Plantilla de página** (ver `desy-choose-page-template` — por ejemplo: `with-header-advanced` para portales, `logged-selector` para webapps autenticadas, `logged-out` para páginas públicas). Las plantillas son agnósticas a la librería (existen como `_template.X.njk` en `desy-html` y como `X-layout` en `desy-angular`).
+3. **Nombre del proyecto** (sin espacios, kebab-case: `mi-app-tramites`)
+4. **Node version target** (NVM, .nvmrc) — recomendado: LTS más reciente
+5. **¿LTS o latest?** Para desy-angular, hay LTS (v13 = Angular 16) o latest (v19)
 
 ## Workflow general (las 3 librerías)
 

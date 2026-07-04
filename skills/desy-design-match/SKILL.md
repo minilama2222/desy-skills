@@ -18,6 +18,7 @@ Workflow de **fidelidad visual**: cómo acercarse a una imagen de referencia (go
 - Estás en la 1ª pasada (esqueleto) — preocúpate primero de la estructura y los bindings
 - Solo quieres consultar qué token usar → `desy-styles-reference`
 - La diferencia es funcional, no visual (e.g. un campo no se envía, un evento no dispara)
+- La plantilla de página usada **no es la correcta** para el tipo de página (e.g. usar `_template.home.njk` para un portal institucional en vez de `_template.with-header-advanced.njk`). Antes de medir discrepancias, valida la plantilla con [`desy-choose-page-template`](.). Sin plantilla correcta, las diferencias visuales masivas no se arreglan con tuning de tokens — son estructurales.
 
 ## Regla de oro: la imagen de referencia manda
 

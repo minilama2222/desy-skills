@@ -252,5 +252,6 @@ Si necesitas un pattern que ni está en los 55 ni se puede tunear de uno existen
 * **Skill: `desy-implement-layout-patterns`** — para patrones estructurales de maquetación (fieldset+legend, grid responsive, acciones en section+ul, header con skip-link).
 * **Skill: `desy-scaffold-project`** — para crear la página que contendrá los patrones.
 * **Skill: `desy-component-recognizer`** — para identificar el patrón visualmente desde un screenshot.
+* **Skill: `desy-choose-page-template`** — **pre-requisito del flujo**: identifica la plantilla de página (`with-header-advanced`, `logged-selector`, `logged-out`, `edit-fixed`, etc.) ANTES de implementar el patrón. Sin plantilla correcta, este patrón se inserta en un `_template.X.njk` que puede no ser el del gold.
 * **Catálogo oficial:** `https://desy.aragon.es/patrones.html.md` (solo 19 de los 55).
 * **Repo fuente:** `gorilas/desy.aragon.es` en `src/templates/includes/_pattern.*.njk` (los 55 patterns).

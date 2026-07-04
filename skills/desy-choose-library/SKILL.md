@@ -58,6 +58,10 @@ Las 3 librerías comparten la misma identidad visual DESY, pero cada una tiene p
 | Requisito | Si sí | Si no |
 |---|---|---|
 | **SEO crítico** (portales, webs públicas) | **desy-html** (mejor para indexación) | da igual |
+
+## Siguiente paso en el flujo
+
+Tras decidir librería, el siguiente paso es elegir **plantilla de página** con [`desy-choose-page-template`](.) — tabla de selección "tipo de página → plantilla" que cubre las 4 familias oficiales (sin sesión, con sesión, edición, portal). Las plantillas son agnósticas a la librería: existen tanto en `desy-html` (como `_template.X.njk` en `node_modules/desy-html/src/templates/pages/`) como en `desy-angular` (como `X-layout` en `src/app/feature-modules/page-templates/layouts/`).
 | **Carga rápida en 3G / SEO / Core Web Vitals** | **desy-html** (más ligero, sin runtime JS) | da igual |
 | **Autenticación centralizada** (DIGA, MFE en Gobierno de Aragón) | **desy-angular** o **desy-ionic** | desy-html vale |
 | **Accesibilidad WCAG 2.2 AA obligatoria** | Las 3 lo cumplen, da igual | da igual |
