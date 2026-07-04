@@ -25,6 +25,8 @@ Patrones estructurales de maquetación DESY para agrupar, grid-ear y disponer ac
 
 **Cuándo aplica este paso:** antes de elegir el patrón estructural (header, footer, fieldset, grid, acciones), cuando tengas una referencia visual (gold del sitio oficial, mockup de Figma, captura de un sitio similar). NO aplica si solo tienes texto o si vas a implementar sin referencia.
 
+**Pre-requisito del Paso 0 (Paso -0.5):** identifica primero la **plantilla de página** que vas a extender con `desy-choose-page-template` (por ejemplo: `_template.with-header-advanced.njk` para portales institucionales, `_template.logged-selector.njk` para webapps autenticadas, `_template.logged-out.njk` para páginas públicas sin auth). Sin la plantilla correcta, el header y el footer no se montarán como en el gold (ej. usar `_template.home.njk` para un portal da header local del starter en vez del header-advanced institucional).
+
 **El bucle (3 pasos):**
 
 1. **Compara** la referencia contra tu 1ª pasada. Identifica qué difiere estructuralmente. Usa `desy-design-match` para medir discrepancias si tienes el gold servible (HTML o screenshot).

@@ -17,6 +17,7 @@ Skill para identificar componentes UI del Design System DESY analizando imágene
 **NO uses este skill si:**
 - El usuario solo quiere implementar un componente ya identificado (usa `desy-implement-component` directamente)
 - No tienes la imagen (es solo texto)
+- Necesitas decidir **qué plantilla de página** usar antes de identificar componentes. Primero [`desy-choose-page-template`](.) (tipo de página → plantilla); luego este skill dentro del `contentBlock` de esa plantilla.
 
 ## El catálogo
 
