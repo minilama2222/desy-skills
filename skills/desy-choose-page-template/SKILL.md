@@ -16,28 +16,36 @@ Ayuda a decidir qué plantilla de página DESY usar para una página nueva o una
 
 ## Taxonomía oficial (de `desy.aragon.es/plantillas.html`)
 
-DESY define **4 familias de plantillas** + plantillas especiales:
+DESY define **4 familias de plantillas** + plantillas especiales. La distinción principal es **portal público vs webapp** (con o sin auth):
 
-1. **Sin sesión iniciada** → páginas públicas antes de autenticarse.
-2. **Con sesión iniciada** → 6 variantes para webapps autenticadas.
-3. **Edición de contenido** → 2 variantes para formularios de edición.
-4. **Portal web** → cabeceras avanzadas de 3 bandas para portales institucionales.
-5. *Especiales*: `home` (solo para la home del starter, **NO usar en producción**), `mfe*` (iframes MFE).
+- **Portal o sitio web informativo** (público, navegación institucional, sin login): cabecera `header-advanced` de 3 bandas. Solo este tipo usa `with-header-advanced`.
+- **WebApps** (públicas sin loguear, o autenticadas tras loguear): cabecera `header` normal de 1 banda. El resto de plantillas pertenecen a esta categoría.
+- **Edición de contenido** (formularios de edición con cabecera de edición): variante de webapp.
+- *Especiales*: `home` (solo para la home del starter, **NO usar en producción**), `mfe*` (iframes MFE), `test` (solo para tests).
+
+**Regla clave**: solo `with-header-advanced` tiene 3 bandas. El resto tiene header normal (1 banda). Si la página es de un portal informativo público, header-advanced. Si es una webapp (login, gestor, app autenticada), header normal.
 
 ## Tabla de selección
 
-| Tipo de página / caso | Plantilla desy-html | Layout desy-angular | Notas |
-|---|---|---|---|
-| **Portal web** (home de portal, secciones, **404**) | `_template.with-header-advanced.njk` | `advanced-header-layout` | Cabecera de 3 bandas (`header-advanced` con `title`, `customNavigationHtml`, `offcanvas`). Para portales institucionales como Portal de Salud. |
-| **Sin sesión iniciada** (mapa web, accesibilidad, landing) | `_template.logged-out.njk` | `logged-out-layout` | Cabecera estándar sin auth ni selector. |
-| **Webapp base** (autenticada, sin selector de apps) | `_template.logged.njk` | `logged-layout` | Webapp autenticada simple. |
-| **Webapp con selector de apps** | `_template.logged-selector.njk` | `logged-selector-layout` | Permite cambiar entre apps desde la cabecera. |
-| **Webapp cabecera fija** (sticky al scroll) | `_template.logged-selector-fixed.njk` | `logged-selector-fixed-layout` | Cabecera visible al hacer scroll. |
-| **Webapp cabecera fija + headroom.js** | `_template.logged-selector-fixed-headroom.njk` | `logged-selector-fixed-headroom-layout` | Cabecera se oculta al bajar, aparece al subir. |
-| **Webapp con subcabecera** | `_template.logged-selector-subheader.njk` | `logged-selector-subheader-layout` | Subcabecera bajo el header para navegación de contenidos relacionados. |
-| **Webapp con menú lateral** (sidebar) | `_template.logged-selector-with-sidebar.njk` | `logged-selector-sidebar-layout` | Sidebar 25% + sección interior 75%. |
-| **Edición cabecera fija** | `_template.edit-fixed.njk` | `edit-selector-fixed-layout` | Formulario de edición con cabecera de edición fija. |
-| **Edición con sidebar sticky** | `_template.edit-fixed-with-sticky-sidebar.njk` | (componer con `logged-selector-sidebar-layout` + bloques edit) | Edición con menú lateral sticky. |
+| Tipo de página / caso | Plantilla desy-html | Layout desy-angular | Cabecera | Notas |
+|---|---|---|---|---|
+| **Portal o sitio web informativo** (home de portal, secciones, **404**) | `_template.with-header-advanced.njk` | `advanced-header-layout` | `header-advanced` (3 bandas) | Único caso con header-advanced. Para portales institucionales como Portal de Salud, Vivienda, etc. |
+| **WebApp sin loguear** (mapa web, accesibilidad, landing, login) | `_template.logged-out.njk` | `logged-out-layout` | `header` normal (1 banda) | Páginas públicas de una webapp, antes de autenticarse. |
+| **WebApp autenticada base** (sin selector de apps) | `_template.logged.njk` | `logged-layout` | `header` normal (1 banda) | Webapp autenticada simple. |
+| **WebApp autenticada con selector de apps** (gestor, intranet con varias apps) | `_template.logged-selector.njk` | `logged-selector-layout` | `header` normal (1 banda) | Permite cambiar entre apps desde la cabecera. |
+| **WebApp cabecera fija** (sticky al scroll) | `_template.logged-selector-fixed.njk` | `logged-selector-fixed-layout` | `header` normal (1 banda) | Cabecera visible al hacer scroll. |
+| **WebApp cabecera fija + headroom.js** | `_template.logged-selector-fixed-headroom.njk` | `logged-selector-fixed-headroom-layout` | `header` normal (1 banda) | Cabecera se oculta al bajar, aparece al subir. |
+| **WebApp con subcabecera** | `_template.logged-selector-subheader.njk` | `logged-selector-subheader-layout` | `header` normal (1 banda) | Subcabecera bajo el header para navegación de contenidos relacionados. |
+| **WebApp con menú lateral** (sidebar) | `_template.logged-selector-with-sidebar.njk` | `logged-selector-sidebar-layout` | `header` normal (1 banda) | Sidebar 25% + sección interior 75%. |
+| **Edición cabecera fija** | `_template.edit-fixed.njk` | `edit-selector-fixed-layout` | `header` edición (1 banda) | Formulario de edición con cabecera de edición fija. |
+| **Edición con sidebar sticky** | `_template.edit-fixed-with-sticky-sidebar.njk` | (componer con `logged-selector-sidebar-layout` + bloques edit) | `header` edición (1 banda) | Edición con menú lateral sticky. |
+
+**Caso real validado (Portal de Salud, 2026-07-04)**: dentro del mismo dominio `salud.aragon.es` coexisten 2 apps distintas con plantillas distintas:
+
+- **Portal Salud** (público) → `_template.with-header-advanced.njk` (header-advanced tuneado con "Portal de Salud" + nav institucional). Ej: página 404.
+- **Gestor de expedientes** (webapp autenticada) → `_template.logged-selector.njk` (header normal con dropdown "Gestor de expedientes" + nav Inicio/Expedientes/Bandejas + user). Ej: inicio con cards, manual de ayuda con FAQs, wizard paso 1-3.
+
+Lección: dentro de un mismo portal institucional pueden convivir múltiples webapps. La elección de plantilla NO se decide por "el sitio en general" sino por **la página concreta** y su contexto de acceso (público vs autenticado vs edición).
 
 ## Bloques disponibles en las plantillas
 
