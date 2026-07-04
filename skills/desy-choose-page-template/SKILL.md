@@ -1,6 +1,6 @@
 ---
 name: desy-choose-page-template
-description: "Choose the right DESY page template (with-header-advanced, logged, logged-selector, logged-out, edit-fixed, etc.) by page type. Library-agnostic (desy-html Nunjucks + desy-angular layouts). Use BEFORE scaffolding."
+description: "Pick the right DESY page template (portal, logged, logged-selector, logged-out, edit-fixed, etc.) by page type. Library-agnostic. Use before scaffolding."
 ---
 
 # desy-choose-page-template
