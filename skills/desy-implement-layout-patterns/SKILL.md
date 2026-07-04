@@ -21,6 +21,39 @@ Patrones estructurales de maquetación DESY para agrupar, grid-ear y disponer ac
 - Tienes acciones al final del form (Siguiente, Atrás, Saltar, etc.) y necesitas el patrón de section+ul
 - Necesitas saber cuándo aplicar `mt-base mb-base lg:mt-0 lg:mb-0` vs nada
 
+## Paso 0: ¿tienes referencia visual? Bucle "compara → busca ejemplo → aplica tuneando"
+
+**Cuándo aplica este paso:** antes de elegir el patrón estructural (header, footer, fieldset, grid, acciones), cuando tengas una referencia visual (gold del sitio oficial, mockup de Figma, captura de un sitio similar). NO aplica si solo tienes texto o si vas a implementar sin referencia.
+
+**El bucle (3 pasos):**
+
+1. **Compara** la referencia contra tu 1ª pasada. Identifica qué difiere estructuralmente. Usa `desy-design-match` para medir discrepancias si tienes el gold servible (HTML o screenshot).
+2. **Busca el ejemplo concreto** del catálogo DESY que más se acerca a la referencia. Para header, `desy-component-recognizer` (regla 5) clasifica por nº de bandas: `header-mini` (1 banda fina), `header` (1 banda con nav+user), `header-advanced` (3 bandas). Para otros componentes, cada `_examples.<componente>.njk` lista ejemplos tuneables (header: 14, footer: 15, etc.).
+3. **Aplica tuneando.** El ejemplo concreto da la estructura (bandas, posiciones, clases, anchos). Los params del componente (texto, items, dropdown) se ajustan al caso concreto.
+
+**Ejemplo validado 2026-07-04 (wizard paso-1, Gobierno de Aragón):**
+
+- *Referencia (gold):* header con logo Aragón + dropdown "Gestor de expedientes" + nav Inicio/Expedientes/Bandejas + dropdown "Ana Pérez". Footer con links + Creado por SDA + CC BY 4.0 + dirección + logos EU/Fondos Europeos.
+- *Componente clasificado:* `header` (1 banda, webapp autenticada). NO `header-advanced` (que sería 3 bandas).
+- *Ejemplo del catálogo elegido:* "Con todo" (`_examples.header.njk`, ejemplo #13) — coincide estructuralmente con el gold.
+- *Tuneo header:* cambiar `navigation.items` (Navigation item 1/2/3 → Inicio/Expedientes/Bandejas) y `dropdown.items` (Marta Pérez → Ana Pérez).
+- *Ejemplo del catálogo elegido footer:* "Con logo feder y otros logos personalizados" (`_examples.footer.njk`) — coincide con los logos EU/Fondos Europeos del gold.
+- *Tuneo footer:* el ejemplo ya trae los logos correctos; ajustar solo textos de los links.
+
+**Nomenclatura validada (2026-07-04, corregir uso):**
+
+- NO usar "chrome" para el logo. Usar **logo extendido** (`yourlogo-expanded.svg`, con texto, header webapp) y **logo contraído** (`yourlogo-compact.svg`, sin texto, móvil / header-mini). Existe también **logo mini** (`yourlogo-mini.svg`) para header-mini en pantallas muy estrechas.
+
+**Cuándo NO aplicar este paso:**
+
+- ❌ Si no tienes referencia visual (implementas solo con texto del usuario).
+- ❌ Si el componente no está en el catálogo (caso edge; documentar primero antes de improvisar).
+- ❌ Si la referencia coincide exactamente con un ejemplo ya aplicado (no hace falta re-trabajar).
+
+**Relación con `desy-design-match`:**
+
+`desy-design-match` afina la fidelidad visual fina (spacing, tipografía, márgenes) en 2ª pasada. Este Paso 0 elige el patrón estructural correcto en 1ª pasada. Orden: primero Paso 0 (estructura), luego `desy-design-match` (fidelidad).
+
 ## Fieldset+legend sr-only para grupos semánticos
 
 **Regla:** cualquier grupo de inputs relacionados **se envuelve en `<fieldset>` con `<legend class="sr-only">`**, incluso si el grupo es un único checkbox.
