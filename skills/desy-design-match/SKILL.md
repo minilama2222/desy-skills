@@ -59,6 +59,21 @@ Usa **cualquier herramienta de captura de screenshots headless** que tengas disp
 
 Construye un HTML side-by-side con la implementación a la izquierda y la referencia a la derecha. Captura ese HTML para tener una vista única de comparación.
 
+#### ⚠️ Lección crítica (2026-07-04): viewport estándar obligatorio
+
+**Problema encontrado:** capturas del gold a 1280×900 vs capturas del built a 1265×... (default de `agent-browser`) producen **layouts diferentes** aunque el HTML renderizado sea idéntico. La causa: el viewport por defecto de `agent-browser` puede quedar por debajo del breakpoint `lg:` (1024px) o aplicar `device-scale-factor` que rompe el cálculo de media queries.
+
+**Síntoma típico:** en el gold el h1 y los botones de acción están en la misma fila; en el built aparecen en filas separadas. NO es un fallo del código — es un fallo del viewport de captura.
+
+**Regla:** **SIEMPRE especificar viewport explícito al capturar comparativas.** Viewport canónico desktop: `1280×900` (≥ 1024px para que `lg:` aplique correctamente). Si tu herramienta no acepta viewport, usa `chromium --headless --window-size=1280,900 --screenshot=...` como fallback.
+
+**Checklist de verificación antes de comparar:**
+1. ¿Ambas capturas tienen el mismo viewport? (mismo `width` exacto en píxeles).
+2. ¿El viewport es ≥ 1024px (breakpoint `lg:` de Tailwind)?
+3. ¿Las media queries del patrón DESY (e.g. `lg:flex`, `lg:flex-row-reverse`) aplican correctamente en ambas?
+
+**Si agent-browser devuelve un viewport extraño** (ej. 1265×... cuando pediste 1280×900), desconfía. Re-captura con `chromium --headless --window-size=1280,900` directamente. La diferencia entre 1265 y 1280 es de 15px pero suficiente para activar/desactivar media queries si hay rounding.
+
 ### Paso 3 — Mide y reporta discrepancias
 
 Para cada elemento clave (h1, primer párrafo, primer input, último form group, botones), captura en ambas páginas:
@@ -94,27 +109,50 @@ La página solo está "terminada" cuando el usuario lo confirma. La 1ª pasada e
 
 ## Tipos de referencia
 
-### HTML servible (gold del benchmark, otra página ya construida)
+### Imagen bitmap (mockup, screenshot de Figma, JPG/PNG sin DOM) — **caso más habitual**
 
-**Ventaja:** puedes inspeccionar el DOM directamente. Tienes acceso a todas las APIs de estilos computados del navegador (`getComputedStyle` en DevTools, equivalente en cualquier browser-automation library).
-
-Cómo medir (genérico):
-1. Sirve el HTML en un puerto local
-2. Captura el screenshot con la herramienta que tengas
-3. Inspecciona con cualquier API que devuelva los estilos computados del navegador
-4. Compara con tu implementación elemento a elemento
-
-### Imagen bitmap (mockup, screenshot de Figma, JPG/PNG sin DOM)
-
-**Limitación:** no hay DOM que inspeccionar. Tienes que analizar píxeles.
+**Limitación:** no hay DOM que inspeccionar. Tienes que analizar píxeles y **inferir las clases del sistema de diseño a partir del rendering visual**.
 
 Cómo medir:
-1. Captura tu implementación con la herramienta que tengas
-2. **Análisis visual con un LLM con capacidad de visión** (pásale la imagen y pregúntale: "qué distancia hay entre X e Y en píxeles", "qué font-size aproximado tiene este h1", "qué grosor de margen hay entre estos dos bloques")
-3. **Análisis pixel-art con una herramienta de diff de imágenes** (PIL, ImageMagick, o similar) — para medir distancias exactas entre regiones y encontrar bordes
-4. Combina ambos: el LLM te da la lectura cualitativa, el pixel-art te da la cuantitativa
+1. Captura tu implementación con la herramienta que tengas (siempre al mismo viewport que el gold, ej. 1280×900).
+2. **Análisis visual con un LLM con capacidad de visión** (pásale la imagen y pregúntale: "qué distancia hay entre X e Y en píxeles", "qué font-size aproximado tiene este h1", "qué grosor de margen hay entre estos dos bloques").
+3. **Análisis pixel-art con una herramienta de diff de imágenes** (PIL, ImageMagick, o similar) — para medir distancias exactas entre regiones y encontrar bordes.
+4. Combina ambos: el LLM te da la lectura cualitativa, el pixel-art te da la cuantitativa.
 
 **Tolerancia:** menos preciso que DOM. Apunta a ±2-3px de precisión, no ±0.5px.
+
+### Gramática visual → clases (clave para no asumir HTML disponible)
+
+Cuando no hay HTML fuente, tienes que **leer el screenshot con la gramática del sistema de diseño en la cabeza**. Esto es la habilidad que diferencia un buen afinado de uno malo:
+
+| Lo que ves en el screenshot | Cómo lo infieres | Clase probable |
+|---|---|---|
+| Texto MUY grande (~40px), top de página | h1 máximo (landing header) | `c-h0` o `text-4xl+` |
+| Texto grande-mediano (~30px), top de página | h1 estándar | `<h1>` plano en `prose`, o `c-h1` |
+| Texto mediano (~24px), sección | h2 sección | `<h2 class="c-h2">` |
+| Texto mediano (~18px), párrafo destacado | párrafo grande | `text-lg` o `c-paragraph-lg` |
+| Texto normal (~16px), párrafo | párrafo default | `<p>` plano en `prose`, o `c-paragraph-base` |
+| Texto pequeño (~14px) | párrafo pequeño | `text-sm` o `c-paragraph-sm` |
+| Texto AZUL subrayado | link | `c-link` |
+| H2 con link adentro | sección clickeable (índice) | `<h2><a class="c-link">` |
+| H2 sin link, color negro | sección informativa | `<h2>` plano |
+| Línea horizontal fina gris | separador | `<hr class="border-t border-neutral-base">` |
+| Lista con bullets custom `▸` | FAQ / disclosure | `details/summary` o accordion |
+| Bloque con icono + texto | icono + label | `_pattern.X` específico |
+
+**Caso real (2026-07-04):** tenía `<h1 class="c-h0">` "para que destaque" en `manual-con-faqs`. El gold mostraba un h1 grande-mediano pero no el más grande del sistema. Inféralo: `<h1>` plano hereda `prose h1` (30px). Corregir a `<h1>` plano dio fidelidad 100% al gold. **Anti-pattern**: usar `c-h0` por defecto "para que destaque más". El sistema tiene rangos, no siempre el máximo.
+
+### HTML servible (cuando SÍ lo tienes — bonus, no caso general)
+
+**Ventaja:** puedes inspeccionar el DOM directamente. Tienes acceso a todas las APIs de estilos computados del navegador.
+
+Cómo medir:
+1. Sirve el HTML en un puerto local
+2. Captura el screenshot con la herramienta que tengas
+3. Inspecciona con cualquier API que devuelva los estilos computados del navegador (`getComputedStyle` en DevTools, equivalente en cualquier browser-automation library)
+4. Compara con tu implementación elemento a elemento
+
+**Pero no asumas que siempre tendrás HTML.** El caso normal es screenshot. Entrena primero la lectura visual del screenshot; el HTML es bonus cuando está disponible.
 
 ## Cómo investigar discrepancias (checklist)
 
