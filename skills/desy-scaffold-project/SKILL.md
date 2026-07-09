@@ -9,11 +9,28 @@ Crea el esqueleto de un proyecto nuevo con la librería DESY elegida: clona el s
 
 > ⚠️ **Para el agente (importante):** los bloques bash de esta skill son **REFERENCE TEMPLATES** que el usuario copia y ejecuta en su propia máquina. **NO los ejecutes automáticamente.** Si el usuario pide "hazme el scaffold", explica los pasos uno a uno y pídele que los corra él. Esto aplica especialmente a `curl | bash` (NVM), `find ... -exec sed -i ...` (rename), `npm install --legacy-peer-deps` y `npx cap add ios/android` — son operaciones pesadas y/o destructivas que el usuario debe confirmar.
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"clonar el starter"*, *"scaffold del proyecto"*, *"crear el proyecto DESY desde cero"*, *"git clone `desy-html-starter`"*, *"git clone `desy-angular-starter`"*, *"arrancar dev server"*, *"`npm install --legacy-peer-deps`"*.
+- **Cargar:** cuando `desy-preflight-check` devolvió `PROYECTO_NO_EXISTE`, o el usuario pide empezar proyecto nuevo.
+- **NO usar para:** proyecto ya existente (→ `desy-implement-component` / `desy-implement-pattern`), elegir librería (→ `desy-choose-library`), afinar visualmente (→ `desy-design-match`), elegir plantilla (→ `desy-choose-page-template`).
 
-- Acabas de decidir qué librería usar (`desy-choose-library`) y necesitas arrancar
-- Vas a empezar un proyecto DESY desde cero
-- Quieres migrar un proyecto existente al stack de una librería DESY
+## Posición en el workflow DESY
+Paso **3** (o bifurcación desde `desy-preflight-check` si NO_EXISTE). Workflow completo en `desy-preflight-check`.
+
+## Errores típicos que evita
+- ❌ **Saltarse `desy-preflight-check` antes**: si ya hay proyecto, lo pisa.
+- ❌ **`npm install desy-html` en proyecto vacío**: la librería por sí sola no provee el toolchain (Vite + Tailwind + Nunjucks). Se necesita el **starter** que la trae como devDependency. El output esperado de cualquier proyecto DESY es siempre el `dist/` del starter.
+- ❌ **Sin `--legacy-peer-deps` en desy-angular**: las peer dependencies de Angular 19 entran en conflicto.
+- ❌ **Sin `.nvmrc`**: cada dev instala una versión distinta de Node y rompe builds.
+- ❌ **Renombrar antes de instalar**: los scripts `post-install` asumen el nombre original del starter.
+- ❌ **Commitear `node_modules` o `dist/`**: el `.gitignore` del starter ya los excluye.
+- ❌ **`npx cap add ios` sin Xcode instalado** (desy-ionic).
+- ❌ **`ionic cap` (legacy)** en lugar de `npx cap` (Capacitor CLI directo).
+- ❌ **macOS M1/M2 sin `arch -arm64 npm install`**: issues con `node-gyp`.
+- ❌ **HTML estático "a ojo"** sin pasar por el starter + build: no se compila.
+
+## Siguiente skill típica
+→ **`desy-preflight-check`** (re-validar tras scaffold para confirmar OK). Si OK: `desy-choose-page-template` (si vienes de bifurcación) o `desy-implement-pattern`. Tras implementar: `desy-design-match` + `desy-validate-accessibility`.
 
 ## Inputs que necesitas
 

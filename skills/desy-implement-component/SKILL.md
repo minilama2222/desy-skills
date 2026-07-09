@@ -21,12 +21,26 @@ Si te piden "hazme una página X" y no estás en un starter DESY:
 3. **Ahora** aplica este skill para generar el componente o página dentro de ese proyecto
 4. El output final debe ser el `dist/` compilado, no HTML suelto
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"implementa el botón X"*, *"genera el código del componente Y"*, *"necesito un input con autocomplete X"*, *"tabla con paginación"*, *"modal de confirmación"*, *"macro `componentButton`"*, *"`componentInput` con variante primary"*.
+- **Cargar:** tras `desy-scaffold-project` + `desy-choose-page-template`. En paralelo con `desy-implement-pattern`.
+- **NO usar para:** secciones de página completas (→ `desy-implement-pattern`), estructura de maquetación (→ `desy-implement-layout-patterns`), reconocer desde imagen (→ `desy-component-recognizer`), elegir librería/plantilla (→ `desy-choose-library` + `desy-choose-page-template`), proyecto sin starter (→ `desy-scaffold-project`).
 
-- El equipo sabe QUÉ componente necesita (ej: "un botón de enviar", "una tabla con paginación", "un modal de confirmación")
-- El equipo ya tiene claro en qué librería va a trabajar (desy-html / desy-angular / desy-ionic)
-- Se necesita el código listo para pegar con los parámetros concretos
-- El equipo quiere verificar la accesibilidad de un componente antes de mergear
+## Posición en el workflow DESY
+Paso **6** — ejecutar después de scaffolder, en paralelo con `desy-implement-pattern`. Workflow completo en `desy-preflight-check`.
+
+## Errores típicos que evita
+- ❌ **Implementar sin starter DESY clonado**: HTML estático con clases DESY en proyecto vacío no se compila, no usa macros reales — es "imitación", no uso de la librería.
+- ❌ **Inventar nombres de props**: validar siempre contra `angular-md/demo-X.md` o `_examples.X.njk`.
+- ❌ **Utility classes Tailwind en tipografía** (`text-3xl font-semibold` en vez de `c-h1`): el sistema tiene clases semánticas dedicadas.
+- ❌ **Sin FormGroup reactivo** en desy-angular (`<form novalidate>` no basta — `controlContainer` queda null).
+- ❌ **Inputs sin `w-full`** dentro de grid: los componentes atómicos DESY NO llevan `w-full` por defecto.
+- ❌ **Macros compuestos con params directos**: `componentInputGroup`, `componentCheckboxes`, `componentRadios`, `componentFieldset`, `componentTableAdvanced` esperan `items: []` con sub-ítems, no params directos.
+- ❌ **HTML estático en vez de Nunjucks + macros**: el output de desy-html debe ser `.njk` que se compila con Vite.
+- ❌ **Saltarse atributos ARIA** "porque el ejemplo ya los trae" — los ejemplos oficiales los incluyen.
+
+## Siguiente skill típica
+→ **`desy-design-match`** (afinar contra gold). Si va dentro de patrón grande: `desy-implement-pattern`. Si necesitas estructura: `desy-implement-layout-patterns`. Si dudas del token: `desy-styles-reference`. Tras afinar: `desy-validate-accessibility`. Si target es Angular: `desy-angular-translator`.
 
 ## Inputs que necesitas pedir
 

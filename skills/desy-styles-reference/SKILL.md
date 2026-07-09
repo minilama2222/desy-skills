@@ -7,15 +7,31 @@ description: "Reference of the DESY design tokens (colors, spacing, typography, 
 
 Catálogo de los **tokens de diseño del sistema DESY** (colores, espaciado, tipografía, sombras), extraídos directamente del source CSS de la librería `desy-html`. Referencia obligatoria antes de aplicar cualquier estilo visual en un proyecto DESY.
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"¿qué color uso para...?"*, *"¿qué espaciado para este gap?"*, *"`p-base` o `p-4`?"*, *"`text-primary-base` o `text-blue-700`?"*, *"`mb-lg` o `mb-7`?"*, *"el h1 me sale más pequeño que en el gold, ¿qué clase uso?"*, *"¿qué font-size tiene `c-h1`?"*, *"¿qué radio tiene el botón?"*.
+- **Cargar:** on-demand en cualquier paso de implementación, especialmente cuando el output no coincide con el gold.
+- **NO usar para:** implementar componente con macro existente (la macro ya aplica tokens — no tocar), generar Nunjucks (→ `desy-implement-component`; consultar este solo para overrides), proyecto que NO es starter DESY (tokens distintos), validar contraste (→ `desy-validate-accessibility`).
 
-- Vas a aplicar color de fondo, borde o texto → consulta la sección "Colores"
-- Vas a aplicar margin, padding o gap → consulta la sección "Espaciado"
-- Vas a aplicar tipografía (h1, párrafo, etc.) → consulta la sección "Tipografía"
-- Vas a aplicar sombra o focus ring → consulta la sección "Sombras y focus"
-- No sabes si una utility class de Tailwind es la "del proyecto" o la genérica → consulta la regla de oro
+## Posición en el workflow DESY
+**On-demand** — se invoca en cualquier punto de la cadena cuando hay duda sobre qué token usar. Relación estrecha con `desy-implement-component` (overrides), `desy-design-match` (discrepancias), `desy-validate-accessibility` (ratios de contraste). Workflow completo en `desy-preflight-check`.
 
-## Regla de oro: tokens del proyecto, NO utility Tailwind por defecto
+## Errores típicos que evita
+- ❌ **Utility classes Tailwind por defecto** en lugar de tokens del proyecto: `text-blue-700`, `p-4`, `text-3xl font-semibold` rompen la coherencia cromática y tipográfica del sistema.
+- ❌ **Colores hex hardcodeados** (`#00607a`) en vez de `bg-primary-base`: rompe si el sistema actualiza el token central.
+- ❌ **Tipografía con `text-3xl font-semibold`** en lugar de `c-h1`: la clase semántica encapsula tipo + peso + tamaño + line-height + color. El utility class solo da una parte.
+- ❌ **Valores de espaciado arbitrarios** (`gap-3`, `p-5`): el sistema usa escala canónica {8, 16, 28, 32}px.
+- ❌ **Sombras de focus manuales** cuando las macros ya las aplican: las macros DESY ya traen `--shadow-outline-focus` correcto.
+- ❌ **`lg:grid-cols-5` "no existe"** porque no aparece en el CSS precompilado: Vite genera utilities on-demand, el precompilado no las trae todas (patrón documentado en `desy-design-match`).
+
+## Siguiente skill típica
+→ **On-demand según la duda resuelta:** si era color de componente → `desy-implement-component`; si era spacing/tipografía contra gold → `desy-design-match`; si era contraste WCAG → `desy-validate-accessibility`; si era radio/sombra → `desy-implement-layout-patterns` o `desy-implement-component`. Típicamente NO es paso final — siempre vuelve a una skill de implementación.
+
+## Related
+
+- `desy-implement-component` — cómo usar las macros de la librería (este skill es la base visual, implement es la aplicación práctica).
+- `desy-scaffold-project` — cómo arrancar el proyecto donde se aplican estos tokens.
+- `desy-validate-accessibility` — para validar que el uso de color cumple ratios WCAG (los pares `*-base` sobre `*-light` y blanco están pensados para AA).
+- `desy-design-match` — para diagnosticar discrepancias visuales post-implementación.
 
 **Aplica siempre utility classes de Tailwind 4 con los tokens semánticos del proyecto, NUNCA utility classes con valores por defecto.**
 

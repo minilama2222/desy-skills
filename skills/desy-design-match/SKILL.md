@@ -7,18 +7,27 @@ description: "Workflow iterativo para que la implementación visual de una pági
 
 Workflow de **fidelidad visual**: cómo acercarse a una imagen de referencia (gold HTML servible, mockup, captura de Figma) cuando se está implementando una página del sistema de diseño DESY. Complementa a `desy-styles-reference` (que es la fuente de verdad de los tokens).
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"no coincide con el gold"*, *"esto se ve raro"*, *"afinar visualmente"*, *"fidelidad visual"*, *"spacings están mal"*, *"tipografía no encaja"*, *"margen de más/menos"*, *"comparar gold vs implementación"*, *"captura side-by-side"*, *"viewport canónico"*.
+- **Cargar:** tras `desy-implement-*` (fase 2 de afinado), antes de `desy-validate-accessibility`.
+- **NO usar para:** 1ª pasada (esqueleto), consultar token (→ `desy-styles-reference`), diferencia funcional no visual, plantilla incorrecta (→ `desy-choose-page-template` primero).
 
-- Acabas de terminar la 1ª pasada estructural de una página y hay diferencias visibles con la referencia
-- El build pasa, los contadores coinciden, pero la página se ve "rara" en algún detalle (spacing, tipografía, layout)
-- Necesitas decidir si una discrepancia concreta (4px, 8px, 28px) es ruido del navegador o merece un fix
-- El usuario reporta "esto se ve mal" sin más detalle
+## Posición en el workflow DESY
+Paso **7** — ejecutar después de `desy-implement-*`, antes de `desy-validate-accessibility`. Workflow completo en `desy-preflight-check`.
 
-**NO uses este skill si:**
-- Estás en la 1ª pasada (esqueleto) — preocúpate primero de la estructura y los bindings
-- Solo quieres consultar qué token usar → `desy-styles-reference`
-- La diferencia es funcional, no visual (e.g. un campo no se envía, un evento no dispara)
-- La plantilla de página usada **no es la correcta** para el tipo de página (e.g. usar `_template.home.njk` para un portal institucional en vez de `_template.with-header-advanced.njk`). Antes de medir discrepancias, valida la plantilla con [`desy-choose-page-template`](.). Sin plantilla correcta, las diferencias visuales masivas no se arreglan con tuning de tokens — son estructurales.
+## Errores típicos que evita
+- ❌ **`mb-sm` en h1 sin verificar `-mt-X` del siguiente** (overlap): benchmark 2026-06-08 documentó que `c-h1` (mb-lg 28px) + `-mt-base` (-16px) en el lead da 12px limpios. Sobreescribir rompe la fórmula.
+- ❌ **Viewport 1265×... en lugar de 1280×900**: produce layouts distintos aunque el HTML sea idéntico. La causa: viewport por defecto de algunas herramientas queda por debajo del breakpoint `lg:` (1024px).
+- ❌ **Viewport 1280×900 que corta el footer fuera**: el viewport estándar NO incluye el footer en la mayoría de páginas. Usar `--window-size=1280,4000` y recortar al alto real con Python+PIL.
+- ❌ **Servir el built con `python -m http.server` y el CSS precompilado**: el precompilado de `desy-html` puede NO incluir todas las utilities de Tailwind v4 (ej. `lg:grid-cols-5`). Usar SIEMPRE Vite o regenerar el CSS con Tailwind CLI.
+- ❌ **Márgenes intermedios** cuando los canónicos son {8, 16, 28, 32}px.
+- ❌ **"Está suficientemente bien"** con > 4px de desviación: el usuario nota 4px en un header; 8px lo nota todo el mundo.
+- ❌ **Aplicar fix sin esperar OK**: el usuario puede preferir "déjalo así" si la discrepancia es menor.
+- ❌ **Sobreescribir 4-5 márgenes de una pasada** sin verificar cada uno por separado.
+- ❌ **Capturar solo tu implementación** sin la referencia al lado: sin gold, no hay forma de saber si hay discrepancia.
+
+## Siguiente skill típica
+→ **`desy-validate-accessibility`** (auditoría WCAG 2.2 AA sobre la versión afinada). Si dudas del token: `desy-styles-reference`. Si el afinado reveló plantilla incorrecta: `desy-choose-page-template` retroactivo. Si hay que re-implementar: `desy-implement-component` + `desy-implement-layout-patterns`. Si target es Angular: `desy-angular-translator`.
 
 ## Regla de oro: la imagen de referencia manda
 

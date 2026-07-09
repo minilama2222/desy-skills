@@ -21,12 +21,26 @@ La razón: cada starter es un **proyecto scaffolded** con la toolchain ya config
 
 El output esperado de cualquier proyecto DESY es siempre el `dist/` generado por el toolchain del starter correspondiente (`npm run build` con Vite para desy-html, `npm run build-prod` con Angular CLI para desy-angular, `npm run build` con Ionic CLI para desy-ionic).
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"qué librería uso"*, *"desy-html vs desy-angular vs desy-ionic"*, *"qué stack me conviene"*, *"voy a hacer un portal / webapp / app móvil con DESY"*, *"migro a DESY"*, *"evaluación de stack"*, *"duda entre dos librerías"*.
+- **Cargar:** tras `desy-preflight-check`, antes de `desy-choose-page-template` + `desy-scaffold-project`.
+- **NO usar para:** ya decidida la librería (→ `desy-scaffold-project`), implementar componente (→ `desy-implement-component`), elegir plantilla (→ `desy-choose-page-template`), afinar visualmente (→ `desy-design-match`), traducir Nunjucks→Angular (→ `desy-angular-translator`).
 
-- El equipo va a empezar un proyecto con DESY y no sabe qué librería encaja
-- Hay que migrar código existente a DESY
-- Hay que evaluar pros/contras antes de comprometerse a un stack
-- El equipo duda entre dos librerías y necesita una decisión razonada
+## Posición en el workflow DESY
+Paso **1** — decidir stack. Workflow completo en `desy-preflight-check`.
+
+## Errores típicos que evita
+- ❌ **Empezar por "¿cuál conozco mejor?"** en vez de "¿qué tipo de producto?": el tipo de producto manda.
+- ❌ **desy-angular para portal estático**: overhead de Angular + mantenimiento de versiones para un sitio que no lo necesita.
+- ❌ **desy-html para webapp con auth y CRUD**: terminarás escribiendo tu propio framework encima de Nunjucks.
+- ❌ **Asumir que las 3 son intercambiables**: visualmente similares, técnicamente muy distintas.
+- ❌ **Ignorar tabla de versiones**: desy-angular v13 (Angular 16) ≠ v19 (Angular 19).
+- ❌ **desy-ionic sin publicar en stores**: el overhead de Capacitor, Xcode/Android Studio y builds nativas no compensa si el deliverable es solo web.
+- ❌ **Mezclar librerías en el mismo proyecto**: si empiezas con desy-html, no añadas desy-angular para "complementar".
+- ❌ **Colisión de requisitos**: desy-html con auth compleja o desy-angular con SEO crítico. Confirmar con el equipo si el SEO es para contenido público o autenticado.
+
+## Siguiente skill típica
+→ **`desy-choose-page-template`** (paso 2) + **`desy-scaffold-project`** (paso 3, clonar starter oficial). Si recomendación es "no usar DESY": documentar y consultar con SDA en `https://www.aragon.es/`.
 
 ## Decision framework (3 preguntas)
 

@@ -18,16 +18,24 @@ Traduce código Nunjucks de la librería `desy-html` a código TypeScript + temp
 
 **Implicación:** la traducción es la dirección canónica, no es 1:1.
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"traduce este Nunjucks a Angular"*, *"pásame este HTML a desy-angular"*, *"convierte este macro a `<desy-x>`"*, *"equivalencia HTML → Angular"*, *"`<desy-button>`"*, *"`<desy-input-group>`"*, *"FormGroup reactivo"*, *"desyCustomInnerContent"*.
+- **Cargar:** tras `desy-implement-component` + `desy-design-match` + `desy-validate-accessibility`, solo si el target final es `desy-angular`.
+- **NO usar para:** trabajar solo con desy-html (→ `desy-implement-component`), desy-ionic (este skill no cubre móvil), traducción inversa Angular → HTML (flujo no documentado).
 
-- Tienes un fragmento de código `desy-html` (Nunjucks) y necesitas pasarlo a `desy-angular` (TS + template)
-- Estás generando un proyecto nuevo con `desy-angular-starter` y tienes código de referencia en `desy-html`
-- Estás documentando la equivalencia entre ambos
+## Posición en el workflow DESY
+Paso **9** — solo si target es `desy-angular`. Workflow completo en `desy-preflight-check`.
 
-**NO uses este skill si:**
-- Estás trabajando solo con `desy-html` (no necesitas Angular)
-- Estás en `desy-ionic` (móvil) — la traducción es distinta y este skill no la cubre
-- Necesitas la traducción **inversa** (Angular → HTML) — eso es otro flujo
+## Errores típicos que evita
+- ❌ **Asumir traducción 1:1**: para componentes compuestos (table-advanced, modal, accordion, header-advanced) es **conceptual** (dicts → sub-componentes), no sintáctica.
+- ❌ **`standalone: true`**: los componentes desy-angular son `standalone: false` (parte de NgModule).
+- ❌ **Forma A (`desyInnerContent`)** vs Forma B (`*desyCustomInnerContent`): la documentada es la B.
+- ❌ **FormGroup reactivo faltante**: `<form novalidate>` no basta; `[formControlName]` falla. Sin `formGroupClasses="mb-base"` el ritmo vertical rompe (32px en lugar de 16px).
+- ❌ **`*ngFor`/`*ngIf`**: usar `@for`/`@if` (Angular 17+).
+- ❌ **Inventar equivalencias** cuando existe `angular-md/demo-X.md` (20+ documentados, 37 sin documentar — leer el demo).
+
+## Siguiente skill típica
+→ **`desy-validate-accessibility`** (re-validar tras traducir) + **`desy-design-match`** (comparar Angular vs Nunjucks afinado). Si la traducción reveló issues: volver a `desy-implement-component`. Si el target cambió: `desy-choose-library`.
 
 ## Patrones generales de traducción
 

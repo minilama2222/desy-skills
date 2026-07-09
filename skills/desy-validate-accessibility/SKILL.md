@@ -9,15 +9,36 @@ Valida la accesibilidad WCAG 2.2 AA de componentes o páginas implementadas con 
 
 > ⚠️ **Para el agente (importante):** los bloques bash de esta skill son **REFERENCE TEMPLATES** que el usuario o el equipo ejecuta en su propio proyecto (`npm install --save-dev @axe-core/cli`, `npx axe http://localhost:...`, etc.). **NO los ejecutes automáticamente** sin confirmación explícita — el `npm install --save-dev` modifica `package.json` del proyecto del usuario y el scan contra `localhost` asume que hay un dev server corriendo. Si el usuario pide "valida accesibilidad", explica los pasos y deja que él los corra, o pídele permiso explícito antes de cada uno.
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"valida accesibilidad"*, *"comprueba WCAG"*, *"pasa el axe"*, *"audita accesibilidad"*, *"¿es accesible?"*, *"cumple WCAG 2.2 AA?"*, *"preparamos release, hay que pasar revisión oficial"*.
+- **Cargar:** tras `desy-design-match`, antes del merge/release.
+- **NO usar para:** implementar componente (→ `desy-implement-component` primero, validar después), consultar token (→ `desy-styles-reference`), diferencia visual no a11y (→ `desy-design-match`), auditar contraste aislado (→ WebAIM/Colour Contrast Analyser directo).
 
-- Antes de mergear cualquier PR con UI nueva
-- Al auditar código existente
-- Después de implementar un componente con `desy-implement-component`
-- Antes de pasar el proyecto a revisión de accesibilidad oficial (obligatoria por RD 1112/2018)
-- Cuando se modifica un componente existente y se quiere verificar que sigue siendo accesible
+## Posición en el workflow DESY
+Paso **8** — ejecutar después de `desy-implement-*` + `desy-design-match`, antes del merge. Workflow completo en `desy-preflight-check`.
 
-## Prerequisitos
+## Errores típicos que evita
+- ❌ **Mergear UI sin pasar axe-core**: el primer escaneo encuentra 5-15 issues triviales (labels sin `for`, contraste < 4.5:1, headings sin jerarquía).
+- ❌ **Confiar solo en automáticas**: axe-core y pa11y detectan ~30-40% de issues. El resto requiere test manual (teclado, lector de pantalla).
+- ❌ **Saltarse lector de pantalla**: `aria-invalid` faltante, `role="alert"` mal aplicado, landmarks duplicados son invisibles a axe pero críticos.
+- ❌ **No probar teclado en modales**: foco que escapa al hacer Tab, Esc que no cierra, foco que no vuelve al botón origen — pasa el scan pero rompe la experiencia.
+- ❌ **Auditar solo en desktop**: test responsive (375px, tablet) revela target size táctil, scroll horizontal, menús hamburguesa inaccesibles.
+
+## Siguiente skill típica
+→ Si validación OK: mergear / release / revisión oficial.
+→ Si issues: **`desy-implement-component`** (fix específico) o **`desy-styles-reference`** (si el issue es de tokens de contraste).
+→ Si la página no es accesible por problema visual WCAG: `desy-implement-layout-patterns` o `desy-design-match`.
+→ Si target es desy-angular: re-validar tras traducir.
+
+## Related
+
+- **Skill: `desy-implement-component`** — generó el código que se valida aquí.
+- **Skill: `desy-choose-library`** — eligió la librería usada.
+- **Skill: `desy-scaffold-project`** — montó el proyecto.
+- **Skill: `desy-design-match`** — afina visualmente antes de validar a11y.
+- **Skill: `desy-styles-reference`** — fuente de verdad de tokens (consultar ratios de contraste).
+- **Mapa del ecosistema DESY:** `docs/ecosystem-map.md` (en este repo).
+- **Doc oficial DESY accesibilidad:** `https://desy.aragon.es/como-empezar-accesibilidad.html.md`
 
 Antes de aplicar este skill, asegúrate de tener:
 
