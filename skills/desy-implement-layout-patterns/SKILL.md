@@ -13,13 +13,26 @@ Patrones estructurales de maquetación DESY para agrupar, grid-ear y disponer ac
 
 **Hallazgo 2026-07-03 (acceso al repo `gorilas/desy.aragon.es`):** Estos patterns son transversales en el sitio oficial. Se aplican también a cards (`cards-misma-altura`), cabeceras (`cabecera-editar`), errores (`errores-estaticos`), notificaciones, FAQs, listados, etc.
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"estructura de fieldset+legend"*, *"fieldset sr-only"*, *"grid responsive con `lg:grid-cols-4`"*, *"spacing entre form groups"*, *"acciones al final del form"*, *"`mt-base mb-base lg:mt-0 lg:mb-0`"*, *"skip-link"*, *"cards grid misma altura"*, *"notificación con `role=status`"*, *"FAQ acordeón"*.
+- **Cargar:** en paralelo con `desy-implement-pattern` + `desy-implement-component`, cuando la página tiene formularios o secciones repetibles.
+- **NO usar para:** componente suelto (→ `desy-implement-component`), patrón atómico grande (→ `desy-implement-pattern`), afinar visualmente (→ `desy-design-match`), validar a11y de estructura (→ `desy-validate-accessibility`).
 
-- Te piden una página con un form (wizard, formulario de edición, alta de datos)
-- Vas a montar varios inputs en una grid y necesitas saber qué grid usar
-- Necesitas agrupar inputs por sección semántica (Domicilio, Ubicación, etc.) con fieldset+legend
-- Tienes acciones al final del form (Siguiente, Atrás, Saltar, etc.) y necesitas el patrón de section+ul
-- Necesitas saber cuándo aplicar `mt-base mb-base lg:mt-0 lg:mb-0` vs nada
+## Posición en el workflow DESY
+Complemento **paralelo** a `desy-implement-pattern` + `desy-implement-component`. Workflow completo en `desy-preflight-check`.
+
+## Errores típicos que evita
+- ❌ **Olvidar `<fieldset><legend class="sr-only">`** en grupos de inputs: WCAG 2.2 AA obligatorio.
+- ❌ **`<div role="group">` en lugar de `<fieldset>`**: `role="group"` no es estándar, usar fieldset siempre.
+- ❌ **`mb-sm` en h1 sin verificar `-mt-X` del siguiente**: causa overlap (benchmark 2026-06-08). El `c-h1` sin override + `-mt-base` en el lead es idiomático.
+- ❌ **Skip-link como `<button>`**: debe ser `<a href="#content">` (navega, no ejecuta).
+- ❌ **Cards con altura fija** (`height: 200px`): usar `h-full` para igualar altura en grid.
+- ❌ **Notificaciones sin `role="status"` o `role="alert"`**: sin live region, los screen readers no las anuncian.
+- ❌ **Cards con `<div>` en lugar de `<ul>/<li>`**: la semántica de lista es importante.
+- ❌ **`flex-column-reverse` (con guion)**: bug del repo oficial. La clase correcta es `flex-col-reverse`.
+
+## Siguiente skill típica
+→ **`desy-design-match`** (afinar visualmente). Si la estructura usa componentes sueltos: `desy-implement-component`. Si dudas de token de spacing: `desy-styles-reference`. Tras afinar: `desy-validate-accessibility`. Si target es Angular: `desy-angular-translator`.
 
 ## Paso 0: ¿tienes referencia visual? Bucle "compara → busca ejemplo → aplica tuneando"
 

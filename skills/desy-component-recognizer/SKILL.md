@@ -7,17 +7,27 @@ description: "Reconoce componentes del Design System DESY (Digital Service Stand
 
 Skill para identificar componentes UI del Design System DESY analizando imágenes (mockups, screenshots, fotos de pizarras, etc.). Combina visión multimodal con un catálogo de descripciones visuales mantenidas por el equipo de SDA (Servicios Digitales de Aragón).
 
-## When to use this skill
+## Cuándo usarla
+- **Triggers:** *"qué componentes tiene esta imagen"*, *"reconoce los componentes"*, *"identifica el stack"*, *"qué hay en este mockup"*, *"mapea este diseño a DESY"*, *"audita qué componentes usa este diseño"*, *"como este mockup pero con X cambios"*.
+- **Cargar:** solo si hay imagen de referencia. Caso especial: sirve también para **validar** implementación contra catálogo (no solo extracción fría).
+- **NO usar para:** implementar componente ya identificado (→ `desy-implement-component`), sin imagen (no hay qué reconocer), elegir plantilla (→ `desy-choose-page-template` primero).
 
-- El usuario te pasa una imagen de un mockup o screenshot y te pide "qué componentes tiene", "reconoce los componentes", "identifica el stack"
-- Necesitas mapear un diseño visual a los nombres técnicos de la librería
-- Estás haciendo un audit de "qué componentes DESY usa este diseño" para una migración o refactor
-- El usuario te da una imagen de referencia (ej: "como este mockup pero con X cambios") y necesitas identificar qué se reutiliza
+## Posición en el workflow DESY
+Paso **0.5** — ejecutar SOLO si hay imagen de referencia, entre preflight y choose-library. Workflow completo en `desy-preflight-check`.
 
-**NO uses este skill si:**
-- El usuario solo quiere implementar un componente ya identificado (usa `desy-implement-component` directamente)
-- No tienes la imagen (es solo texto)
-- Necesitas decidir **qué plantilla de página** usar antes de identificar componentes. Primero [`desy-choose-page-template`](.) (tipo de página → plantilla); luego este skill dentro del `contentBlock` de esa plantilla.
+## Errores típicos que evita
+- ❌ **Saltarse esta skill cuando hay imagen** y asumir "a ojo": sesión OCX julio 2026 (maqueta 404 Portal Salud) improvisó placeholders para el footer institucional porque el agente cargó 5 skills pero NO esta. El catálogo tiene 57 componentes + 653 ejemplos con `visualDescription` escrita por SDA.
+- ❌ **Confundir `alert` con `notification`**: `alert` es wrapper; `notification` es lo visible (icono + texto + X).
+- ❌ **`modal` vs `dialog` vs `drawer`**: modal bloquea UI con overlay; dialog usa `<dialog>` nativo; drawer es panel lateral (offcanvas).
+- ❌ **`input` vs `input-group` vs `date-input` vs `datepicker`**: atómico vs compuesto vs formato fecha vs popup calendario.
+- ❌ **`table` vs `table-advanced`**: filtros/checkboxes/paginación → `table-advanced`.
+- ❌ **`header-mini` vs `header` vs `header-advanced`**: 1 banda fina solo logo vs 1 banda con nav vs 3 bandas (logo / nombre portal / nav).
+- ❌ **Asumir 2 ejemplos visualmente similares son el mismo componente** cuando difieren en params, JS global o pseudoclase simulada.
+- ❌ **Inventar nombre de componente** cuando el catálogo tiene la variante exacta (validar contra `assets/catalog.json`).
+- ❌ **Confundir el "recuadro con border 1px" del catálogo** (`componentExample`) con parte del componente.
+
+## Siguiente skill típica
+→ **`desy-choose-library`** (paso 1) si no hay stack. → `desy-choose-page-template` (paso 2) si hay librería. → `desy-implement-component` (paso 6) o `desy-implement-pattern` (pasos 4-5) según componentes reconocidos. → `desy-implement-layout-patterns` si la imagen muestra estructura. Tras implementar: `desy-design-match` (paso 7) + `desy-validate-accessibility` (paso 8).
 
 ## El catálogo
 

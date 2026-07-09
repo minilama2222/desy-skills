@@ -11,18 +11,27 @@ Implementa uno de los **55 patrones atómicos oficiales** de DESY cuando necesit
 
 **Origen del nombre:** antes `desy-implement-pattern` cubría solo los 19 documentados. Ampliado en 2026-07-03 para cubrir los 36 patterns adicionales que estaban en el repo pero no en la doc oficial.
 
-## Cuándo usar este skill
+## Cuándo usarla
+- **Triggers:** *"implementa el patrón X"*, *"aplica el patrón Y"*, *"necesito una sección de FAQs / cards / 404 / megamenú"*, *"tunea este patrón"*, *"combina FAQs + acordeón"*, *"de los 55, cuál me encaja"*.
+- **Cargar:** tras `desy-choose-page-template` + `desy-scaffold-project`, con proyecto DESY clonado y `node_modules` listo.
+- **NO usar para:** componente suelto (→ `desy-implement-component`), página completa con plantilla (→ `desy-scaffold-project` primero, vuelve aquí para el patrón dentro), estructura de maquetación (→ `desy-implement-layout-patterns` complementario), reconocer patrón visualmente (→ `desy-component-recognizer`).
 
-* Te piden implementar una **sección de página DESY** mayor que un componente individual pero menor que una página completa.
-* Tienes claro **qué patrón necesitas** (por nombre, descripción o screenshot).
-* Estás en un proyecto DESY (HTML, Angular o Ionic) clonado y con `node_modules` listo.
+## Posición en el workflow DESY
+Pasos **4-5** — ejecutar después de elegir plantilla + scaffolder, antes de afinar visualmente. En paralelo con `desy-implement-component` y `desy-implement-layout-patterns`. Workflow completo en `desy-preflight-check`.
 
-**Cuándo NO usar este skill:**
+## Errores típicos que evita
+- ❌ **Confundir patrón atómico con componente suelto**: FAQs es patrón (sección completa); `input` es componente suelto.
+- ❌ **Confundir patrón atómico con plantilla completa**: FAQs NO es plantilla; necesita `contentBlock` dentro de `_template.logged-out.njk` o similar.
+- ❌ **Asumir que solo hay 19 patrones**: la doc pública lista 19, pero el repo `gorilas/desy.aragon.es` tiene **55 patrones** en `src/templates/includes/_pattern.*.njk`. Esta skill documenta los 55.
+- ❌ **`flex-column-reverse` (con guion)**: bug del repo oficial en 5 archivos. La clase correcta es `flex-col-reverse`.
+- ❌ **Eliminar `<fieldset><legend class="sr-only">`** "porque no se ve": WCAG 2.2 AA obligatorio.
+- ❌ **`input` por `select` sin mantener `name` y `label.text`**: rompe el binding del formulario.
+- ❌ **`<desy-button>` por `<a>`** para "Saltar": la variante `c-button--transparent` existe.
+- ❌ **Inventar utility classes** (`w-[150px]`, `bg-custom-blue`): usar solo tokens DESY/Tailwind.
+- ❌ **Cambiar el patrón por completo** en vez de tunear uno cercano (ej. "Avanzar y retroceder" como base para wizards).
 
-* **Componente suelto** (un solo botón, input, card) → `desy-implement-component`.
-* **Página completa con plantilla** (header + footer + skip-link + el patrón dentro) → `desy-scaffold-project` para crear la página y luego vuelve aquí para implementar el patrón dentro.
-* **Estructuras de agrupación / maquetación** (fieldset+legend, grid responsive, acciones en section+ul, spacing) → `desy-implement-layout-patterns` (complementario).
-* **Reconocer un patrón visualmente desde un screenshot** → `desy-component-recognizer`.
+## Siguiente skill típica
+→ **`desy-design-match`** (afinar contra gold). Si el patrón usa componentes sueltos: `desy-implement-component`. Si necesita estructura: `desy-implement-layout-patterns`. Si dudas de tokens: `desy-styles-reference`. Tras afinar: `desy-validate-accessibility`. Si target es Angular: `desy-angular-translator`.
 
 ## Workflow
 

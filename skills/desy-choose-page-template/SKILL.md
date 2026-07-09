@@ -7,14 +7,27 @@ description: "Pick the right DESY page template (portal, logged, logged-selector
 
 Ayuda a decidir qué plantilla de página DESY usar para una página nueva o una migración, según el tipo de página. La decisión es **independiente de la librería**: las mismas plantillas existen en `desy-html` (como `_template.X.njk`) y en `desy-angular` (como `X-layout`).
 
-## Cuándo usar este skill
+## Cuándo usarla
+- **Triggers:** *"¿qué plantilla uso?"*, *"¿qué layout le pongo?"*, *"¿qué `_template.X.njk`?"*, *"¿qué `X-layout`?"*, *"estoy maquetando un portal / webapp / login / wizard / 404"*, *"es página pública o autenticada"*, *"¿con header-advanced o header normal?"*.
+- **Cargar:** tras `desy-choose-library`, antes de `desy-scaffold-project` + `desy-implement-*`.
+- **NO usar para:** librería sin decidir (→ `desy-choose-library`), implementar contenido dentro de plantilla (→ `desy-implement-layout-patterns` + `desy-implement-pattern` + `desy-implement-component`), afinar visualmente (→ `desy-design-match`), reconocer desde imagen (→ `desy-component-recognizer`).
 
-- Vas a crear una página nueva y necesitas saber qué plantilla extiende antes de empezar.
-- Estás migrando una página existente a DESY y necesitas mapear al template correcto.
-- Estás revisando una implementación y necesitas validar que la plantilla elegida es la adecuada.
-- **NO** usar para elegir librería (eso es `desy-choose-library`). **NO** usar para implementar el contenido dentro de la plantilla (eso es `desy-implement-layout-patterns` + `desy-implement-component`).
+## Posición en el workflow DESY
+Paso **2** — ejecutar después de elegir librería, antes de scaffolder o implementar. Si hay imagen de referencia, ejecutar también `desy-component-recognizer` ANTES. Workflow completo en `desy-preflight-check`.
 
-## Taxonomía oficial (de `desy.aragon.es/plantillas.html`)
+## Errores típicos que evita
+- ❌ **`_template.home.njk` para páginas que no son la home del starter**: solo aplica a la home de `desy-html-starter`. Si la usas para un 404 o portal, sale con header local del starter en lugar del institucional. Patrón detectado en validación del 404 del Portal de Salud (2026-07-04).
+- ❌ **Asumir que la cabecera visible define la plantilla**: la cabecera puede tunearse en cualquier plantilla; el factor decisivo es la **familia** (portal, sin sesión, webapp, edición), no la cabecera concreta.
+- ❌ **Override `headerBlock` o `footerBlock`** cuando solo necesitas tunear parámetros: pasar params al `componentHeader(...)` / `componentFooter(...)` dentro del bloque del template.
+- ❌ **Inventar nueva plantilla**: las 10 de la tabla oficial cubren el 95% de páginas institucionales.
+- ❌ **Confundir plantillas con patrones atómicos**: las plantillas son el chrome completo; los patrones atómicos son secciones dentro de `contentBlock`.
+- ❌ **Elegir plantilla por la cabecera que se ve en una imagen** sin verificar la familia.
+- ❌ **Saltar este paso e ir directo a `desy-implement-pattern`**: sin plantilla, no sabes dónde montar el patrón.
+
+## Siguiente skill típica
+→ **`desy-scaffold-project`** (paso 3) si preflight = NO_EXISTE. → **`desy-implement-layout-patterns`** (paso 4) para estructurar `contentBlock`. → **`desy-implement-pattern`** (paso 5) para el patrón de negocio dentro. → **`desy-implement-component`** (paso 6) para componentes sueltos. Si hay imagen y aún no se cargó `desy-component-recognizer`: hacerlo retroactivo. Si página es solo chrome sin `contentBlock` personalizado: `desy-design-match` directo.
+
+## Related
 
 DESY define **4 familias de plantillas** + plantillas especiales. La distinción principal es **portal público vs webapp** (con o sin auth):
 
