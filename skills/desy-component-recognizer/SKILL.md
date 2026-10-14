@@ -25,6 +25,7 @@ Paso **0.5** — ejecutar SOLO si hay imagen de referencia, entre preflight y ch
 - ❌ **Asumir 2 ejemplos visualmente similares son el mismo componente** cuando difieren en params, JS global o pseudoclase simulada.
 - ❌ **Inventar nombre de componente** cuando el catálogo tiene la variante exacta (validar contra `assets/catalog.json`).
 - ❌ **Confundir el "recuadro con border 1px" del catálogo** (`componentExample`) con parte del componente.
+- ❌ **Hacer «Volver», «Cancelar» o «Ver más» como `c-link`**: son `button` transparente (regla 11). Piloto 01 de desy-skills-evals (2026-10): 15 de 54 runs, los tres modelos.
 
 ## Siguiente skill típica
 → **`desy-choose-library`** (paso 1) si no hay stack. → `desy-choose-page-template` (paso 2) si hay librería. → `desy-implement-component` (paso 6) o `desy-implement-pattern` (pasos 4-5) según componentes reconocidos. → `desy-implement-layout-patterns` si la imagen muestra estructura. Tras implementar: `desy-design-match` (paso 7) + `desy-validate-accessibility` (paso 8).
@@ -210,6 +211,22 @@ En el catálogo de ejemplos (las páginas de `examples-X.html`), cada ejemplo es
 - **Azul petroléo/petróleo (#00607a)** = color primario, muchos componentes
 - **Verde, rojo, amarillo** = estados (success, alert, warning)
 - **No confundir rojo de "alerta" con rojo de "link clickeado"** (los links visited pueden ser rojos pero NO son alert)
+
+### 11. **Acción subrayada = `button` transparente, no `link`**
+
+Un texto subrayado en semibold (a menudo con flecha ← o →) que **es una acción de la página** es el componente `button` en su variante `transparente` (`c-button c-button--transparent`), no `link`. Se ve casi igual que un enlace, pero tiene el padding del botón: el texto empieza unos 8–10 px más adentro que el borde del bloque.
+
+Es `button` transparente:
+- «Volver» / «Atrás», encima del título o al final de la página (con flecha ←).
+- «Cancelar», «Saltar», junto a un botón primario («Guardar», «Siguiente paso»).
+- «Ver más →», «Ver todos», al pie de una sección de cards o de un listado.
+
+Es `link` (`c-link`) solo:
+- dentro de texto corrido («Acepto la política de privacidad»);
+- en listas de enlaces (`links-list`, pie de página, migas);
+- como título enlazado de una card.
+
+Si navega, el botón transparente es `<a href="…" class="c-button c-button--transparent">`; si actúa sobre el formulario, `<button type="button" class="c-button c-button--transparent">`. En la tabla de salida: `button | transparente | base`.
 
 ## Limitaciones conocidas
 
