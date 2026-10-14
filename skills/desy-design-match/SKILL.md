@@ -1,6 +1,6 @@
 ---
 name: desy-design-match
-description: "Workflow iterativo para que la implementación visual de una página DESY coincida con la imagen de referencia. Cubre el proceso de medir, comparar y afinar spacing/tipografía después de la primera pasada estructural. NO cubre la fuente de verdad de los tokens (eso es desy-styles-reference)."
+description: "Afina una página DESY contra su imagen de referencia: mide anchos, tipografía y márgenes y los lleva a los tokens del sistema. Úsala SIEMPRE que se maquete una página DESY a partir de una imagen (mockup, captura, referencia.png), antes de darla por terminada, aunque nadie diga que algo no coincide; y también cuando la implementación no coincida con la referencia («no coincide con el gold», «afinar», «spacing o tipografía mal»). Incluye las convenciones responsive del gold (c-h1 lg:c-h0, c-h3 lg:c-h2, -mt-base c-paragraph-base lg:c-paragraph-lg). NO es la fuente de verdad de los tokens (eso es desy-styles-reference)."
 ---
 
 # desy-design-match
@@ -9,7 +9,7 @@ Workflow de **fidelidad visual**: cómo acercarse a una imagen de referencia (go
 
 ## Cuándo usarla
 - **Triggers:** *"no coincide con el gold"*, *"esto se ve raro"*, *"afinar visualmente"*, *"fidelidad visual"*, *"spacings están mal"*, *"tipografía no encaja"*, *"margen de más/menos"*, *"comparar gold vs implementación"*, *"captura side-by-side"*, *"viewport canónico"*.
-- **Cargar:** tras `desy-implement-*` (fase 2 de afinado), antes de `desy-validate-accessibility`.
+- **Cargar:** siempre que haya imagen de referencia, tras `desy-implement-*` y antes de `desy-validate-accessibility`, **aunque la página parezca bien**. La invoca `desy-preflight-check` como paso 4 de su secuencia.
 - **NO usar para:** 1ª pasada (esqueleto), consultar token (→ `desy-styles-reference`), diferencia funcional no visual, plantilla incorrecta (→ `desy-choose-page-template` primero).
 
 ## Posición en el workflow DESY
@@ -49,6 +49,19 @@ Extraídas de la documentación oficial de tipografía de DESY. Antes de inventa
 | Párrafo pequeño | `.c-paragraph-sm` | 14px | 20px | mb-sm (8px) |
 
 **Canónico = {8, 16, 28, 32}px** (mb-sm, mb-base, mb-lg, mb-8). Nada intermedio a no ser que la referencia lo pida explícitamente.
+
+### Convenciones tipográficas del gold
+
+**La clase se elige por el tamaño medido, no por el nivel del DOM.** Un h2 puede llevar `c-h1 lg:c-h0`, y un h3, `text-2xl`. Mide la altura del texto en la referencia (desktop, 1280 px), busca la fila de «Medidas canónicas» que coincide y, si el tamaño solo cambia en desktop, usa el prefijo `lg:`.
+
+| Dónde | Elemento | Clases en el gold | Tamaño en desktop |
+|---|---|---|---|
+| Portal (home) | h1 y h2 de bloque destacado («Actualidad», título de card a ancho completo) | `c-h1 lg:c-h0` | 40 px |
+| Portal | h2 de sección («Buscador», «Lo más consultado») | `c-h3 lg:c-h2` | 24 px |
+| Portal | título de card | `c-h3` | 18 px |
+| Portal | título de card mini | `c-h4 mb-base text-black` | 16 px |
+| Formulario por pasos | lead bajo el h1 | `-mt-base c-paragraph-base lg:c-paragraph-lg` | 18 px |
+| Lista de items (`cabecera-item`) | título del item (h3) | `sm:flex-1 font-bold text-2xl leading-tight mb-xs` | 24 px |
 
 ## Workflow iterativo de fidelidad visual
 
@@ -149,6 +162,8 @@ Presenta al usuario una tabla como esta:
 
 **No apliques fixes automáticamente.** Cada discrepancia puede tener un "vale, arréglalo" o un "no merece la pena, déjalo así". Espera el visto bueno explícito.
 
+**En una sesión sin usuario** (agente autónomo, encargo «maqueta esta página»): no esperes OK. Aplica el fix de cada discrepancia ≥ 4 px, re-mide, y al terminar reporta la tabla de discrepancias con el estado de cada una. La página sigue sin estar terminada hasta que la tabla no tenga bloqueantes.
+
 ### Paso 5 — Aplica el fix mínimo
 
 Para cada discrepancia aprobada:
@@ -188,13 +203,14 @@ Cuando no hay HTML fuente, tienes que **leer el screenshot con la gramática del
 
 | Lo que ves en el screenshot | Cómo lo infieres | Clase probable |
 |---|---|---|
-| Texto MUY grande (~40px), top de página | h1 máximo (landing header) | `c-h0` o `text-4xl+` |
+| Texto MUY grande (~40px), top de página o bloque destacado | h1 máximo, o h2 de bloque en portales | `c-h0`, o `c-h1 lg:c-h0` si en móvil es menor |
 | Texto grande-mediano (~30px), top de página | h1 estándar | `<h1>` plano en `prose`, o `c-h1` |
 | Texto mediano (~24px), sección | h2 sección | `<h2 class="c-h2">` |
 | Texto mediano (~18px), párrafo destacado | párrafo grande | `text-lg` o `c-paragraph-lg` |
 | Texto normal (~16px), párrafo | párrafo default | `<p>` plano en `prose`, o `c-paragraph-base` |
 | Texto pequeño (~14px) | párrafo pequeño | `text-sm` o `c-paragraph-sm` |
-| Texto AZUL subrayado | link | `c-link` |
+| Texto azul subrayado dentro de un párrafo o en una lista de enlaces | link | `c-link` |
+| Texto subrayado en semibold que es una acción («Volver», «Cancelar», «Ver más →») | botón transparente | `c-button c-button--transparent` (regla 11 de `desy-component-recognizer`) |
 | H2 con link adentro | sección clickeable (índice) | `<h2><a class="c-link">` |
 | H2 sin link, color negro | sección informativa | `<h2>` plano |
 | Línea horizontal fina gris | separador | `<hr class="border-t border-neutral-base">` |
