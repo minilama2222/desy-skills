@@ -96,23 +96,24 @@ Para cada elemento identificado en el paso 2:
 Devuelve SIEMPRE en este formato (es el que espera el sistema, según `desy-identify`):
 
 ```markdown
-| Nº | Componente | Variante | Ubicación en imagen | Notas adicionales |
-|:--:|:-----------|:---------|:--------------------|:------------------|
-| 1 | button | primario | header, derecha | "Acceder" |
-| 2 | input | text | main, formulario | label "Nombre" |
-| 3 | input | text | main, formulario | label "Apellido 1" |
-| 4 | input | text | main, formulario | label "NIF", pattern NIF/NIE |
-| 5 | error-message | alert | main, debajo del input NIF | "Formato no válido" |
-| 6 | button | primario | main, final del form | "Siguiente" |
-| 7 | button | default | main, final del form | "Atrás", disabled |
-| 8 | footer | - | footer | institucional con 3 logos |
+| Nº | Componente | Variante | Tamaño | Ubicación en imagen | Notas adicionales |
+|:--:|:-----------|:---------|:-------|:--------------------|:------------------|
+| 1 | button | primario | base | header, derecha | "Acceder" |
+| 2 | input | text | base | main, formulario | label "Nombre" |
+| 3 | input | text | base | main, formulario | label "Apellido 1" |
+| 4 | input | text | base | main, formulario | label "NIF", pattern NIF/NIE |
+| 5 | error-message | alert | base | main, debajo del input NIF | "Formato no válido" |
+| 6 | button | primario | base | main, final del form | "Siguiente" |
+| 7 | button | default | base | main, final del form | "Atrás", disabled |
+| 8 | footer | - | - | footer | institucional con 3 logos |
 ```
 
 **Reglas para la tabla:**
 - **Numerar secuencialmente** (1, 2, 3...) de arriba a abajo, izquierda a derecha
 - **Una fila por componente** (no por subelemento). Ej: si ves un `input-group` con 2 inputs + 1 botón, UNA sola fila para `input-group` (no 3 filas)
 - **Solo descomponer en atómicos** (button, input, label) cuando NO haya un compuesto (input-group, date-input, checkboxes, modal) que coincida
-- **Variante:** la del catálogo (`primario`, `alerta`, `default`, `text`, `sm`, `lg`, etc.)
+- **Variante:** la del catálogo (`primario`, `alerta`, `default`, `text`, etc.). El tamaño NO va aquí.
+- **Tamaño (obligatorio):** `sm`, `base` o `lg`. Cada componente lo expresa con su propia clase: `c-button--sm`/`--lg`, `c-dropdown--sm`/`--lg`, `c-menubar__button--sm`/`--lg`, `c-checkboxes--sm`/`--radios--sm`. Si el control mide como sus vecinos o es una acción de página, `base`. Si no hay tamaño (icono, footer, separador), `-`. Nunca mezclar el tamaño en la columna Variante.
 - **Ubicación:** header/nav/main/aside/footer + posición relativa
 - **Notas:** texto visible, iconos, colores específicos, relaciones con otros componentes
 - **Grupos de campos → fieldset.** Cada grupo de inputs bajo un título visible («Datos de identidad», «Datos de contacto», «Dirección postal») o encerrado en un bloque se anota en Notas como `fieldset + legend sr-only «<título del grupo>»`. El checkbox legal («Acepto la política de privacidad») lleva **su propio** fieldset: `fieldset + legend sr-only «Política de privacidad»`. Si el título del grupo es un h2 visible, el h2 va fuera del fieldset y la legend lo repite oculta: nunca `legend class="c-h2"`. Estructura en `desy-implement-layout-patterns` → «Fieldset+legend sr-only para grupos semánticos».
@@ -273,16 +274,16 @@ Si 2+ checks fallan, re-evalúa el matching. Si todavía dudas, propón 2 candid
 **Output esperado:**
 
 ```markdown
-| Nº | Componente | Variante | Ubicación en imagen | Notas adicionales |
-|:--:|:-----------|:---------|:--------------------|:------------------|
-| 1 | skip-link | - | top, oculto hasta focus | "Saltar al contenido principal" |
-| 2 | header | mini | header | logo Aragón, sin nav (no logueado) |
-| 3 | link | primary | main, parte superior | "He olvidado mi contraseña" |
-| 4 | input-group | text | main, formulario | label "Usuario", hint con icono |
-| 5 | input-group | password | main, formulario | label "Contraseña", con ojito |
-| 6 | button | primary | main, final del form | "Acceder", ancho completo |
-| 7 | link | default | main, debajo del form | "Crear cuenta nueva" |
-| 8 | footer | - | footer | institucional con 3 logos |
+| Nº | Componente | Variante | Tamaño | Ubicación en imagen | Notas adicionales |
+|:--:|:-----------|:---------|:-------|:--------------------|:------------------|
+| 1 | skip-link | - | - | top, oculto hasta focus | "Saltar al contenido principal" |
+| 2 | header | mini | mini | header | logo Aragón, sin nav (no logueado) |
+| 3 | link | primary | base | main, parte superior | "He olvidado mi contraseña" |
+| 4 | input-group | text | base | main, formulario | label "Usuario", hint con icono |
+| 5 | input-group | password | base | main, formulario | label "Contraseña", con ojito |
+| 6 | button | primary | base | main, final del form | "Acceder", ancho completo |
+| 7 | link | default | base | main, debajo del form | "Crear cuenta nueva" |
+| 8 | footer | - | - | footer | institucional con 3 logos |
 ```
 
 ## Validación con gold estándar
@@ -290,6 +291,7 @@ Si 2+ checks fallan, re-evalúa el matching. Si todavía dudas, propón 2 candid
 Si tienes un screenshot gold oficial (ej: `https://desy.aragon.es/componente-X-codigo.html.md`), compáralo con tu identificación:
 - **Componentes:** ¿coinciden? (debería ser 100% para mocks del mismo sistema)
 - **Variantes:** ¿coinciden? (debería ser 100% para mocks exactos)
+- **Tamaños:** ¿coinciden? (`sm` en barras de acciones y cards; `base` en formularios y acciones de página)
 - **Ubicación:** ¿coincide la posición relativa? (puede variar en mocks rediseñados)
 
 Las discrepancias en mocks rediseñados son SEÑALES de mejora (ej: el usuario migró de variant `default` a variant `primary`, eso es información valiosa).
