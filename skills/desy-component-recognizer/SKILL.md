@@ -115,6 +115,7 @@ Devuelve SIEMPRE en este formato (es el que espera el sistema, según `desy-iden
 - **Variante:** la del catálogo (`primario`, `alerta`, `default`, `text`, `sm`, `lg`, etc.)
 - **Ubicación:** header/nav/main/aside/footer + posición relativa
 - **Notas:** texto visible, iconos, colores específicos, relaciones con otros componentes
+- **Grupos de campos → fieldset.** Cada grupo de inputs bajo un título visible («Datos de identidad», «Datos de contacto», «Dirección postal») o encerrado en un bloque se anota en Notas como `fieldset + legend sr-only «<título del grupo>»`. El checkbox legal («Acepto la política de privacidad») lleva **su propio** fieldset: `fieldset + legend sr-only «Política de privacidad»`. Si el título del grupo es un h2 visible, el h2 va fuera del fieldset y la legend lo repite oculta: nunca `legend class="c-h2"`. Estructura en `desy-implement-layout-patterns` → «Fieldset+legend sr-only para grupos semánticos».
 
 ## Reglas críticas de matching
 
