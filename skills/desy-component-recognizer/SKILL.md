@@ -229,6 +229,23 @@ Es `link` (`c-link`) solo:
 
 Si navega, el botón transparente es `<a href="…" class="c-button c-button--transparent">`; si actúa sobre el formulario, `<button type="button" class="c-button c-button--transparent">`. En la tabla de salida: `button | transparente | base`.
 
+### 12. **Cuadrado de color + texto en MAYÚSCULAS = estado del item**
+
+Un cuadrado pequeño de color seguido de una palabra en MAYÚSCULAS y semibold («PUBLICADO», «PENDIENTE», «RECHAZADO»), en la cabecera de un item o de una card, junto a una fecha, es el **estado del patrón `cabecera-item`**. No es `pill` ni un `span` con colores elegidos a ojo, y tampoco la macro `componentStatus` (esa pinta texto en negrita + icono, sin cuadrado). Marcado del patrón:
+
+```html
+<span class="inline-block w-base h-base mr-sm mt-1 lg:mt-0 bg-success-dark"></span>
+<span class="flex-1 lg:flex-initial font-semibold uppercase">Publicado</span>
+```
+
+El color da el estado: `bg-success-dark` (verde), `bg-alert-base` (rojo), `bg-warning-base` (amarillo), `bg-neutral-base` (gris). En la tabla de salida: `status | éxito | - | card, bajo el título | "PUBLICADO", marcado de cabecera-item`.
+
+### 13. **Botón que muestra u oculta un panel = `toggle`**
+
+Un botón «Mostrar filtros», «Mostrar filtros y ordenación» o «Ver más opciones» que abre y cierra un panel de la misma página es el componente `toggle` (`c-toggle`), no un `button` con `aria-expanded` hecho a mano. Lleva **dos iconos**, uno por estado, dentro de `c-button--is-not-pressed` y `c-button--is-pressed`; el tamaño lo da el botón (`c-button--sm` si es pequeño).
+
+En la tabla de salida: `toggle | 2 iconos | sm | main, sobre el listado | "Mostrar filtros y ordenación", controla el panel de filtros`.
+
 ## Limitaciones conocidas
 
 - **El catálogo es de `desy-html` (v16.x).** Los componentes de `desy-angular` o `desy-ionic` no están catalogados. Si el mockup usa Ionic (mobile-first, gesture-driven) o Angular Material, NO uses este skill.
