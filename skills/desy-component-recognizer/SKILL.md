@@ -166,9 +166,10 @@ Distinguir los 3 tipos de header por la estructura visible:
 
 - `menu-horizontal`: barra de navegación horizontal simple, una sola línea
 - `menu-navigation`: navegación más completa, puede tener submenús, branding integrado
-- `menubar`: patrón tipo desktop application (File, Edit, View...), con menús desplegables por click
+- `menubar`: barra de botones para **accionar sobre un listado**, no un menú de escritorio. Va justo encima (o debajo) de una tabla o de una lista de items, y agrupa acciones en bloque: «Añadir», «Exportar», «Eliminar seleccionados», a menudo con un icono de flecha ▾ para desplegar variantes. Es el patrón oficial `menubar-filtro-busqueda` / `menubar-filtro-orden`, y sus botones son `c-menubar__button` (con `--sm` si van en una card o barra de acciones).
+- `menu-navigation` **también** existe como menú de aplicación web con branding (logo + enlaces + menú de usuario), pero eso no es `menubar`.
 
-**Si ves una nav horizontal en un header web** → `menu-navigation`. Si es una nav simple con 3-4 links sin submenús → `menu-horizontal`. Si parece un menú de aplicación tipo Word → `menubar`.
+**Si ves una nav horizontal en un header web** → `menu-navigation`. Si es una nav simple con 3-4 links sin submenús → `menu-horizontal`. Si es una fila de botones con iconos y flechas ▾ encima de una tabla/listado → `menubar` (no `button`s sueltos).
 
 ### 7. **`alert` MUESTRA un `notification` — identifica el notification, no el alert**
 
