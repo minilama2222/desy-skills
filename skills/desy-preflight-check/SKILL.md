@@ -15,33 +15,23 @@ Verifica el estado del proyecto antes de planificar cualquier tarea DESY. Es la 
 - **NO usar para:** usuario ya dio contexto explícito (librería + repo + ruta) y se va directo a `desy-implement-pattern`; tarea puramente conceptual; validar output ya implementado (→ `desy-validate-accessibility` o `desy-design-match`).
 
 ## Posición en el workflow DESY
-Paso **0** de la cadena canónica — debe ejecutarse SIEMPRE antes del paso 1. No tiene paso anterior; es el punto de entrada.
 
-```
-[desy-preflight-check]                ← ESTÁS AQUÍ
-   │
-   ├── si PROYECTO_NO_EXISTE → [desy-scaffold-project]
-   │
-   └── si PROYECTO_OK → reporte contexto y continúa
-            ↓
-       [desy-component-recognizer]    ← paso 0.5 (solo si hay imagen)
-            ↓
-       [desy-choose-library]          ← paso 1
-            ↓
-       [desy-choose-page-template]    ← paso 2
-            ↓
-       [desy-scaffold-project]        ← paso 3 (si preflight OK, omitir)
-            ↓
-       [desy-implement-pattern / implement-component / implement-layout-patterns]  ← pasos 4-6
-            ↓
-       [desy-design-match]            ← paso 7
-            ↓
-       [desy-validate-accessibility]  ← paso 8
-            ↓ (si target es desy-angular)
-       [desy-angular-translator]      ← paso 9
-            ↓ (on-demand durante todo el flujo)
-       [desy-styles-reference]        ← consulta de tokens
-```
+Paso **0** y **orquestador** de la cadena. Esta skill no termina al detectar el proyecto: decide qué skills se cargan después y en qué orden. Cada paso de la tabla es una **invocación de la herramienta `Skill`**, no un recordatorio: leer el nombre de una skill no la carga.
+
+**Secuencia obligatoria para maquetar una página DESY:**
+
+| # | Invoca | Cuándo | Por qué |
+|---|---|---|---|
+| 1 | `desy-component-recognizer` | Si hay imagen de referencia | Decide componente, variante, tamaño y fieldsets antes de escribir código |
+| 2 | `desy-choose-page-template` | Siempre | La plantilla trae header, footer y el espacio superior del contenido |
+| 3 | `desy-implement-pattern`, `desy-implement-layout-patterns`, `desy-implement-component` | Según la tabla del recognizer: patrón, estructura (fieldset, grid, acciones) o componente suelto | Las reglas de fieldset, acciones de página, tamaños y anchos están ahí |
+| 4 | `desy-design-match` | Siempre que haya imagen, antes de dar la página por terminada | Mide tipografía, anchos y márgenes contra la referencia y los lleva al token |
+| 5 | `desy-validate-accessibility` | Siempre, al final | Checklist sin servidor: fieldsets, un solo h1, labels, skip-link |
+| — | `desy-styles-reference` | Cada vez que vayas a escribir una clase de utilidad que no sale de una macro (`mb-`, `gap-`, `w-`, `max-w-`, `grid-cols-`, `text-`) | Evita Tailwind por defecto y valores arbitrarios en px |
+
+Si `PROYECTO_NO_EXISTE`, antes va `desy-scaffold-project` (Paso 2). `desy-choose-library` solo si la librería no está decidida. Si el destino es `desy-angular`, `desy-angular-translator` va después del paso 5.
+
+**Regla:** la página **no está terminada** hasta haber invocado `desy-design-match` y `desy-validate-accessibility` y haber pasado el checklist de salida (Paso 5). Un build en verde no es «terminado».
 
 ## Cómo aplicar
 
@@ -81,11 +71,37 @@ Devuelve al usuario:
 - **Comando dev:** `npm run dev` o el que esté definido
 - **Comando build:** `npm run build` o `npm run build-prod` o el equivalente
 
-### Paso 4: Si hay imagen de referencia → cargar component-recognizer
+### Paso 4: Encadena las skills con `Skill`
 
-Si el usuario proporcionó una imagen (screenshot, mockup, gold), invoca `desy-component-recognizer` con esa imagen **antes** de continuar con `desy-choose-page-template`. Esto identifica qué componentes del catálogo hay que usar y evita improvisar placeholders.
+Con el proyecto identificado, invoca con la herramienta `Skill` las skills de la secuencia de «Posición en el workflow DESY», en ese orden:
 
-Si NO hay imagen, salta directamente a `desy-choose-library`.
+1. Si hay imagen (screenshot, mockup, `referencia.png`): `desy-component-recognizer` **antes** de escribir código. Su tabla de salida (componente, variante, tamaño, fieldset) es la lista de trabajo.
+2. `desy-choose-page-template`.
+3. Las skills de implementación que pida la tabla del recognizer.
+4. `desy-design-match` y `desy-validate-accessibility` al final, aunque la página «se vea bien».
+
+Si NO hay imagen, empieza en el punto 2.
+
+### Paso 5: Checklist de salida (antes de decir «terminado»)
+
+Cada comando tiene que dar el resultado indicado. Si no lo da, vuelve a la skill que se indica.
+
+```bash
+# 1. Un fieldset por grupo de campos y por checkbox legal (HTML compilado): ≥ nº de grupos
+#    → desy-implement-layout-patterns
+grep -c '<fieldset' dist/<pagina>.html
+
+# 2. Exactamente un h1 (HTML compilado): 1 → desy-validate-accessibility
+grep -o '<h1[ >]' dist/<pagina>.html | wc -l
+
+# 3. Ni valores arbitrarios ni escala numérica de Tailwind en las clases que escribiste
+#    (fuente de la página): vacío → desy-styles-reference
+grep -oE '(class=|\"classes\": )\"[^\"]*\"' src/<pagina>.html | grep -E '\[[^]]+\]|\b[mp][trblxy]?-[1-9]|\bgap(-[xy])?-[0-9]|[a-z0-9]!( |\")'
+```
+
+- [ ] He invocado `desy-design-match` y comparado con la referencia al mismo viewport (1280 px de ancho).
+- [ ] He invocado `desy-validate-accessibility` y pasado su checklist sin servidor.
+- [ ] Las acciones de página («Volver», «Cancelar», «Ver más») son `c-button c-button--transparent`, no `c-link`.
 
 ## Errores típicos que evita
 - ❌ **Planificar implementación sobre carpeta vacía**: sesión OCX julio 2026 (maqueta 404 Portal Salud) planeó 6 pasos sobre `attached_assets/` sin verificar. Tuvo que retroceder.
@@ -95,9 +111,8 @@ Si NO hay imagen, salta directamente a `desy-choose-library`.
 - ❌ **Saltarse el check por pereza**: "el usuario ya dijo desy-html, no hace falta verificar".
 
 ## Siguiente skill típica
-→ Si preflight OK y no hay imagen: `desy-choose-library` (paso 1) → `desy-choose-page-template` (paso 2).
-→ Si preflight OK y hay imagen: `desy-component-recognizer` (paso 0.5) → `desy-choose-library` (paso 1).
 → Si preflight = NO_EXISTE: `desy-scaffold-project` → volver a invocar `desy-preflight-check` para re-verificar.
+→ Si preflight OK: la secuencia de «Posición en el workflow DESY», empezando por `desy-component-recognizer` si hay imagen y terminando **siempre** en `desy-design-match` + `desy-validate-accessibility`.
 
 ## Anti-patterns
 
