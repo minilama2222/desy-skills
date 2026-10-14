@@ -1,6 +1,6 @@
 ---
 name: desy-styles-reference
-description: "Reference of the DESY design tokens (colors, spacing, typography, shadows) extracted from desy-html library. Invoke when the user asks which utility class to use (e.g. `p-base` vs `p-4`?, `mb-lg` vs `mb-7`?, `text-primary` vs `text-blue-700`?), when reviewing existing code for token compliance, or when Tailwind defaults conflict with the design system. Covers the 8/16/28/32px canonical spacing scale, the primary/neutral/warning/success/info/alert color families with light/base/dark variants, and typography classes (`c-h1`/`c-paragraph-base`/etc.)."
+description: "Tokens de diseño DESY (colores, espaciado, anchos, tipografía, sombras) extraídos de desy-html. Úsala SIEMPRE que vayas a escribir una clase de utilidad que no sale de una macro (mb-, mt-, p-, gap-, w-, max-w-, grid-cols-, text-, bg-) al maquetar o afinar una página DESY, al revisar código y cuando Tailwind por defecto choque con el sistema. Prohíbe los valores arbitrarios ([372px], [3.375rem]) y la escala numérica de Tailwind (p-4, gap-x-4, mb-3!). Cubre la escala canónica de 8/16/28/32 px, las familias de color primary/neutral/warning/success/info/alert y las clases c-h* y c-paragraph-*."
 ---
 
 # desy-styles-reference
@@ -44,6 +44,12 @@ Catálogo de los **tokens de diseño del sistema DESY** (colores, espaciado, tip
 | `bg-gray-100` | `bg-neutral-lighter` | El gris del sistema es `#f6f6f5`, más cálido que el `gray-100` de Tailwind |
 | `gap-4` | `gap-base` | Mismo motivo que `p-base` |
 | `rounded-md` | `rounded-sm` o `rounded` (sin prefijo → 0) | Los radius del proyecto son distintos |
+| `max-w-[372px]`, `w-[205px]`, `lg:w-[59rem]` | `w-full lg:w-2/5`, `lg:w-3/4`, `col-span-2 lg:col-span-3` | Los anchos son fracciones de la columna o del grid, no px. Mide qué parte de la columna ocupa el elemento en la referencia |
+| `md:grid-cols-[173px_362px_1fr]` | `lg:grid-cols-4` + `lg:col-span-N` | Las rejillas de DESY son de columnas iguales; el ancho de cada campo sale de `col-span` |
+| `gap-[21px]`, `mt-[18px]` | `gap-base` o `gap-lg`, `mt-base` | Un valor arbitrario se redondea al token más cercano a la referencia |
+| `gap-x-4`, `px-6 pt-6`, `pb-5`, `gap-1.5` | `gap-x-base`, `px-lg pt-lg`, `pb-base`, `gap-sm` | La escala numérica de Tailwind no es la de DESY |
+| `mb-3!` | `mb-sm` | El `!` final de Tailwind v4 fuerza la clase por encima de la macro: si hace falta, el token o la macro están mal elegidos |
+| `style="background-color: #92949b"` | `bg-neutral-base` | Nada de `style` con colores: todos los colores del sistema tienen utilidad |
 
 **Cómo verificar que estás usando bien los tokens:** después de `npm run build`, abre `dist/css/styles.css` y comprueba que las utility classes que usaste (`bg-primary-base`, `p-base`, etc.) aparecen en el CSS compilado. Si usaste algo como `text-3xl` y NO aparece, el sistema de diseño lo está ignorando.
 
@@ -136,15 +142,15 @@ Documentado en detalle en `desy-implement-component` → sección "Clases tipogr
 
 | Elemento | Clase | Notas |
 |---|---|---|
-| Título principal | `c-h1` | Una por página (o H2 con `c-h1` si la jerarquía visual lo requiere) |
-| Subtítulo | `c-h2` | |
+| Título principal | `c-h1` | Uno por página. En portales, `c-h1 lg:c-h0` (40 px en desktop) |
+| Subtítulo | `c-h2` | En portales, las secciones son `c-h3 lg:c-h2` |
 | Encabezado menor | `c-h3` | |
 | Encabezado auxiliar | `c-h4` | |
 | Párrafo estándar | `c-paragraph-base` | Default para `<p>` |
-| Párrafo destacado (intro) | `c-paragraph-lead` | Bajo el H1 |
+| Párrafo destacado (lead, bajo el H1) | `c-paragraph-lg` | En formularios por pasos, `-mt-base c-paragraph-base lg:c-paragraph-lg`. **`c-paragraph-lead` no existe** en `desy-html`: no la uses |
 | Párrafo pequeño | `c-paragraph-sm` | Hints, notas, metadatos |
 
-**Regla:** NUNCA utility classes (`text-3xl font-semibold`, `text-base leading-normal`) para tipografía. SIEMPRE `c-h*` o `c-paragraph-*`.
+**Regla:** para tipografía, `c-h*` o `c-paragraph-*`, con prefijo `lg:` si la referencia cambia de tamaño en desktop. La excepción es el título del patrón `cabecera-item` (`sm:flex-1 font-bold text-2xl leading-tight mb-xs`), que el patrón oficial escribe con utilidades: cópialo tal cual.
 
 ## Sombras y focus (tokens específicos)
 
@@ -214,6 +220,12 @@ grep -oE '\.(bg|text|border|p|m|gap)-(primary|neutral|alert|warning|success|info
 ```
 
 Si la lista de utility classes que ves en el grep NO incluye las que tú escribiste, revisa los tokens.
+
+**Autocomprobación de las clases que escribiste**, en el fuente de la página (no en el CSS compilado). Tiene que salir vacío; si una coincidencia viene copiada tal cual de un patrón oficial, déjala:
+
+```bash
+grep -oE '(class=|\"classes\": )\"[^\"]*\"' src/<pagina>.html | grep -E '\[[^]]+\]|\b[mp][trblxy]?-[1-9]|\bgap(-[xy])?-[0-9]|[a-z0-9]!( |\")'
+```
 
 ## Ejemplos: bueno vs malo
 
