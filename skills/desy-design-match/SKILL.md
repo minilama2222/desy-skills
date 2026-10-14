@@ -125,12 +125,17 @@ Alternativas equivalentes según el entorno:
 
 ### Paso 3 — Mide y reporta discrepancias
 
-Para cada elemento clave (h1, primer párrafo, primer input, último form group, botones), captura en ambas páginas:
-- `font-size` y `line-height` (tipografía)
-- `margin-top` y `margin-bottom` (espaciado vertical)
-- `width` del primer input (anchura)
+**Mide primero los anchos y después los márgenes.** Un contenedor demasiado ancho cambia los saltos de línea y la altura de todo lo que va debajo; afinar márgenes antes de corregir el ancho es trabajo perdido.
 
-**No asumas "se ve igual". Mide.** Las discrepancias de 1-3px son ruido del navegador; las de 4-12px son afinables; las de >12px requieren atención.
+1. **Anchos**, en este orden:
+   - Contenedor del contenido: ¿ocupa todo el `container` o una parte? En formularios y fichas DESY lo habitual son 3 de 4 columnas en desktop: `<div class="grid grid-cols-2 lg:grid-cols-4 gap-lg"><div class="col-span-2 lg:col-span-3">…</div></div>` (o `lg:w-3/4`).
+   - Cada input frente a su columna: `w-full lg:w-2/5`, `w-full`, `w-44 lg:w-full` o `attributes.size` (los patrones de ancho de `desy-implement-component`).
+   - Párrafos: si los saltos de línea no coinciden con la referencia, el ancho está mal (suele sobrar un `max-w-*`).
+   - Columnas de tabla: si las filas salen más altas que en la referencia, alguna columna es demasiado estrecha.
+2. **Tipografía:** `font-size` y `line-height` de h1, h2, primer párrafo y títulos de card (ver «Convenciones tipográficas del gold»).
+3. **Márgenes verticales:** `margin-top` y `margin-bottom` de h1, lead, primer input, último grupo y bloque de acciones.
+
+**No asumas "se ve igual". Mide.**
 
 Presenta al usuario una tabla como esta:
 
@@ -151,6 +156,13 @@ Para cada discrepancia aprobada:
 - Re-captura y re-mide para verificar
 - Si la diferencia se reduce a < 4px, márcala como "resuelta"
 - Si no se resuelve, hay causa más profunda (margen de padre, padding de contenedor, font-size heredado) — vuelve al checklist del Paso 3
+
+**Reglas del fix:**
+
+- **No añadas `pt-`/`mt-`/`pb-` al contenido para mover el bloque del título.** La plantilla (`_template.*.njk`) ya trae el espacio superior del `main`. Si el título queda desplazado, quita el margen que añadiste, no sumes otro.
+- **Redondea al token, nunca al píxel.** Si mides 21 px, elige entre `gap-base` (16) y `gap-lg` (28) el más cercano a la referencia. Si mides 372 px de ancho, busca la fracción de columna (`lg:w-2/5`, `lg:col-span-3`), no `max-w-[372px]`. En DESY no se usan valores arbitrarios (`-[…px]`, `-[…rem]`, `grid-cols-[…]`) ni la escala numérica de Tailwind (`pt-4`, `gap-1.5`, `mb-3!`).
+- **Separaciones del gold:** entre secciones de un portal, `pb-xl lg:pb-2xl` en cada sección (~80 px en desktop), no `mt-3xl` (160 px); entre cards de una rejilla, `gap-lg`; entre cards apiladas, `mb-base`.
+- **Antes de las acciones del formulario**, el espacio sale del último `c-form-group` (~32 px): no añadas `mt-lg` a la sección de acciones.
 
 ### Paso 6 — Confirmación explícita
 
