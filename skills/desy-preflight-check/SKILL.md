@@ -12,7 +12,8 @@ Verifica el estado del proyecto antes de planificar cualquier tarea DESY. Es la 
 ## Cuándo usarla
 - **Triggers:** *"maqueta esta página con DESY"*, *"implementa X con desy-html"*, *"crea un componente DESY"*, *"tengo esta imagen / mockup, hazme la página"*, *"añade una página a mi proyecto DESY"*.
 - **Cargar:** SIEMPRE al iniciar tarea DESY, antes de `desy-choose-library` + `desy-implement-*`.
-- **NO usar para:** usuario ya dio contexto explícito (librería + repo + ruta) y se va directo a `desy-implement-pattern`; tarea puramente conceptual; validar output ya implementado (→ `desy-validate-accessibility` o `desy-design-match`).
+- **Atajo:** si el usuario ya dio contexto explícito (librería + repo + ruta), puedes saltarte la detección (Pasos 1-3), pero **no** la secuencia de «Posición en el workflow DESY» ni el checklist de salida (Paso 5).
+- **NO usar para:** tarea puramente conceptual; validar output ya implementado (→ `desy-validate-accessibility` o `desy-design-match`).
 
 ## Posición en el workflow DESY
 
