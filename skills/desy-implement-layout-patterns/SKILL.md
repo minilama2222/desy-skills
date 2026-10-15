@@ -19,7 +19,7 @@ Patrones estructurales de maquetación DESY para agrupar, grid-ear y disponer ac
 - **NO usar para:** componente suelto (→ `desy-implement-component`), patrón atómico grande (→ `desy-implement-pattern`), afinar visualmente (→ `desy-design-match`), validar a11y de estructura (→ `desy-validate-accessibility`).
 
 ## Posición en el workflow DESY
-Complemento **paralelo** a `desy-implement-pattern` + `desy-implement-component`. Workflow completo en `desy-preflight-check`.
+Paso **3** de la secuencia de `desy-preflight-check` — en paralelo con `desy-implement-pattern` + `desy-implement-component`, antes de `desy-design-match`.
 
 ## Errores típicos que evita
 - ❌ **Olvidar `<fieldset><legend class="sr-only">`** en grupos de inputs: WCAG 2.2 AA obligatorio.

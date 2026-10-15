@@ -13,7 +13,7 @@ Skill para identificar componentes UI del Design System DESY analizando imágene
 - **NO usar para:** implementar componente ya identificado (→ `desy-implement-component`), sin imagen (no hay qué reconocer), elegir plantilla (→ `desy-choose-page-template` primero).
 
 ## Posición en el workflow DESY
-Paso **0.5** — ejecutar SOLO si hay imagen de referencia, entre preflight y choose-library. Workflow completo en `desy-preflight-check`.
+Paso **1** de la secuencia de `desy-preflight-check` — SOLO si hay imagen de referencia, antes de elegir plantilla y de escribir código.
 
 ## Errores típicos que evita
 - ❌ **Saltarse esta skill cuando hay imagen** y asumir "a ojo": sesión OCX julio 2026 (maqueta 404 Portal Salud) improvisó placeholders para el footer institucional porque el agente cargó 5 skills pero NO esta. El catálogo tiene 57 componentes + 653 ejemplos con `visualDescription` escrita por SDA.
@@ -28,7 +28,7 @@ Paso **0.5** — ejecutar SOLO si hay imagen de referencia, entre preflight y ch
 - ❌ **Hacer «Volver», «Cancelar» o «Ver más» como `c-link`**: son `button` transparente (regla 11). Piloto 01 de desy-skills-evals (2026-10): 15 de 54 runs, los tres modelos.
 
 ## Siguiente skill típica
-→ **`desy-choose-library`** (paso 1) si no hay stack. → `desy-choose-page-template` (paso 2) si hay librería. → `desy-implement-component` (paso 6) o `desy-implement-pattern` (pasos 4-5) según componentes reconocidos. → `desy-implement-layout-patterns` si la imagen muestra estructura. Tras implementar: `desy-design-match` (paso 7) + `desy-validate-accessibility` (paso 8).
+→ **`desy-choose-page-template`** (paso 2). → `desy-implement-pattern`, `desy-implement-layout-patterns` o `desy-implement-component` (paso 3) según la tabla de salida. Tras implementar, siempre: `desy-design-match` (paso 4) + `desy-validate-accessibility` (paso 5). Si la librería aún no está decidida, antes `desy-choose-library`.
 
 ## El catálogo
 

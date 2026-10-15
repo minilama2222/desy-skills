@@ -13,7 +13,7 @@ Ayuda a decidir qué plantilla de página DESY usar para una página nueva o una
 - **NO usar para:** librería sin decidir (→ `desy-choose-library`), implementar contenido dentro de plantilla (→ `desy-implement-layout-patterns` + `desy-implement-pattern` + `desy-implement-component`), afinar visualmente (→ `desy-design-match`), reconocer desde imagen (→ `desy-component-recognizer`).
 
 ## Posición en el workflow DESY
-Paso **2** — ejecutar después de elegir librería, antes de scaffolder o implementar. Si hay imagen de referencia, ejecutar también `desy-component-recognizer` ANTES. Workflow completo en `desy-preflight-check`.
+Paso **2** de la secuencia de `desy-preflight-check` — antes de implementar. Si hay imagen de referencia, `desy-component-recognizer` (paso 1) va ANTES.
 
 ## Errores típicos que evita
 - ❌ **`_template.home.njk` para páginas que no son la home del starter**: solo aplica a la home de `desy-html-starter`. Si la usas para un 404 o portal, sale con header local del starter en lugar del institucional. Patrón detectado en validación del 404 del Portal de Salud (2026-07-04).
@@ -25,7 +25,7 @@ Paso **2** — ejecutar después de elegir librería, antes de scaffolder o impl
 - ❌ **Saltar este paso e ir directo a `desy-implement-pattern`**: sin plantilla, no sabes dónde montar el patrón.
 
 ## Siguiente skill típica
-→ **`desy-scaffold-project`** (paso 3) si preflight = NO_EXISTE. → **`desy-implement-layout-patterns`** (paso 4) para estructurar `contentBlock`. → **`desy-implement-pattern`** (paso 5) para el patrón de negocio dentro. → **`desy-implement-component`** (paso 6) para componentes sueltos. Si hay imagen y aún no se cargó `desy-component-recognizer`: hacerlo retroactivo. Si página es solo chrome sin `contentBlock` personalizado: `desy-design-match` directo.
+→ **`desy-scaffold-project`** si preflight = NO_EXISTE. → Paso 3: **`desy-implement-layout-patterns`** para estructurar `contentBlock`, **`desy-implement-pattern`** para el patrón de negocio dentro, **`desy-implement-component`** para componentes sueltos. Si hay imagen y aún no se cargó `desy-component-recognizer`: hacerlo retroactivo. Si página es solo chrome sin `contentBlock` personalizado: `desy-design-match` (paso 4) directo.
 
 ## Related
 

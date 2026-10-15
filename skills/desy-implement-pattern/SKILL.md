@@ -17,7 +17,7 @@ Implementa uno de los **55 patrones atómicos oficiales** de DESY cuando necesit
 - **NO usar para:** componente suelto (→ `desy-implement-component`), página completa con plantilla (→ `desy-scaffold-project` primero, vuelve aquí para el patrón dentro), estructura de maquetación (→ `desy-implement-layout-patterns` complementario), reconocer patrón visualmente (→ `desy-component-recognizer`).
 
 ## Posición en el workflow DESY
-Pasos **4-5** — ejecutar después de elegir plantilla + scaffolder, antes de afinar visualmente. En paralelo con `desy-implement-component` y `desy-implement-layout-patterns`. Workflow completo en `desy-preflight-check`.
+Paso **3** de la secuencia de `desy-preflight-check` — después de elegir plantilla, antes de `desy-design-match`. En paralelo con `desy-implement-component` y `desy-implement-layout-patterns`. Workflow completo en `desy-preflight-check`.
 
 ## Errores típicos que evita
 - ❌ **Confundir patrón atómico con componente suelto**: FAQs es patrón (sección completa); `input` es componente suelto.
