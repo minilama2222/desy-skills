@@ -224,7 +224,7 @@ Si la lista de utility classes que ves en el grep NO incluye las que tú escribi
 **Autocomprobación de las clases que escribiste**, en el fuente de la página (no en el CSS compilado). Tiene que salir vacío; si una coincidencia viene copiada tal cual de un patrón oficial, déjala:
 
 ```bash
-grep -oE '(class=|\"classes\": )\"[^\"]*\"' src/<pagina>.html | grep -E '\[[^]]+\]|\b[mp][trblxy]?-[1-9]|\bgap(-[xy])?-[0-9]|[a-z0-9]!( |\")'
+grep -oE '(class=|"classes": )"[^"]*"' src/<pagina>.html | grep -E '\[[^]]+\]|(^|[ ":])-?[mp][trblxy]?-[1-9][0-9.]*( |"|!)|(^|[ ":])gap(-[xy])?-[1-9][0-9.]*( |"|!)|[a-z0-9]!( |")'
 ```
 
 ## Ejemplos: bueno vs malo
