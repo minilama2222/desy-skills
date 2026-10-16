@@ -1,6 +1,6 @@
 # Skill Prompts Collection
 
-> **Colección de prompts de prueba** para testear las 12 skills `desy-*` de forma individual o combinada, en cualquier entorno que soporte SKILL.md (OpenClaw, OpenCode, Claude Code, Codex). Cada prompt está diseñado para activar el skill correspondiente, con contexto suficiente para que el agente tenga con qué trabajar.
+> **Colección de prompts de prueba** para testear las 12 skills `desy-*` de forma individual o combinada, en cualquier agente o IDE que cargue SKILL.md. Cada prompt está diseñado para activar el skill correspondiente, con contexto suficiente para que el agente tenga con qué trabajar.
 >
 > **Cómo usar:**
 > 1. Copia el prompt tal cual
@@ -157,7 +157,7 @@
 **Prompt:**
 > Tengo esta imagen `mockup-home-portal.png` (sustituye por una captura de https://desy.aragon.es/patron-pagina-acceso-cargando.html). Maquétame la página con DESY: reconoce los componentes, elige el patrón que corresponda e impleméntala. Estoy en una carpeta de trabajo nueva.
 
-**Output esperado:** El agente invoca `desy-preflight-check` ANTES de planificar, ejecuta `test -f package.json && test -d node_modules || echo PROYECTO_NO_EXISTE` y detecta `PROYECTO_NO_EXISTE`. **No** planifica 6 pasos de implementación sobre carpeta vacía: pregunta si clona el starter oficial (o pasa los comandos de `desy-scaffold-project`) y espera. Es el gap exacto que el skill cierra (patrón detectado en sesiones reales, junio-julio 2026).
+**Output esperado:** El agente invoca `desy-preflight-check` ANTES de planificar, ejecuta `test -f package.json && test -d node_modules || echo PROYECTO_NO_EXISTE` y detecta `PROYECTO_NO_EXISTE`. **No** planifica 6 pasos de implementación sobre carpeta vacía: pregunta si clona el starter oficial (o pasa los comandos de `desy-scaffold-project`) y espera. Es el hueco que el skill cubre: un agente con skills DESY tiende a planificar implementación sin verificar antes que exista un proyecto.
 
 #### Caso 9.2 — Proyecto existente + orquestación de la cadena
 **Prompt:**
@@ -169,15 +169,15 @@
 
 #### Caso 10.1 — Portal público vs webapp autenticada
 **Prompt:**
-> Dos páginas del mismo dominio `salud.aragon.es`: (a) la 404 del portal público; (b) el inicio del gestor de expedientes, que va tras login y tiene dropdown de app + nav Inicio/Expedientes/Bandejas. ¿Qué plantilla (`_template.X.njk`) uso en cada una?
+> Dos páginas del mismo dominio institucional `<portal>.aragon.es` (cualquier portal con subdominio `aragon.es`): (a) la 404 pública del portal; (b) el inicio del gestor de expedientes, que va tras login y tiene dropdown de app + nav Inicio/Expedientes/Bandejas. ¿Qué plantilla (`_template.X.njk`) uso en cada una?
 
-**Output esperado:** (a) `_template.with-header-advanced.njk` (`advanced-header-layout`, cabecera 3 bandas) — es el único caso con header-advanced. (b) `_template.logged-selector.njk` (`logged-selector-layout`, cabecera normal 1 banda). Cita el caso real validado (Portal de Salud, 2026-07-04): dentro del mismo dominio conviven varias webapps con plantillas distintas; la decisión es **por página y contexto de acceso**, no por «el sitio en general».
+**Output esperado:** (a) `_template.with-header-advanced.njk` (`advanced-header-layout`, cabecera 3 bandas) — es el único caso con header-advanced. (b) `_template.logged-selector.njk` (`logged-selector-layout`, cabecera normal 1 banda). Lección: dentro de un mismo dominio institucional conviven varias webapps con plantillas distintas; la decisión es **por página y contexto de acceso** (público / autenticado / edición), no por «el sitio en general».
 
 #### Caso 10.2 — La trampa de la cabecera visible
 **Prompt:**
 > Voy a hacer el 404 de un portal institucional. Como la cabecera se parece a la de la home del starter, voy a partir de `_template.home.njk` y tunearla. ¿Te parece bien?
 
-**Output esperado:** Corrige: **no**. `_template.home.njk` solo aplica a la home del `desy-html-starter`; en producción sale con el header local del starter en vez del institucional (bug detectado en la validación del 404 del Portal de Salud). Para portal público → `with-header-advanced`. Aplica la regla clave: la cabecera visible **no** define la plantilla; la define la **familia** (portal / sin sesión / webapp / edición). Recuerda que no se overridea `headerBlock`/`footerBlock`: se tunen con params.
+**Output esperado:** Corrige: **no**. `_template.home.njk` solo aplica a la home del `desy-html-starter`; en producción sale con el header local del starter en vez del institucional (el 404 de un portal público queda con aspecto de starter). Para portal público → `with-header-advanced`. Aplica la regla clave: la cabecera visible **no** define la plantilla; la define la **familia** (portal / sin sesión / webapp / edición). Recuerda que no se overridea `headerBlock`/`footerBlock`: se tunen con params.
 
 ### `desy-implement-pattern`
 

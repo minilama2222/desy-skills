@@ -302,7 +302,7 @@ Para saber cómo implementar componentes, mira [`desy-implement-component`](http
 
 ### Estrategia C: "Skill como entrada para un agente"
 
-Si integras OpenClaw u otro agente en tu proyecto, los skills se pueden instalar localmente y el agente los invocará automáticamente cuando el dev pida algo:
+Si integras un agente o IDE compatible con SKILL.md en tu proyecto, los skills se pueden instalar localmente y se invocan automáticamente cuando el dev pida algo:
 
 > "Necesito un modal de confirmación"
 > → el agente matchea con `desy-implement-component`
@@ -340,8 +340,8 @@ Para saber si los skills están ayudando:
 
 - **v0.1** (inicial): 4 skills MVP — `choose-library`, `scaffold-project`, `implement-component`, `validate-accessibility`. Cubre los casos de uso más comunes.
 - **v0.2** (intermedia): +4 skills de soporte — `styles-reference` (catálogo de tokens), `component-recognizer` (reconocer desde mockup), `angular-translator` (Nunjucks → Angular), `design-match` (fidelidad visual). Cubre el ciclo completo de maquetación.
-- **v0.3**: 8 skills. Validado con wizard de 3 pasos (paso-1, paso-2, paso-3) con fidelidad 100% al gold tras 1 fix.
-- **v0.4** (actual): 12 skills. +4 de la ronda 1 de endurecimiento — `preflight-check` (paso 0 orquestador), `choose-page-template` (plantilla de página), `implement-pattern` (55 patrones atómicos) e `implement-layout-patterns` (patrones estructurales), derivados de los fallos detectados en el benchmark de evals.
+- **v0.3**: 8 skills. Cubre el ciclo completo de maquetación: decidir librería, scaffold, reconocer desde mockup, implementar, afinar y validar accesibilidad.
+- **v0.4** (actual): 12 skills. +4 que cierran huecos del catálogo — `preflight-check` (paso 0 orquestador que verifica el proyecto antes de planificar), `choose-page-template` (elige la plantilla por familia, no por la cabecera visible), `implement-pattern` (55 patrones atómicos, no solo los 19 documentados) e `implement-layout-patterns` (fieldset+legend sr-only, grids, acciones, skip-link).
 - **v1.0** (estabilidad): los 12 skills cubriendo el 90% de casos, sin cambios breaking.
 
 ## 🤝 Contribuir

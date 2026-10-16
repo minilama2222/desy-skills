@@ -1,6 +1,6 @@
 # DESY — Mapa Mental del Ecosistema
 
-> **Documento de referencia** construido a partir de la lectura de toda la doc oficial en `desy.aragon.es/llms.txt`. Sirve como base para diseñar skills que ayuden a desarrolladores a usar DESY.
+> **Documento de referencia** que resume el ecosistema DESY a partir de la doc oficial en `desy.aragon.es/llms.txt`. Pensado como mapa mental para devs que llegan al sistema y necesitan entender qué pieza encaja con qué.
 
 ## 🌍 Visión general
 
