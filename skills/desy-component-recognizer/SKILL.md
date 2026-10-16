@@ -13,7 +13,7 @@ Skill para identificar componentes UI del Design System DESY analizando imágene
 - **NO usar para:** implementar componente ya identificado (→ `desy-implement-component`), sin imagen (no hay qué reconocer), elegir plantilla (→ `desy-choose-page-template` primero).
 
 ## Posición en el workflow DESY
-Paso **0.5** — ejecutar SOLO si hay imagen de referencia, entre preflight y choose-library. Workflow completo en `desy-preflight-check`.
+Paso **1** de la secuencia de `desy-preflight-check` — SOLO si hay imagen de referencia, antes de elegir plantilla y de escribir código.
 
 ## Errores típicos que evita
 - ❌ **Saltarse esta skill cuando hay imagen** y asumir "a ojo": sesión OCX julio 2026 (maqueta 404 Portal Salud) improvisó placeholders para el footer institucional porque el agente cargó 5 skills pero NO esta. El catálogo tiene 57 componentes + 653 ejemplos con `visualDescription` escrita por SDA.
@@ -28,7 +28,7 @@ Paso **0.5** — ejecutar SOLO si hay imagen de referencia, entre preflight y ch
 - ❌ **Hacer «Volver», «Cancelar» o «Ver más» como `c-link`**: son `button` transparente (regla 11). Piloto 01 de desy-skills-evals (2026-10): 15 de 54 runs, los tres modelos.
 
 ## Siguiente skill típica
-→ **`desy-choose-library`** (paso 1) si no hay stack. → `desy-choose-page-template` (paso 2) si hay librería. → `desy-implement-component` (paso 6) o `desy-implement-pattern` (pasos 4-5) según componentes reconocidos. → `desy-implement-layout-patterns` si la imagen muestra estructura. Tras implementar: `desy-design-match` (paso 7) + `desy-validate-accessibility` (paso 8).
+→ **`desy-choose-page-template`** (paso 2). → `desy-implement-pattern`, `desy-implement-layout-patterns` o `desy-implement-component` (paso 3) según la tabla de salida. Tras implementar, siempre: `desy-design-match` (paso 4) + `desy-validate-accessibility` (paso 5). Si la librería aún no está decidida, antes `desy-choose-library`.
 
 ## El catálogo
 
@@ -97,15 +97,14 @@ Devuelve SIEMPRE en este formato (es el que espera el sistema, según `desy-iden
 
 ```markdown
 | Nº | Componente | Variante | Tamaño | Ubicación en imagen | Notas adicionales |
-|:--:|:-----------|:---------|:-------|:--------------------|:------------------|
+|:--:|:-----------|:---------|:------:|:--------------------|:------------------|
 | 1 | button | primario | base | header, derecha | "Acceder" |
-| 2 | input | text | base | main, formulario | label "Nombre" |
-| 3 | input | text | base | main, formulario | label "Apellido 1" |
-| 4 | input | text | base | main, formulario | label "NIF", pattern NIF/NIE |
-| 5 | error-message | alert | base | main, debajo del input NIF | "Formato no válido" |
-| 6 | button | primario | base | main, final del form | "Siguiente" |
-| 7 | button | default | base | main, final del form | "Atrás", disabled |
-| 8 | footer | - | - | footer | institucional con 3 logos |
+| 2 | input-group | text | - | main, formulario | label "Nombre"; fieldset + legend sr-only «Datos de identidad» |
+| 3 | input-group | text | - | main, formulario | label "NIF", pattern NIF/NIE; mismo fieldset que 2 |
+| 4 | error-message | alert | - | main, debajo del input NIF | "Formato no válido" |
+| 5 | button | primario | base | main, final del form | "Siguiente" |
+| 6 | button | transparente | base | main, final del form | "Cancelar" (regla 11) |
+| 7 | footer | - | - | footer | institucional con 3 logos |
 ```
 
 **Reglas para la tabla:**
@@ -113,7 +112,9 @@ Devuelve SIEMPRE en este formato (es el que espera el sistema, según `desy-iden
 - **Una fila por componente** (no por subelemento). Ej: si ves un `input-group` con 2 inputs + 1 botón, UNA sola fila para `input-group` (no 3 filas)
 - **Solo descomponer en atómicos** (button, input, label) cuando NO haya un compuesto (input-group, date-input, checkboxes, modal) que coincida
 - **Variante:** la del catálogo (`primario`, `alerta`, `default`, `text`, etc.). El tamaño NO va aquí.
-- **Tamaño (obligatorio):** `sm`, `base` o `lg`. Cada componente lo expresa con su propia clase: `c-button--sm`/`--lg`, `c-dropdown--sm`/`--lg`, `c-menubar__button--sm`/`--lg`, `c-checkboxes--sm`/`--radios--sm`. Si el control mide como sus vecinos o es una acción de página, `base`. Si no hay tamaño (icono, footer, separador), `-`. Nunca mezclar el tamaño en la columna Variante.
+- **Tamaño:** obligatorio en `button`, `dropdown`, `checkboxes`, `radios` y `menubar` (`sm`, `base` o `lg`); `-` en el resto. Mídelo por la altura del control en la referencia a 1280 px: **~30 px → `sm`**, **~42 px → `base`**, **~54 px → `lg`**. Dos controles de la misma fila con la misma altura tienen el mismo tamaño.
+- **El tamaño va con la clase del propio componente:** `c-dropdown--sm` en un desplegable (nunca `c-button--sm` sobre un `c-dropdown`), `c-menubar__button--sm` en los items de un menubar, `c-checkboxes--sm` en checkboxes.
+- **Acciones de página** («Guardar», «Cancelar», «Volver», «Acción principal»): `base` salvo que la referencia muestre otra altura. Barras de acciones de tabla y desplegables dentro de cards: `sm`.
 - **Ubicación:** header/nav/main/aside/footer + posición relativa
 - **Notas:** texto visible, iconos, colores específicos, relaciones con otros componentes
 - **Grupos de campos → fieldset.** Cada grupo de inputs bajo un título visible («Datos de identidad», «Datos de contacto», «Dirección postal») o encerrado en un bloque se anota en Notas como `fieldset + legend sr-only «<título del grupo>»`. El checkbox legal («Acepto la política de privacidad») lleva **su propio** fieldset: `fieldset + legend sr-only «Política de privacidad»`. Si el título del grupo es un h2 visible, el h2 va fuera del fieldset y la legend lo repite oculta: nunca `legend class="c-h2"`. Estructura en `desy-implement-layout-patterns` → «Fieldset+legend sr-only para grupos semánticos».
@@ -167,10 +168,14 @@ Distinguir los 3 tipos de header por la estructura visible:
 
 - `menu-horizontal`: barra de navegación horizontal simple, una sola línea
 - `menu-navigation`: navegación más completa, puede tener submenús, branding integrado
-- `menubar`: barra de botones para **accionar sobre un listado**, no un menú de escritorio. Va justo encima (o debajo) de una tabla o de una lista de items, y agrupa acciones en bloque: «Añadir», «Exportar», «Eliminar seleccionados», a menudo con un icono de flecha ▾ para desplegar variantes. Es el patrón oficial `menubar-filtro-busqueda` / `menubar-filtro-orden`, y sus botones son `c-menubar__button` (con `--sm` si van en una card o barra de acciones).
-- `menu-navigation` **también** existe como menú de aplicación web con branding (logo + enlaces + menú de usuario), pero eso no es `menubar`.
+- `menubar`: fila de **acciones** (no de navegación) con botones y desplegables por click. En DESY, sobre todo:
+  - **Acciones sobre una tabla o un listado** (patrón «acciones de tabla»): botones pequeños en fila sobre la tabla («Importar items», «Aceptar», «Archivar», «Reenviar ▾»), normalmente con el checkbox «Seleccionar todo» a la izquierda. Cada item lleva `c-menubar__button--sm`; el que se ve como enlace, además `c-menubar__button--transparent`.
+  - **Filtros de un listado** (patrones `menubar-filtro-busqueda` y `menubar-filtro-orden`): «Items y estados ▾», «Ordenar por ▾» dentro del panel de filtros.
+  - Menú de aplicación tipo escritorio (Archivo, Editar, Ver…), el caso menos frecuente.
 
-**Si ves una nav horizontal en un header web** → `menu-navigation`. Si es una nav simple con 3-4 links sin submenús → `menu-horizontal`. Si es una fila de botones con iconos y flechas ▾ encima de una tabla/listado → `menubar` (no `button`s sueltos).
+**Si ves una nav horizontal en un header web** → `menu-navigation`. Si es una nav simple con 3-4 links sin submenús → `menu-horizontal`. **Si ves dos o más acciones pequeñas en fila sobre una tabla o en un panel de filtros**, aunque mezclen enlace, botón y desplegable → **un solo `menubar` `sm`**, no `button` + `dropdown` sueltos. En la tabla de salida, una fila: `menubar | - | sm | main, sobre la tabla | Importar items (transparente), Aceptar, Reenviar (submenú)`.
+
+Implementación: `desy-implement-component` → «Ejemplo 2: Tabla con acciones en lote» (`componentMenubar` con `c-menubar__button--sm`).
 
 ### 7. **`alert` MUESTRA un `notification` — identifica el notification, no el alert**
 
@@ -277,12 +282,12 @@ Si 2+ checks fallan, re-evalúa el matching. Si todavía dudas, propón 2 candid
 | Nº | Componente | Variante | Tamaño | Ubicación en imagen | Notas adicionales |
 |:--:|:-----------|:---------|:-------|:--------------------|:------------------|
 | 1 | skip-link | - | - | top, oculto hasta focus | "Saltar al contenido principal" |
-| 2 | header | mini | mini | header | logo Aragón, sin nav (no logueado) |
-| 3 | link | primary | base | main, parte superior | "He olvidado mi contraseña" |
-| 4 | input-group | text | base | main, formulario | label "Usuario", hint con icono |
-| 5 | input-group | password | base | main, formulario | label "Contraseña", con ojito |
+| 2 | header | mini | - | header | logo Aragón, sin nav (no logueado) |
+| 3 | link | primary | - | main, parte superior | "He olvidado mi contraseña" |
+| 4 | input-group | text | - | main, formulario | label "Usuario", hint con icono |
+| 5 | input-group | password | - | main, formulario | label "Contraseña", con ojito |
 | 6 | button | primary | base | main, final del form | "Acceder", ancho completo |
-| 7 | link | default | base | main, debajo del form | "Crear cuenta nueva" |
+| 7 | link | default | - | main, debajo del form | "Crear cuenta nueva" |
 | 8 | footer | - | - | footer | institucional con 3 logos |
 ```
 

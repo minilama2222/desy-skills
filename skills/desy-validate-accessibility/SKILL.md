@@ -17,7 +17,7 @@ Valida la accesibilidad WCAG 2.2 AA de componentes o páginas implementadas con 
 - **NO usar para:** implementar componente (→ `desy-implement-component` primero, validar después), consultar token (→ `desy-styles-reference`), diferencia visual no a11y (→ `desy-design-match`), auditar contraste aislado (→ WebAIM/Colour Contrast Analyser directo).
 
 ## Posición en el workflow DESY
-Paso **8** — ejecutar después de `desy-implement-*` + `desy-design-match`, antes del merge. Workflow completo en `desy-preflight-check`.
+Paso **5** de la secuencia de `desy-preflight-check` — después de `desy-implement-*` + `desy-design-match`, antes de dar la página por terminada y antes del merge.
 
 ## Errores típicos que evita
 - ❌ **Mergear UI sin pasar axe-core**: el primer escaneo encuentra 5-15 issues triviales (labels sin `for`, contraste < 4.5:1, headings sin jerarquía).

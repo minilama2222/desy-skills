@@ -22,42 +22,38 @@
 ## 🗺️ Flujo del desarrollador (cuándo usar cada skill)
 
 ```
-   ┌────────────────────────────┐
-   │ 0. desy-preflight-check    │  ← SIEMPRE primero: ¿existe proyecto DESY?
-   └─────────────┬──────────────┘
+   ┌──────────────────────────────────────────┐
+   │ 0. desy-preflight-check  (orquestador)   │  ← SIEMPRE primero: ¿existe proyecto DESY? y qué skills se invocan
+   └─────────────┬────────────────────────────┘
+                 ▼  preparación, solo si hace falta
+   ┌──────────────────────────────────────────┐
+   │ desy-choose-library → desy-scaffold-project │  ← Librería sin decidir o PROYECTO_NO_EXISTE
+   └─────────────┬────────────────────────────┘
+                 ▼  secuencia obligatoria (cada paso es una invocación de `Skill`)
+   ┌──────────────────────────────────────────┐
+   │ 1. desy-component-recognizer  (si imagen)│  ← Componente, variante, tamaño y fieldsets antes de escribir código
+   └─────────────┬────────────────────────────┘
                  ▼
-   ┌─────────────────────────┐
-   │ 1. desy-choose-library   │  ← Tienes un proyecto nuevo o migración
-   └────────────┬────────────┘
-                ▼
-   ┌──────────────────────────────┐
-   │ 2. desy-choose-page-template │  ← ¿Qué plantilla de página es?
-   └────────────┬─────────────────┘
-                ▼
-   ┌─────────────────────────┐
-   │ 3. desy-scaffold-project│  ← Tienes librería elegida, necesitas arrancar
-   └────────────┬────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │4. desy-component-recognizer  (opcional)│  ← Tienes un mockup, identifica componentes
-   └────────────┬───────────────────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │5. desy-implement-component / pattern / │  ← Genera código (componente, patrón o layout)
-   │   implement-layout-patterns            │
-   └────────────┬───────────────────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │6. desy-angular-translator    (si aplica) │  ← Si target es Angular, traduce Nunjucks → Angular
-   └────────────┬───────────────────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │7. desy-design-match     (iterativo)    │  ← 1ª pasada → captura → medir → esperar OK → fix
-   └────────────┬───────────────────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │8. desy-validate-accessibility  (a11y)   │  ← Antes de mergear
-   └────────────────────────────────────────┘
+   ┌──────────────────────────────────────────┐
+   │ 2. desy-choose-page-template             │  ← ¿Qué plantilla de página es?
+   └─────────────┬────────────────────────────┘
+                 ▼
+   ┌──────────────────────────────────────────┐
+   │ 3. desy-implement-pattern / -component / │  ← Genera código (patrón, componente o layout)
+   │    implement-layout-patterns             │
+   └─────────────┬────────────────────────────┘
+                 ▼
+   ┌──────────────────────────────────────────┐
+   │ 4. desy-design-match     (si imagen)     │  ← Mide anchos, tipografía y márgenes y los lleva al token
+   └─────────────┬────────────────────────────┘
+                 ▼
+   ┌──────────────────────────────────────────┐
+   │ 5. desy-validate-accessibility           │  ← Checklist sin servidor; axe-core antes de mergear
+   └─────────────┬────────────────────────────┘
+                 ▼  si target es Angular
+   ┌──────────────────────────────────────────┐
+   │ desy-angular-translator                  │  ← Traduce Nunjucks → Angular y re-valida
+   └──────────────────────────────────────────┘
 ```
 
 (`desy-styles-reference` se consulta on-demand durante todo el flujo.)

@@ -24,7 +24,7 @@ Traduce código Nunjucks de la librería `desy-html` a código TypeScript + temp
 - **NO usar para:** trabajar solo con desy-html (→ `desy-implement-component`), desy-ionic (este skill no cubre móvil), traducción inversa Angular → HTML (flujo no documentado).
 
 ## Posición en el workflow DESY
-Paso **9** — solo si target es `desy-angular`. Workflow completo en `desy-preflight-check`.
+Después del paso 5 de la secuencia de `desy-preflight-check` — solo si target es `desy-angular`.
 
 ## Errores típicos que evita
 - ❌ **Asumir traducción 1:1**: para componentes compuestos (table-advanced, modal, accordion, header-advanced) es **conceptual** (dicts → sub-componentes), no sintáctica.

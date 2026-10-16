@@ -13,7 +13,7 @@ Workflow de **fidelidad visual**: cómo acercarse a una imagen de referencia (go
 - **NO usar para:** 1ª pasada (esqueleto), consultar token (→ `desy-styles-reference`), diferencia funcional no visual, plantilla incorrecta (→ `desy-choose-page-template` primero).
 
 ## Posición en el workflow DESY
-Paso **7** — ejecutar después de `desy-implement-*`, antes de `desy-validate-accessibility`. Workflow completo en `desy-preflight-check`.
+Paso **4** de la secuencia de `desy-preflight-check` — después de `desy-implement-*`, antes de `desy-validate-accessibility`.
 
 ## Errores típicos que evita
 - ❌ **`mb-sm` en h1 sin verificar `-mt-X` del siguiente** (overlap): benchmark 2026-06-08 documentó que `c-h1` (mb-lg 28px) + `-mt-base` (-16px) en el lead da 12px limpios. Sobreescribir rompe la fórmula.

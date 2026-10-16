@@ -27,7 +27,7 @@ Si te piden "hazme una página X" y no estás en un starter DESY:
 - **NO usar para:** secciones de página completas (→ `desy-implement-pattern`), estructura de maquetación (→ `desy-implement-layout-patterns`), reconocer desde imagen (→ `desy-component-recognizer`), elegir librería/plantilla (→ `desy-choose-library` + `desy-choose-page-template`), proyecto sin starter (→ `desy-scaffold-project`).
 
 ## Posición en el workflow DESY
-Paso **6** — ejecutar después de scaffolder, en paralelo con `desy-implement-pattern`. Workflow completo en `desy-preflight-check`.
+Paso **3** de la secuencia de `desy-preflight-check` — en paralelo con `desy-implement-pattern` y `desy-implement-layout-patterns`, antes de `desy-design-match`.
 
 ## Errores típicos que evita
 - ❌ **Implementar sin starter DESY clonado**: HTML estático con clases DESY en proyecto vacío no se compila, no usa macros reales — es "imitación", no uso de la librería.
