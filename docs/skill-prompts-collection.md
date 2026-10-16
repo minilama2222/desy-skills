@@ -1,6 +1,6 @@
 # Skill Prompts Collection
 
-> **Colección de prompts de prueba** para testear las 8 skills `desy-*` de forma individual o combinada, en cualquier entorno que soporte SKILL.md (OpenClaw, OpenCode, Claude Code, Codex). Cada prompt está diseñado para activar el skill correspondiente, con contexto suficiente para que el agente tenga con qué trabajar.
+> **Colección de prompts de prueba** para testear las 12 skills `desy-*` de forma individual o combinada, en cualquier entorno que soporte SKILL.md (OpenClaw, OpenCode, Claude Code, Codex). Cada prompt está diseñado para activar el skill correspondiente, con contexto suficiente para que el agente tenga con qué trabajar.
 >
 > **Cómo usar:**
 > 1. Copia el prompt tal cual
@@ -151,9 +151,65 @@
 
 **Output esperado:** Lista estructurada: (1) Scan automático con axe-core o pa11y (~30% de issues). (2) Test manual de teclado (tab order, focus visible, traps en modales) — donde se descubre la mayoría. (3) Test con lector de pantalla (NVDA en Windows, VoiceOver en macOS) para confirmar anuncios y roles ARIA. (4) Verificación de contraste de color específica. Tiempo total estimado: 30-60 min por página.
 
+### `desy-preflight-check`
+
+#### Caso 9.1 — Directorio vacío (debe frenar y bifurcar)
+**Prompt:**
+> Tengo esta imagen `mockup-home-portal.png` (sustituye por una captura de https://desy.aragon.es/patron-pagina-acceso-cargando.html). Maquétame la página con DESY: reconoce los componentes, elige el patrón que corresponda e impleméntala. Estoy en una carpeta de trabajo nueva.
+
+**Output esperado:** El agente invoca `desy-preflight-check` ANTES de planificar, ejecuta `test -f package.json && test -d node_modules || echo PROYECTO_NO_EXISTE` y detecta `PROYECTO_NO_EXISTE`. **No** planifica 6 pasos de implementación sobre carpeta vacía: pregunta si clona el starter oficial (o pasa los comandos de `desy-scaffold-project`) y espera. Es el gap exacto que el skill cierra (patrón detectado en sesiones reales, junio-julio 2026).
+
+#### Caso 9.2 — Proyecto existente + orquestación de la cadena
+**Prompt:**
+> En `~/mi-portal` (ya clonado, con `desy-html` en `node_modules`) tengo que maquetar una webapp autenticada con un formulario de 2 pasos. Tengo `referencia.png`. ¿Por dónde empiezo?
+
+**Output esperado:** Reporta contexto (nombre, librería `desy-html`, versión, `npm run dev`/`build`) y **carga la secuencia** con la herramienta `Skill`, en orden: `component-recognizer` (hay imagen) → `choose-page-template` → `implement-pattern` / `implement-layout-patterns` / `implement-component` → `design-match` → `validate-accessibility`; `styles-reference` al escribir utilities. Deja claro que la página no está terminada hasta pasar el checklist de salida (Paso 5). No basta con *nombrar* los skills: hay que invocarlos.
+
+### `desy-choose-page-template`
+
+#### Caso 10.1 — Portal público vs webapp autenticada
+**Prompt:**
+> Dos páginas del mismo dominio `salud.aragon.es`: (a) la 404 del portal público; (b) el inicio del gestor de expedientes, que va tras login y tiene dropdown de app + nav Inicio/Expedientes/Bandejas. ¿Qué plantilla (`_template.X.njk`) uso en cada una?
+
+**Output esperado:** (a) `_template.with-header-advanced.njk` (`advanced-header-layout`, cabecera 3 bandas) — es el único caso con header-advanced. (b) `_template.logged-selector.njk` (`logged-selector-layout`, cabecera normal 1 banda). Cita el caso real validado (Portal de Salud, 2026-07-04): dentro del mismo dominio conviven varias webapps con plantillas distintas; la decisión es **por página y contexto de acceso**, no por «el sitio en general».
+
+#### Caso 10.2 — La trampa de la cabecera visible
+**Prompt:**
+> Voy a hacer el 404 de un portal institucional. Como la cabecera se parece a la de la home del starter, voy a partir de `_template.home.njk` y tunearla. ¿Te parece bien?
+
+**Output esperado:** Corrige: **no**. `_template.home.njk` solo aplica a la home del `desy-html-starter`; en producción sale con el header local del starter en vez del institucional (bug detectado en la validación del 404 del Portal de Salud). Para portal público → `with-header-advanced`. Aplica la regla clave: la cabecera visible **no** define la plantilla; la define la **familia** (portal / sin sesión / webapp / edición). Recuerda que no se overridea `headerBlock`/`footerBlock`: se tunen con params.
+
+### `desy-implement-pattern`
+
+#### Caso 11.1 — Identificar el patrón desde una descripción
+**Prompt:**
+> Necesito un bloque para pedir los datos de dirección de un formulario DESY: vía, número, piso, código postal, municipio y provincia. ¿Qué patrón atómico me encaja y cómo lo implemento?
+
+**Output esperado:** Mapea la descripción al patrón de **domicilio postal** (`patrones-domicilio-postal.html.md`) sin que se lo den por nombre. Busca primero el código en `node_modules/desy-html/src/templates/` (sin red); si no se compone, cae a la URL `.md` o al repo `gorilas/desy.aragon.es` vía `gh api` (con red y `gh`). Recuerda: patrón ≠ componente suelto (no es «una lista de inputs») ni ≠ plantilla completa (necesita `contentBlock` dentro de `_template.*.njk`).
+
+#### Caso 11.2 — Tunear uno cercano, no reinventar
+**Prompt:**
+> Quiero una sección con tarjetas; cada tarjeta tiene un título, un estado («PUBLICADO») con cuadradito de color y una fecha a la derecha. ¿Me la inventas con divs o hay algo hecho?
+
+**Output esperado:** **No** reinventa: identifica el patrón de listado/`cabecera-item` (título + estado + fecha + acciones) y lo tunea. Recuerda que el estado es cuadrado de color + texto en mayúsculas (no `pill`). Avisa de bugs conocidos del repo oficial (p. ej. `flex-column-reverse` con guion → la clase correcta es `flex-col-reverse`) y prohíbe utility classes inventadas (`w-[150px]`). Mantiene `<fieldset><legend class="sr-only">` si hay grupo de campos.
+
+### `desy-implement-layout-patterns`
+
+#### Caso 12.1 — Fieldset+legend sr-only en un grupo de campos
+**Prompt:**
+> Estoy maquetando el formulario de «Datos de identidad» de una webapp DESY: nombre, apellidos, NIF, fecha de nacimiento. ¿Cómo agrupo estos campos?
+
+**Output esperado:** Envuelve el grupo en `<fieldset>` con `<legend class="sr-only">«Datos de identidad»</legend>`. El título **visible** va en un h2 **fuera** del fieldset (nunca `legend class="c-h2"`, que deja el `main` sin encabezados). Un único checkbox legal también lleva su propio fieldset. `role="group"` no sustituye a `fieldset`. Marca `lg:col-span-N` para los campos anidados en la grid.
+
+#### Caso 12.2 — Grid responsive, acciones al final y spacing por tokens
+**Prompt:**
+> Formulario DESY a 2 columnas en desktop y 1 en móvil, con «Guardar» y «Cancelar» al final. ¿Cómo monto la rejilla, los botones y el espaciado entre grupos?
+
+**Output esperado:** Grid con `lg:grid-cols-4` + `lg:col-span-N` por campo (no `grid-cols-[173px_362px_1fr]` ni anchos en px). Acciones al final como botón («Guardar» primario, «Cancelar» **transparente**, no `link`). Spacing con tokens (`mt-base`, `mb-base`, `gap-base`), nunca la escala de Tailwind (`mt-4`, `gap-4`) ni valores arbitrarios (`gap-[21px]`). Donde dudes del token → `desy-styles-reference`.
+
 ---
 
-## 2. Prompts combinados (8 casos)
+## 2. Prompts combinados (10 casos)
 
 Estos prompts están diseñados para que el agente encadene 2-4 skills. El output esperado es una cadena de artefactos.
 
@@ -320,6 +376,24 @@ Estos prompts están diseñados para que el agente encadene 2-4 skills. El outpu
 **Skills esperadas:** `component-recognizer` → `styles-reference` (lookup) → `angular-translator` (si hubiera HTML de referencia) → `implement-component` (Angular) → `design-match` → `validate-accessibility`
 
 **Output esperado:** Componente Angular funcional con todo el flujo verificado. El más largo de los prompts combinados — útil como stress test del encadenamiento.
+
+### Combinado 2.9 — Descripción textual → página DESY completa (arranca en preflight)
+
+**Prompt:**
+> Quiero una página de «mi carpeta ciudadana» con DESY, en un proyecto que aún no existe. Es un portal público institucional. Lleva: cabecera institucional, una sección de bienvenida, una lista de trámites en tarjetas con estado y una zona de contacto. Hazlo de punta a punta.
+
+**Skills esperadas:** `preflight-check` (detecta NO_EXISTE) → `scaffold-project` (o pide clonar) → `choose-library` (si no está decidida) → `choose-page-template` → `implement-layout-patterns` + `implement-pattern` + `implement-component` → `design-match` → `validate-accessibility` (con `styles-reference` puntual).
+
+**Output esperado:** Cadena completa de artefactos con el **preflight primero** (sin planificar sobre carpeta vacía). El portal público debe resolver a `with-header-advanced`; las tarjetas con estado, a `cabecera-item`. Termina con el checklist sin servidor (fieldsets, un solo h1, labels, skip-link) antes de dar la página por hecha.
+
+### Combinado 2.10 — Carpeta vacía + «hazlo todo» (detector del gap)
+
+**Prompt:**
+> Maquétame esta webapp DESY (`referencia.png`): login, dashboard con cards y un formulario de contacto de 2 pasos. Estoy en un directorio recién creado y vacío.
+
+**Skills esperadas:** `preflight-check` → (frena) `scaffold-project` → `choose-page-template` (`logged-out` para login, `logged-selector` para el dashboard) → `implement-*` → `design-match` → `validate-accessibility`.
+
+**Output esperado:** Este es el **caso de regresión** del orquestador: el agente NO debe saltar directo a `choose-library`/`implement-pattern` sobre la carpeta vacía. Debe detectar `PROYECTO_NO_EXISTE`, frenar y bifurcar al scaffold con permiso del usuario. Si planifica implementación sobre el vacío, el skill ha fallado.
 
 ---
 
