@@ -27,7 +27,7 @@ Si te piden "hazme una página X" y no estás en un starter DESY:
 - **NO usar para:** secciones de página completas (→ `desy-implement-pattern`), estructura de maquetación (→ `desy-implement-layout-patterns`), reconocer desde imagen (→ `desy-component-recognizer`), elegir librería/plantilla (→ `desy-choose-library` + `desy-choose-page-template`), proyecto sin starter (→ `desy-scaffold-project`).
 
 ## Posición en el workflow DESY
-Paso **6** — ejecutar después de scaffolder, en paralelo con `desy-implement-pattern`. Workflow completo en `desy-preflight-check`.
+Paso **3** de la secuencia de `desy-preflight-check` — en paralelo con `desy-implement-pattern` y `desy-implement-layout-patterns`, antes de `desy-design-match`.
 
 ## Errores típicos que evita
 - ❌ **Implementar sin starter DESY clonado**: HTML estático con clases DESY en proyecto vacío no se compila, no usa macros reales — es "imitación", no uso de la librería.
@@ -74,7 +74,7 @@ Antes de generar código, confirma con el equipo:
 | Encabezado menor | `c-h3` | Para sub-secciones |
 | Encabezado auxiliar | `c-h4` | Rara vez, para tarjetas o items |
 | Párrafo estándar | `c-paragraph-base` | El default para `<p>` |
-| Párrafo destacado (lead) | `c-paragraph-lead` | Para introductorio bajo el H1 |
+| Párrafo destacado (lead) | `c-paragraph-lg` | Para el introductorio bajo el H1. En formularios por pasos, `-mt-base c-paragraph-base lg:c-paragraph-lg` (base en móvil, lg en desktop). **No existe `c-paragraph-lead`** |
 | Párrafo pequeño | `c-paragraph-sm` | Para notas, hints, metadatos |
 
 ### Combinaciones habituales (vistas en `src/plantilla-editar-con-cabecera-fija-y-sidebar-sticky.html`)
@@ -86,7 +86,7 @@ Antes de generar código, confirma con el equipo:
 ### Reglas prácticas
 
 1. **Un H1 con `c-h1` por página** (o un H2 con `c-h1` si la jerarquía visual lo requiere)
-2. **Párrafos siempre con `c-paragraph-base`** o `c-paragraph-lead` si es intro
+2. **Párrafos siempre con `c-paragraph-base`**, o `c-paragraph-lg` si es intro (con `lg:` si solo crece en desktop: `-mt-base c-paragraph-base lg:c-paragraph-lg`). `c-paragraph-lead` no existe en `desy-html`.
 3. **NO** usar `text-*`, `font-*`, `leading-*` para tipografía — son la antítesis del sistema de diseño
 4. **Excepción:** spacing (`mb-base`, `mt-sm`) y color contextual (`text-primary-base` para acentos) sí se pueden aplicar como utility classes encima de las `c-*`
 
@@ -255,9 +255,23 @@ Screenshots de las 5 plantillas más representativas (1280x2400px) están dispon
 - `componentButton` — `{text, classes, href, type, disabled, ...}`
 - `componentInput` — `{id, name, type, label, autocomplete, ...}` (un input individual)
 - `componentSelect` — `{id, name, label, items: [{value, text}]}`
-- `componentLink` — **NO EXISTE como macro** — usa `<a class="c-link" href="...">...</a>`
+- `componentLink` — **NO EXISTE como macro** — usa `<a class="c-link" href="...">...</a>` **solo para enlaces dentro de texto o en listas de enlaces**. Las acciones de página («Volver», «Cancelar», «Saltar», «Ver más») no son enlaces: son `componentButton` con `"classes": "c-button--transparent"` (y `href` si navegan).
 - `componentPill` — `{text, classes, type, href, ...}`
 - `componentCard` — patrón propio (ver ejemplo en `_examples.card.njk`)
+
+### Tamaños: cada componente con su propia clase
+
+| Componente | sm | base | lg |
+|---|---|---|---|
+| `componentButton` | `c-button--sm` | (sin clase) | `c-button--lg` |
+| `componentDropdown` | `c-dropdown--sm` | (sin clase) | `c-dropdown--lg` |
+| `componentMenubar` (cada item) | `c-menubar__button--sm` | (sin clase) | `c-menubar__button--lg` |
+| `componentCheckboxes` / `componentRadios` | `c-checkboxes--sm` / `c-radios--sm` | (sin clase) | — |
+
+- Alturas aproximadas: `sm` ~30 px (`px-2 py-1 text-sm`), base ~42 px (`px-3 py-2`), `lg` ~54 px (`px-4 py-3 text-lg`).
+- El tamaño se aplica con la clase **del componente**: `c-button--sm` sobre un `c-dropdown` no lo achica y se queda con altura base.
+- Acciones de página: tamaño base. Barras de acciones de tabla y acciones dentro de cards: `sm` (`c-menubar__button--sm`, `c-dropdown c-dropdown--secondary c-dropdown--sm`).
+- Antes de poner `--sm` o `--lg`, compara la altura del control con la de sus vecinos en la referencia: si miden lo mismo, tienen el mismo tamaño.
 
 ### Cómo encontrar la estructura correcta
 

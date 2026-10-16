@@ -1,13 +1,15 @@
 ---
 name: desy-validate-accessibility
-description: "Validate WCAG 2.2 AA accessibility of DESY components and pages. Use before merging UI, auditing, or reviewing accessibility. Combines automated + manual tests."
+description: "Valida la accesibilidad WCAG 2.2 AA de páginas y componentes DESY. Úsala SIEMPRE al terminar de maquetar o modificar una página DESY, antes de darla por terminada, también en sesiones sin servidor ni usuario: trae un checklist que se ejecuta con grep sobre el HTML (fieldsets con legend, un solo h1, labels, skip-link). Úsala también antes de mergear, en auditorías y en revisiones de accesibilidad, con axe-core y tests manuales."
 ---
 
 # desy-validate-accessibility
 
 Valida la accesibilidad WCAG 2.2 AA de componentes o páginas implementadas con DESY. Combina herramientas automáticas con tests manuales (teclado, lector de pantalla, contraste).
 
-> ⚠️ **Para el agente (importante):** los bloques bash de esta skill son **REFERENCE TEMPLATES** que el usuario o el equipo ejecuta en su propio proyecto (`npm install --save-dev @axe-core/cli`, `npx axe http://localhost:...`, etc.). **NO los ejecutes automáticamente** sin confirmación explícita — el `npm install --save-dev` modifica `package.json` del proyecto del usuario y el scan contra `localhost` asume que hay un dev server corriendo. Si el usuario pide "valida accesibilidad", explica los pasos y deja que él los corra, o pídele permiso explícito antes de cada uno.
+> ⚠️ **Para el agente (importante):** hay dos niveles.
+> - **El «Checklist sin servidor» se ejecuta siempre**, también en sesiones autónomas: solo lee ficheros (`grep` sobre el HTML compilado), no instala nada ni necesita servidor.
+> - **Los bloques bash del Workflow (axe-core, Pa11y) son REFERENCE TEMPLATES** que el usuario o el equipo ejecuta en su propio proyecto. **NO los ejecutes automáticamente** sin confirmación explícita: `npm install --save-dev` modifica el `package.json` del usuario y el scan contra `localhost` asume un dev server corriendo.
 
 ## Cuándo usarla
 - **Triggers:** *"valida accesibilidad"*, *"comprueba WCAG"*, *"pasa el axe"*, *"audita accesibilidad"*, *"¿es accesible?"*, *"cumple WCAG 2.2 AA?"*, *"preparamos release, hay que pasar revisión oficial"*.
@@ -15,7 +17,7 @@ Valida la accesibilidad WCAG 2.2 AA de componentes o páginas implementadas con 
 - **NO usar para:** implementar componente (→ `desy-implement-component` primero, validar después), consultar token (→ `desy-styles-reference`), diferencia visual no a11y (→ `desy-design-match`), auditar contraste aislado (→ WebAIM/Colour Contrast Analyser directo).
 
 ## Posición en el workflow DESY
-Paso **8** — ejecutar después de `desy-implement-*` + `desy-design-match`, antes del merge. Workflow completo en `desy-preflight-check`.
+Paso **5** de la secuencia de `desy-preflight-check` — después de `desy-implement-*` + `desy-design-match`, antes de dar la página por terminada y antes del merge.
 
 ## Errores típicos que evita
 - ❌ **Mergear UI sin pasar axe-core**: el primer escaneo encuentra 5-15 issues triviales (labels sin `for`, contraste < 4.5:1, headings sin jerarquía).
@@ -46,6 +48,28 @@ Antes de aplicar este skill, asegúrate de tener:
 - Node y npm disponibles
 - Opcional pero recomendado: navegador Chrome o Firefox con extensiones instaladas
 - Opcional: lector de pantalla (NVDA en Windows, VoiceOver en macOS, Orca en Linux)
+
+## Checklist sin servidor (sesiones autónomas)
+
+Sobre el HTML compilado de la página (`dist/<pagina>.html` en `desy-html-starter`). Cada comprobación dice el resultado esperado; si falla, corrige antes de dar la página por terminada.
+
+```bash
+P=dist/<pagina>.html
+# 1. Un solo h1 → 1
+grep -o '<h1[ >]' "$P" | wc -l
+# 2. Un fieldset por grupo de campos y por checkbox legal → ≥ nº de grupos
+grep -c '<fieldset' "$P"
+# 3. Cada fieldset con su legend → el mismo número que el anterior
+grep -c '<legend' "$P"
+# 4. Cada input, select y textarea con su label → no imprime nada
+for id in $(grep -oE '<(input|select|textarea)[^>]* id="[^"]+"' "$P" | grep -v 'type="hidden"' | sed -E 's/.* id="([^"]+)".*/\1/'); do grep -q "for=\"$id\"" "$P" || echo "sin label: $id"; done
+# 5. Skip-link → ≥ 1
+grep -c 'c-skip-link' "$P"
+```
+
+- [ ] Los títulos visibles de sección son h2 (o h3) **fuera** del fieldset, y la `legend` los repite con `class="sr-only"`. Una `legend class="c-h2"` deja el `main` sin encabezados.
+- [ ] Los encabezados no saltan de nivel (h1 → h2 → h3).
+- [ ] Los iconos decorativos llevan `aria-hidden="true"`, y los botones que solo tienen icono, `aria-label`.
 
 ## Workflow
 

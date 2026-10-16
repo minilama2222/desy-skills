@@ -19,7 +19,7 @@ Patrones estructurales de maquetación DESY para agrupar, grid-ear y disponer ac
 - **NO usar para:** componente suelto (→ `desy-implement-component`), patrón atómico grande (→ `desy-implement-pattern`), afinar visualmente (→ `desy-design-match`), validar a11y de estructura (→ `desy-validate-accessibility`).
 
 ## Posición en el workflow DESY
-Complemento **paralelo** a `desy-implement-pattern` + `desy-implement-component`. Workflow completo en `desy-preflight-check`.
+Paso **3** de la secuencia de `desy-preflight-check` — en paralelo con `desy-implement-pattern` + `desy-implement-component`, antes de `desy-design-match`.
 
 ## Errores típicos que evita
 - ❌ **Olvidar `<fieldset><legend class="sr-only">`** en grupos de inputs: WCAG 2.2 AA obligatorio.
@@ -114,6 +114,9 @@ El legend SIEMPRE va con `class="sr-only"`:
 - ❌ Poner el título del grupo dentro del `<legend>` visible (debe sr-only para evitar redundancia con el H1/H2)
 - ❌ Usar `<div>` con `role="group"` (no es estándar, mejor fieldset que ya lo provee)
 - ❌ Olvidar `<fieldset>` y meter los inputs sueltos (rompe navegación por landmarks)
+- ❌ Anidar un `c-form-group` dentro de otro, por ejemplo envolviendo en `c-form-group` un `componentInputGroup` o un `componentCheckboxes`, que ya lo traen: los márgenes se suman y el bloque de acciones baja 16–32 px. Un `c-form-group` por campo o por grupo, nunca uno dentro de otro.
+- ❌ Dejar el checkbox legal sin fieldset: «Acepto la política de privacidad» va siempre en su propio `<fieldset>` con `<legend class="sr-only">`, aunque sea un único checkbox. Con la macro: `componentCheckboxes({ "fieldset": { "legend": { "text": "Política de privacidad y protección de datos", "classes": "sr-only" } }, … })`.
+- ❌ Usar la `legend` como título visible (`<legend class="c-h2">`): el `main` se queda sin encabezados. El título visible es un h2 fuera del fieldset; la legend lo repite con `sr-only`.
 
 ## Grid responsivo del formulario
 
@@ -197,17 +200,19 @@ Cuando necesitas 4 inputs cortos (Número, Escalera, Piso, Puerta) en una sola f
 | Variante | Cuándo | Ejemplo |
 |---|---|---|
 | `c-button c-button--primary` | Acción principal del form | Siguiente paso, Enviar, Guardar |
-| `c-button c-button--transparent` | Acción secundaria contextual | Saltar, Cancelar paso actual |
-| `c-button` | Acción neutra | Atrás, Volver |
+| `c-button c-button--transparent` | Acción secundaria o de salida; se ve como texto subrayado en semibold | Volver, Cancelar, Saltar, Ver más |
+| `c-button` | Acción secundaria con borde, al mismo nivel que la principal | Acción secundaria, Guardar borrador |
 | `c-button c-button--alert` | Acción destructiva | Eliminar, Rechazar (con confirmación modal previa) |
 
-**Importante:** "Saltar" es `<button class="c-button c-button--transparent">`, NO un `<a>` pelado. La variante `--transparent` existe en el sistema de diseño para acciones secundarias.
+**Importante:** «Volver», «Cancelar», «Saltar» y «Ver más» son `c-button c-button--transparent`, **nunca** `<a class="c-link">`. Si navega (Volver, Ver más): `<a href="…" class="c-button c-button--transparent">`. Si actúa sobre el formulario (Cancelar, Saltar): `<button type="button" class="c-button c-button--transparent">`. Tamaño base salvo que la referencia muestre otra altura: no añadas `c-button--sm` a «Volver».
 
 ### Layout de los botones
 
-- `<ul class="flex flex-wrap gap-sm">` permite que los botones se reagrupen en mobile si no caben en una fila.
+- `<ul class="flex flex-wrap gap-sm">` en formularios por pasos (Siguiente paso + Cancelar o Saltar): los botones se reagrupan en móvil si no caben en una fila.
+- `<ul class="flex flex-col lg:flex-row gap-sm">` en fichas de edición (Guardar + Cancelar): apilados en móvil, en fila en desktop.
 - Cada botón en su `<li>`.
 - Orden: principal primero (a la izquierda del flujo natural), secundarios después.
+- **No añadas `mt-lg` ni `pt-` a la sección de acciones:** el espacio previo (~32 px en desktop) ya sale del `c-form-group` anterior.
 
 ### Spacing contextual
 

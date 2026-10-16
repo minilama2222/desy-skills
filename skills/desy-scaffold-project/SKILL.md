@@ -15,7 +15,7 @@ Crea el esqueleto de un proyecto nuevo con la librería DESY elegida: clona el s
 - **NO usar para:** proyecto ya existente (→ `desy-implement-component` / `desy-implement-pattern`), elegir librería (→ `desy-choose-library`), afinar visualmente (→ `desy-design-match`), elegir plantilla (→ `desy-choose-page-template`).
 
 ## Posición en el workflow DESY
-Paso **3** (o bifurcación desde `desy-preflight-check` si NO_EXISTE). Workflow completo en `desy-preflight-check`.
+Preparación — bifurcación desde `desy-preflight-check` si NO_EXISTE; va antes de la secuencia de pasos 1-5. Workflow completo en `desy-preflight-check`.
 
 ## Errores típicos que evita
 - ❌ **Saltarse `desy-preflight-check` antes**: si ya hay proyecto, lo pisa.

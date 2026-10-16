@@ -17,7 +17,7 @@ Implementa uno de los **55 patrones atómicos oficiales** de DESY cuando necesit
 - **NO usar para:** componente suelto (→ `desy-implement-component`), página completa con plantilla (→ `desy-scaffold-project` primero, vuelve aquí para el patrón dentro), estructura de maquetación (→ `desy-implement-layout-patterns` complementario), reconocer patrón visualmente (→ `desy-component-recognizer`).
 
 ## Posición en el workflow DESY
-Pasos **4-5** — ejecutar después de elegir plantilla + scaffolder, antes de afinar visualmente. En paralelo con `desy-implement-component` y `desy-implement-layout-patterns`. Workflow completo en `desy-preflight-check`.
+Paso **3** de la secuencia de `desy-preflight-check` — después de elegir plantilla, antes de `desy-design-match`. En paralelo con `desy-implement-component` y `desy-implement-layout-patterns`. Workflow completo en `desy-preflight-check`.
 
 ## Errores típicos que evita
 - ❌ **Confundir patrón atómico con componente suelto**: FAQs es patrón (sección completa); `input` es componente suelto.
@@ -43,9 +43,24 @@ Pasos **4-5** — ejecutar después de elegir plantilla + scaffolder, antes de a
 
 ### Paso 2: Obtén el código
 
-Para los 19 patterns documentados oficialmente: la URL `.md` (e.g. `https://desy.aragon.es/patrones-X.html.md`) tiene el macro Nunjucks + HTML renderizado.
+**Primero, lo que ya está en el proyecto** (sin red, sin credenciales). En `node_modules/desy-html/src/templates/`:
 
-Para los 36 patterns adicionales: el código fuente está en el repo `gorilas/desy.aragon.es` (`src/templates/includes/_pattern.X.njk`). Para acceder, usa:
+| Ruta | Qué trae |
+|---|---|
+| `pages/_template.*.njk` | Las plantillas de página (`with-header-advanced`, `logged-selector`, `logged-out`, `edit-fixed`…) |
+| `pages/_page.*.njk` | Piezas de página: pie («Accesibilidad», «Mapa web»), head, notificaciones, spinners |
+| `components/<componente>/_examples.<componente>.njk` | Ejemplos de cada componente con sus variantes y tamaños: la referencia más fiable de clases y params |
+| `includes/*.njk` | Unos pocos includes (`_acciones-de-cabecera.njk`, `_abrir-notificaciones.njk`…). **No** están los `_pattern.*.njk` |
+
+```bash
+ls node_modules/desy-html/src/templates/pages/
+grep -l "c-menubar__button--sm" node_modules/desy-html/src/templates/components/*/_examples.*.njk
+```
+
+**Después, solo si el patrón no se puede componer con eso:**
+
+- Los 19 patrones documentados: la URL `.md` (`https://desy.aragon.es/patrones-X.html.md`) tiene el macro Nunjucks y el HTML renderizado.
+- Los 36 adicionales están solo en el repo `gorilas/desy.aragon.es` (`src/templates/includes/_pattern.X.njk`). Necesitas red y `gh` autenticado:
 
 ```bash
 gh api "repos/gorilas/desy.aragon.es/contents/src/templates/includes/_pattern.<nombre>.njk?ref=master-github" | python3 -c "import json,sys,base64; print(base64.b64decode(json.load(sys.stdin)['content']).decode('utf-8'))"
@@ -164,7 +179,7 @@ Excluye la categoría **"Páginas y flujos"** (5 patrones) porque esas son compo
 | Menubar filtro + orden | repo: `_pattern.menubar-filtro-orden.njk` | Barra de filtros con selector de ordenación |
 | Acciones de cabecera | repo: `_pattern.acciones-de-cabecera.njk` | Acciones en la cabecera (Guardar/Salir/Guardar y salir) — *tiene bug `flex-column-reverse`* |
 | Cabecera editar | repo: `_pattern.cabecera-editar.njk` | Cabecera con título + acciones de edición |
-| Cabecera item | repo: `_pattern.cabecera-item.njk` | Cabecera con título + submenú horizontal |
+| Cabecera item | repo: `_pattern.cabecera-item.njk` | Cabecera de un item: título `<h3 class="sm:flex-1 font-bold text-2xl leading-tight mb-xs">` (no `c-h3`, que es menor), estado con cuadrado de color + texto `font-semibold uppercase`, fecha, enlace y acciones (`c-dropdown c-dropdown--secondary c-dropdown--sm`) |
 | Cabecera item service | repo: `_pattern.cabecera-item-service.njk` | Cabecera específica para items de servicio |
 | Acciones de página (sólo volver) | repo: `_pattern.acciones-de-pagina-boton-volver.njk` | Solo el botón "Volver" |
 | Acciones de página (siguiente + volver) | repo: `_pattern.acciones-de-pagina-siguiente-paso-y-volver.njk` | Siguiente paso + Volver (orden invertido) |
@@ -213,8 +228,9 @@ Excluye la categoría **"Páginas y flujos"** (5 patrones) porque esas son compo
 
 | Patrón | URL canónica / ubicación | Descripción |
 |---|---|---|
+| Acciones de tabla | `https://desy.aragon.es/patrones-acciones-tabla.html.md` | Barra de acciones sobre la tabla: **`componentMenubar`** con `c-menubar__button--sm` (no botones sueltos) y checkbox «Seleccionar todo» `c-checkboxes--sm`. Código en `desy-implement-component` → «Ejemplo 2» |
 | Tabla de items | repo: `_pattern.tabla-de-items.njk` | Tabla genérica con acciones por fila |
-| Lista de items | repo: `_pattern.lista-de-items.njk` | Lista vertical de items con acciones |
+| Lista de items | repo: `_pattern.lista-de-items.njk` | Lista vertical de items en cards; cada item usa `cabecera-item` |
 | Paginación | repo: `_pattern.paginacion.njk` | Paginación de resultados |
 | Lorem ipsum (large) | repo: `_pattern.loremipsum-large.njk` | Placeholder para demos |
 

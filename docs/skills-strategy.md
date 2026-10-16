@@ -6,46 +6,57 @@
 
 | # | Skill | Para qué |
 |---|---|---|
+| 0 | `desy-preflight-check` | Verificar el estado del proyecto antes de planificar (paso 0 obligatorio) |
 | 1 | `desy-choose-library` | Decidir qué librería DESY usar |
-| 2 | `desy-scaffold-project` | Montar el esqueleto del proyecto |
-| 3 | `desy-styles-reference` | Consultar tokens del design system (colores, espaciado, tipografía, sombras) |
+| 2 | `desy-choose-page-template` | Elegir la plantilla de página (portal, logged, edit-fixed…) |
+| 3 | `desy-scaffold-project` | Montar el esqueleto del proyecto |
 | 4 | `desy-component-recognizer` | Identificar componentes DESY desde un mockup/screenshot |
-| 5 | `desy-implement-component` | Generar código de un componente concreto (Nunjucks/Angular/Ionic) |
-| 6 | `desy-angular-translator` | Traducir código Nunjucks a Angular (TypeScript + template) |
-| 7 | `desy-design-match` | Verificar fidelidad visual vs imagen de referencia tras 1ª pasada |
-| 8 | `desy-validate-accessibility` | Validar WCAG 2.2 AA antes de mergear |
+| 5 | `desy-styles-reference` | Consultar tokens del design system (colores, espaciado, tipografía, sombras) |
+| 6 | `desy-implement-component` | Generar código de un componente concreto (Nunjucks/Angular/Ionic) |
+| 7 | `desy-implement-pattern` | Implementar uno de los 55 patrones atómicos oficiales |
+| 8 | `desy-implement-layout-patterns` | Patrones estructurales (fieldset, grids, acciones, cabecera) |
+| 9 | `desy-angular-translator` | Traducir código Nunjucks a Angular (TypeScript + template) |
+| 10 | `desy-design-match` | Verificar fidelidad visual vs imagen de referencia tras 1ª pasada |
+| 11 | `desy-validate-accessibility` | Validar WCAG 2.2 AA antes de mergear |
 
 ## 🗺️ Flujo del desarrollador (cuándo usar cada skill)
 
 ```
-   ┌─────────────────────────┐
-   │ 1. desy-choose-library   │  ← Tienes un proyecto nuevo o migración
-   └────────────┬────────────┘
-                ▼
-   ┌─────────────────────────┐
-   │ 2. desy-scaffold-project│  ← Tienes librería elegida, necesitas arrancar
-   └────────────┬────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │3. desy-component-recognizer  (opcional)│  ← Tienes un mockup, identifica componentes
-   └────────────┬───────────────────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │4. desy-implement-component    (Nunjucks) │  ← Genera código de cada componente
-   └────────────┬───────────────────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │5. desy-angular-translator    (si aplica) │  ← Si target es Angular, traduce Nunjucks → Angular
-   └────────────┬───────────────────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │6. desy-design-match     (iterativo)    │  ← 1ª pasada → captura → medir → esperar OK → fix
-   └────────────┬───────────────────────────┘
-                ▼
-   ┌────────────────────────────────────────┐
-   │7. desy-validate-accessibility  (a11y)   │  ← Antes de mergear
-   └────────────────────────────────────────┘
+   ┌──────────────────────────────────────────┐
+   │ 0. desy-preflight-check  (orquestador)   │  ← SIEMPRE primero: ¿existe proyecto DESY? y qué skills se invocan
+   └─────────────┬────────────────────────────┘
+                 ▼  preparación, solo si hace falta
+   ┌──────────────────────────────────────────┐
+   │ desy-choose-library → desy-scaffold-project │  ← Librería sin decidir o PROYECTO_NO_EXISTE
+   └─────────────┬────────────────────────────┘
+                 ▼  secuencia obligatoria (cada paso es una invocación de `Skill`)
+   ┌──────────────────────────────────────────┐
+   │ 1. desy-component-recognizer  (si imagen)│  ← Componente, variante, tamaño y fieldsets antes de escribir código
+   └─────────────┬────────────────────────────┘
+                 ▼
+   ┌──────────────────────────────────────────┐
+   │ 2. desy-choose-page-template             │  ← ¿Qué plantilla de página es?
+   └─────────────┬────────────────────────────┘
+                 ▼
+   ┌──────────────────────────────────────────┐
+   │ 3. desy-implement-pattern / -component / │  ← Genera código (patrón, componente o layout)
+   │    implement-layout-patterns             │
+   └─────────────┬────────────────────────────┘
+                 ▼
+   ┌──────────────────────────────────────────┐
+   │ 4. desy-design-match     (si imagen)     │  ← Mide anchos, tipografía y márgenes y los lleva al token
+   └─────────────┬────────────────────────────┘
+                 ▼
+   ┌──────────────────────────────────────────┐
+   │ 5. desy-validate-accessibility           │  ← Checklist sin servidor; axe-core antes de mergear
+   └─────────────┬────────────────────────────┘
+                 ▼  si target es Angular
+   ┌──────────────────────────────────────────┐
+   │ desy-angular-translator                  │  ← Traduce Nunjucks → Angular y re-valida
+   └──────────────────────────────────────────┘
 ```
+
+(`desy-styles-reference` se consulta on-demand durante todo el flujo.)
 
 Cada skill tiene un output concreto que el siguiente puede consumir.
 
@@ -329,8 +340,9 @@ Para saber si los skills están ayudando:
 
 - **v0.1** (inicial): 4 skills MVP — `choose-library`, `scaffold-project`, `implement-component`, `validate-accessibility`. Cubre los casos de uso más comunes.
 - **v0.2** (intermedia): +4 skills de soporte — `styles-reference` (catálogo de tokens), `component-recognizer` (reconocer desde mockup), `angular-translator` (Nunjucks → Angular), `design-match` (fidelidad visual). Cubre el ciclo completo de maquetación.
-- **v0.3** (actual): 8 skills. Validado con wizard de 3 pasos (paso-1, paso-2, paso-3) con fidelidad 100% al gold tras 1 fix.
-- **v1.0** (estabilidad): los 8 skills cubriendo el 90% de casos, sin cambios breaking.
+- **v0.3**: 8 skills. Validado con wizard de 3 pasos (paso-1, paso-2, paso-3) con fidelidad 100% al gold tras 1 fix.
+- **v0.4** (actual): 12 skills. +4 de la ronda 1 de endurecimiento — `preflight-check` (paso 0 orquestador), `choose-page-template` (plantilla de página), `implement-pattern` (55 patrones atómicos) e `implement-layout-patterns` (patrones estructurales), derivados de los fallos detectados en el benchmark de evals.
+- **v1.0** (estabilidad): los 12 skills cubriendo el 90% de casos, sin cambios breaking.
 
 ## 🤝 Contribuir
 

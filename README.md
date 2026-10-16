@@ -6,18 +6,24 @@ Skills (procedimientos canónicos) para que agentes de IA y desarrolladores huma
 
 Un equipo sin maquetadores puede partir de un mockup hecho con Figma, identificar los componentes DESY que necesita, y generar el código correcto con la librería adecuada — sin tener que leer toda la documentación.
 
-## 📚 Skills disponibles (8)
+## 📚 Skills disponibles (12)
+
+Se ejecutan en el orden de la cadena canónica: el **preflight** es el paso 0 obligatorio, y a partir de ahí se encadenan según la tarea.
 
 | Skill | Tamaño | Función |
 |---|---:|---|
-| [`desy-choose-library`](./skills/desy-choose-library) | 14.7KB | Qué librería (`desy-html`, `desy-angular`, `desy-ionic`) y qué starter usar según el caso de uso |
-| [`desy-scaffold-project`](./skills/desy-scaffold-project) | 28KB | Cómo clonar el starter, `npm install`, configurar build, documenta la regla "nunca uses la librería directamente, siempre el starter" |
-| [`desy-styles-reference`](./skills/desy-styles-reference) | 13.8KB | Catálogo de tokens visuales del proyecto: colores semánticos, espaciado (`p-base`, `mb-sm`), tipografía (`c-h1`, `c-paragraph-base`), sombras, radius, iconografía |
-| [`desy-implement-component`](./skills/desy-implement-component) | 28KB | Cómo usar los macros de la librería Nunjucks/Angular/Ionic, tipografía semántica, catálogo de las 16 plantillas oficiales del starter |
-| [`desy-angular-translator`](./skills/desy-angular-translator) | 34.8KB | Traduce código Nunjucks de desy-html a TypeScript + template de desy-angular. Patrón general + tabla de equivalencias para los 20+ componentes más comunes. Tabla de 'trivial vs conceptual' para que el agente sepa cuándo preguntar al usuario |
-| [`desy-validate-accessibility`](./skills/desy-validate-accessibility) | 15.6KB | Checklist WCAG 2.2 AA para validar el output |
-| [`desy-component-recognizer`](./skills/desy-component-recognizer) | 12KB + 627KB catalog | Reconocer componentes DESY desde un mockup o screenshot, con 10 reglas críticas y un linter de validación post-reconocimiento |
-| [`desy-design-match`](./skills/desy-design-match) | 11.8KB | Workflow iterativo de fidelidad visual: cómo acercarse a una imagen de referencia (gold HTML, mockup, screenshot de Figma) tras la 1ª pasada estructural. Tabla de medidas canónicas del design system, 6 pasos iterativos, anti-patterns comunes |
+| [`desy-preflight-check`](./skills/desy-preflight-check) | 7.2KB | **Paso 0 obligatorio.** Verifica si existe proyecto DESY, identifica la librería y la versión instalada; si no hay proyecto, bifurca a scaffold con permiso del usuario |
+| [`desy-choose-library`](./skills/desy-choose-library) | 16.8KB | Qué librería (`desy-html`, `desy-angular`, `desy-ionic`) y qué starter usar según el caso de uso |
+| [`desy-choose-page-template`](./skills/desy-choose-page-template) | 11.4KB | Elige la plantilla de página DESY (portal, logged, logged-selector, logged-out, edit-fixed…). Independiente de la librería |
+| [`desy-scaffold-project`](./skills/desy-scaffold-project) | 21.2KB | Cómo clonar el starter, `npm install`, configurar build, documenta la regla "nunca uses la librería directamente, siempre el starter" |
+| [`desy-component-recognizer`](./skills/desy-component-recognizer) | 18.9KB + 612KB catalog | Reconoce componentes DESY desde un mockup o screenshot, con el catálogo de los 57 componentes y 653 ejemplos, y un linter de validación post-reconocimiento |
+| [`desy-styles-reference`](./skills/desy-styles-reference) | 16.4KB | Catálogo de tokens visuales del proyecto: colores semánticos, espaciado (`p-base`, `mb-sm`), tipografía (`c-h1`, `c-paragraph-base`), sombras, radius, iconografía |
+| [`desy-implement-component`](./skills/desy-implement-component) | 37.3KB | Cómo usar los macros de la librería Nunjucks/Angular/Ionic, tipografía semántica, catálogo de las 16 plantillas oficiales del starter |
+| [`desy-implement-pattern`](./skills/desy-implement-pattern) | 19.9KB | Implementa uno de los **55 patrones atómicos** oficiales (cards, FAQs, errores, cabeceras, listados, megamenú, soporte, cookies) o afina uno similar para una página nueva |
+| [`desy-implement-layout-patterns`](./skills/desy-implement-layout-patterns) | 28.6KB | Patrones estructurales: `fieldset`+`legend`, grids, secciones de acciones al final de sección, cabecera con skip-link |
+| [`desy-angular-translator`](./skills/desy-angular-translator) | 35.3KB | Traduce código Nunjucks de desy-html a TypeScript + template de desy-angular. Patrón general + tabla de equivalencias para los 15+ componentes validados. Tabla de 'trivial vs conceptual' para que el agente sepa cuándo preguntar al usuario |
+| [`desy-design-match`](./skills/desy-design-match) | 24.2KB | Workflow iterativo de fidelidad visual: cómo acercarse a una imagen de referencia (gold HTML, mockup, screenshot de Figma) tras la 1ª pasada estructural. Tabla de medidas canónicas del design system, 6 pasos iterativos, anti-patterns comunes |
+| [`desy-validate-accessibility`](./skills/desy-validate-accessibility) | 18.3KB | Checklist WCAG 2.2 AA para validar el output |
 
 ## 🔧 Linter de variantes
 
@@ -48,31 +54,35 @@ desy-skills/
 ├── docs/                   ← documentación extendida, decisiones de diseño
 │   ├── ecosystem-map.md
 │   └── skills-strategy.md
-└── skills/                 ← 8 skills aprobados
+└── skills/                 ← 12 skills aprobados
+    ├── desy-preflight-check/SKILL.md         # paso 0, orquestador
     ├── desy-choose-library/SKILL.md
+    ├── desy-choose-page-template/SKILL.md
     ├── desy-scaffold-project/SKILL.md
+    ├── desy-component-recognizer/
+    │   ├── SKILL.md                          # orquestador del recognizer
+    │   └── assets/
+    │       ├── catalog.json                  # 612KB, 57 comps, 653 ejemplos
+    │       ├── catalog-summary.md            # 11KB resumen de variantes
+    │       └── linter.py                     # 5.5KB validador post-reconocimiento
     ├── desy-styles-reference/SKILL.md
     ├── desy-implement-component/SKILL.md
+    ├── desy-implement-pattern/SKILL.md       # 55 patrones atómicos
+    ├── desy-implement-layout-patterns/SKILL.md
     ├── desy-angular-translator/SKILL.md
-    ├── desy-validate-accessibility/SKILL.md
     ├── desy-design-match/SKILL.md
-    └── desy-component-recognizer/
-        ├── SKILL.md                            # 12KB orquestador
-        └── assets/
-            ├── catalog.json                    # 627KB, 57 comps, 653 ejemplos
-            ├── catalog-summary.md               # 11KB resumen de variantes
-            └── linter.py                        # 5.4KB validador post-reconocimiento
+    └── desy-validate-accessibility/SKILL.md
 ```
 
 ## 🪷 Cómo se usan estos skills
 
-**Por un agente de IA** (OpenClaw, Claude, etc.): el skill vive en el catálogo de skills del agente. Cuando el usuario hace una pregunta o tarea que matchea con la `description` del frontmatter, el agente lo invoca automáticamente. El **skill pack** completo (los 8 SKILL.md concatenados) tiene ~165KB y se carga como contexto cuando se necesita.
+**Por un agente de IA** (OpenClaw, Claude, etc.): el skill vive en el catálogo de skills del agente. Cuando el usuario hace una pregunta o tarea que matchea con la `description` del frontmatter, el agente lo invoca automáticamente. El **skill pack** completo (los 12 SKILL.md concatenados) tiene ~255KB y se carga como contexto cuando se necesita.
 
 **Por un humano:** cada `SKILL.md` es Markdown legible. Se puede leer directamente en GitHub o clonar y usar como referencia.
 
 ## 📊 Estado del proyecto
 
-- **8 skills aprobados** (commits `482c96e` → `dd9a2f4`)
+- **12 skills aprobados** (commits `482c96e` → `8a551c4`; ronda 1 de endurecimiento: `desy-preflight-check` + compactado)
 - **Catálogo:** 57 componentes, 653 ejemplos extraídos del repo `desy-html` (develop branch)
 - **Benchmark de capacidad:** 5/5 patrones de "Páginas y flujos" validados con opencode + M3, todos ACEPTABLE+
 - **Validación del recognizer:** 21 mockups de la doc oficial analizados
@@ -95,7 +105,7 @@ EUPL-1.2 — ver [LICENSE](./LICENSE). Misma licencia que la librería `desy-htm
 
 ## 🪷 Sobre el sistema de diseño DESY
 
-DESY es el sistema de diseño oficial del Gobierno de Aragón para crear aplicaciones web accesibles, consistentes y conformes con la identidad corporativa. Sigue WCAG 2.1 nivel AA. Más información: [desy.aragon.es](https://desy.aragon.es/).
+DESY es el sistema de diseño oficial del Gobierno de Aragón para crear aplicaciones web accesibles, consistentes y conformes con la identidad corporativa. Sigue WCAG 2.2 nivel AA. Más información: [desy.aragon.es](https://desy.aragon.es/).
 
 **Fuentes primarias:**
 - Doc oficial: <https://desy.aragon.es/>

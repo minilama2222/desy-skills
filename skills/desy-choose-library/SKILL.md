@@ -27,7 +27,7 @@ El output esperado de cualquier proyecto DESY es siempre el `dist/` generado por
 - **NO usar para:** ya decidida la librería (→ `desy-scaffold-project`), implementar componente (→ `desy-implement-component`), elegir plantilla (→ `desy-choose-page-template`), afinar visualmente (→ `desy-design-match`), traducir Nunjucks→Angular (→ `desy-angular-translator`).
 
 ## Posición en el workflow DESY
-Paso **1** — decidir stack. Workflow completo en `desy-preflight-check`.
+Preparación — decidir stack, solo si la librería no está decidida; va antes de la secuencia de pasos 1-5 de `desy-preflight-check`.
 
 ## Errores típicos que evita
 - ❌ **Empezar por "¿cuál conozco mejor?"** en vez de "¿qué tipo de producto?": el tipo de producto manda.
@@ -40,7 +40,7 @@ Paso **1** — decidir stack. Workflow completo en `desy-preflight-check`.
 - ❌ **Colisión de requisitos**: desy-html con auth compleja o desy-angular con SEO crítico. Confirmar con el equipo si el SEO es para contenido público o autenticado.
 
 ## Siguiente skill típica
-→ **`desy-choose-page-template`** (paso 2) + **`desy-scaffold-project`** (paso 3, clonar starter oficial). Si recomendación es "no usar DESY": documentar y consultar con SDA en `https://www.aragon.es/`.
+→ **`desy-scaffold-project`** (clonar starter oficial) y, con el proyecto listo, la secuencia de `desy-preflight-check` (`desy-choose-page-template` es el paso 2). Si recomendación es "no usar DESY": documentar y consultar con SDA en `https://www.aragon.es/`.
 
 ## Decision framework (3 preguntas)
 

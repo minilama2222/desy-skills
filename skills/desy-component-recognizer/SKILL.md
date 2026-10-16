@@ -13,7 +13,7 @@ Skill para identificar componentes UI del Design System DESY analizando imágene
 - **NO usar para:** implementar componente ya identificado (→ `desy-implement-component`), sin imagen (no hay qué reconocer), elegir plantilla (→ `desy-choose-page-template` primero).
 
 ## Posición en el workflow DESY
-Paso **0.5** — ejecutar SOLO si hay imagen de referencia, entre preflight y choose-library. Workflow completo en `desy-preflight-check`.
+Paso **1** de la secuencia de `desy-preflight-check` — SOLO si hay imagen de referencia, antes de elegir plantilla y de escribir código.
 
 ## Errores típicos que evita
 - ❌ **Saltarse esta skill cuando hay imagen** y asumir "a ojo": sesión OCX julio 2026 (maqueta 404 Portal Salud) improvisó placeholders para el footer institucional porque el agente cargó 5 skills pero NO esta. El catálogo tiene 57 componentes + 653 ejemplos con `visualDescription` escrita por SDA.
@@ -25,9 +25,10 @@ Paso **0.5** — ejecutar SOLO si hay imagen de referencia, entre preflight y ch
 - ❌ **Asumir 2 ejemplos visualmente similares son el mismo componente** cuando difieren en params, JS global o pseudoclase simulada.
 - ❌ **Inventar nombre de componente** cuando el catálogo tiene la variante exacta (validar contra `assets/catalog.json`).
 - ❌ **Confundir el "recuadro con border 1px" del catálogo** (`componentExample`) con parte del componente.
+- ❌ **Hacer «Volver», «Cancelar» o «Ver más» como `c-link`**: son `button` transparente (regla 11). Piloto 01 de desy-skills-evals (2026-10): 15 de 54 runs, los tres modelos.
 
 ## Siguiente skill típica
-→ **`desy-choose-library`** (paso 1) si no hay stack. → `desy-choose-page-template` (paso 2) si hay librería. → `desy-implement-component` (paso 6) o `desy-implement-pattern` (pasos 4-5) según componentes reconocidos. → `desy-implement-layout-patterns` si la imagen muestra estructura. Tras implementar: `desy-design-match` (paso 7) + `desy-validate-accessibility` (paso 8).
+→ **`desy-choose-page-template`** (paso 2). → `desy-implement-pattern`, `desy-implement-layout-patterns` o `desy-implement-component` (paso 3) según la tabla de salida. Tras implementar, siempre: `desy-design-match` (paso 4) + `desy-validate-accessibility` (paso 5). Si la librería aún no está decidida, antes `desy-choose-library`.
 
 ## El catálogo
 
@@ -95,25 +96,28 @@ Para cada elemento identificado en el paso 2:
 Devuelve SIEMPRE en este formato (es el que espera el sistema, según `desy-identify`):
 
 ```markdown
-| Nº | Componente | Variante | Ubicación en imagen | Notas adicionales |
-|:--:|:-----------|:---------|:--------------------|:------------------|
-| 1 | button | primario | header, derecha | "Acceder" |
-| 2 | input | text | main, formulario | label "Nombre" |
-| 3 | input | text | main, formulario | label "Apellido 1" |
-| 4 | input | text | main, formulario | label "NIF", pattern NIF/NIE |
-| 5 | error-message | alert | main, debajo del input NIF | "Formato no válido" |
-| 6 | button | primario | main, final del form | "Siguiente" |
-| 7 | button | default | main, final del form | "Atrás", disabled |
-| 8 | footer | - | footer | institucional con 3 logos |
+| Nº | Componente | Variante | Tamaño | Ubicación en imagen | Notas adicionales |
+|:--:|:-----------|:---------|:------:|:--------------------|:------------------|
+| 1 | button | primario | base | header, derecha | "Acceder" |
+| 2 | input-group | text | - | main, formulario | label "Nombre"; fieldset + legend sr-only «Datos de identidad» |
+| 3 | input-group | text | - | main, formulario | label "NIF", pattern NIF/NIE; mismo fieldset que 2 |
+| 4 | error-message | alert | - | main, debajo del input NIF | "Formato no válido" |
+| 5 | button | primario | base | main, final del form | "Siguiente" |
+| 6 | button | transparente | base | main, final del form | "Cancelar" (regla 11) |
+| 7 | footer | - | - | footer | institucional con 3 logos |
 ```
 
 **Reglas para la tabla:**
 - **Numerar secuencialmente** (1, 2, 3...) de arriba a abajo, izquierda a derecha
 - **Una fila por componente** (no por subelemento). Ej: si ves un `input-group` con 2 inputs + 1 botón, UNA sola fila para `input-group` (no 3 filas)
 - **Solo descomponer en atómicos** (button, input, label) cuando NO haya un compuesto (input-group, date-input, checkboxes, modal) que coincida
-- **Variante:** la del catálogo (`primario`, `alerta`, `default`, `text`, `sm`, `lg`, etc.)
+- **Variante:** la del catálogo (`primario`, `alerta`, `default`, `text`, etc.). El tamaño NO va aquí.
+- **Tamaño:** obligatorio en `button`, `dropdown`, `checkboxes`, `radios` y `menubar` (`sm`, `base` o `lg`); `-` en el resto. Mídelo por la altura del control en la referencia a 1280 px: **~30 px → `sm`**, **~42 px → `base`**, **~54 px → `lg`**. Dos controles de la misma fila con la misma altura tienen el mismo tamaño.
+- **El tamaño va con la clase del propio componente:** `c-dropdown--sm` en un desplegable (nunca `c-button--sm` sobre un `c-dropdown`), `c-menubar__button--sm` en los items de un menubar, `c-checkboxes--sm` en checkboxes.
+- **Acciones de página** («Guardar», «Cancelar», «Volver», «Acción principal»): `base` salvo que la referencia muestre otra altura. Barras de acciones de tabla y desplegables dentro de cards: `sm`.
 - **Ubicación:** header/nav/main/aside/footer + posición relativa
 - **Notas:** texto visible, iconos, colores específicos, relaciones con otros componentes
+- **Grupos de campos → fieldset.** Cada grupo de inputs bajo un título visible («Datos de identidad», «Datos de contacto», «Dirección postal») o encerrado en un bloque se anota en Notas como `fieldset + legend sr-only «<título del grupo>»`. El checkbox legal («Acepto la política de privacidad») lleva **su propio** fieldset: `fieldset + legend sr-only «Política de privacidad»`. Si el título del grupo es un h2 visible, el h2 va fuera del fieldset y la legend lo repite oculta: nunca `legend class="c-h2"`. Estructura en `desy-implement-layout-patterns` → «Fieldset+legend sr-only para grupos semánticos».
 
 ## Reglas críticas de matching
 
@@ -164,9 +168,14 @@ Distinguir los 3 tipos de header por la estructura visible:
 
 - `menu-horizontal`: barra de navegación horizontal simple, una sola línea
 - `menu-navigation`: navegación más completa, puede tener submenús, branding integrado
-- `menubar`: patrón tipo desktop application (File, Edit, View...), con menús desplegables por click
+- `menubar`: fila de **acciones** (no de navegación) con botones y desplegables por click. En DESY, sobre todo:
+  - **Acciones sobre una tabla o un listado** (patrón «acciones de tabla»): botones pequeños en fila sobre la tabla («Importar items», «Aceptar», «Archivar», «Reenviar ▾»), normalmente con el checkbox «Seleccionar todo» a la izquierda. Cada item lleva `c-menubar__button--sm`; el que se ve como enlace, además `c-menubar__button--transparent`.
+  - **Filtros de un listado** (patrones `menubar-filtro-busqueda` y `menubar-filtro-orden`): «Items y estados ▾», «Ordenar por ▾» dentro del panel de filtros.
+  - Menú de aplicación tipo escritorio (Archivo, Editar, Ver…), el caso menos frecuente.
 
-**Si ves una nav horizontal en un header web** → `menu-navigation`. Si es una nav simple con 3-4 links sin submenús → `menu-horizontal`. Si parece un menú de aplicación tipo Word → `menubar`.
+**Si ves una nav horizontal en un header web** → `menu-navigation`. Si es una nav simple con 3-4 links sin submenús → `menu-horizontal`. **Si ves dos o más acciones pequeñas en fila sobre una tabla o en un panel de filtros**, aunque mezclen enlace, botón y desplegable → **un solo `menubar` `sm`**, no `button` + `dropdown` sueltos. En la tabla de salida, una fila: `menubar | - | sm | main, sobre la tabla | Importar items (transparente), Aceptar, Reenviar (submenú)`.
+
+Implementación: `desy-implement-component` → «Ejemplo 2: Tabla con acciones en lote» (`componentMenubar` con `c-menubar__button--sm`).
 
 ### 7. **`alert` MUESTRA un `notification` — identifica el notification, no el alert**
 
@@ -211,6 +220,39 @@ En el catálogo de ejemplos (las páginas de `examples-X.html`), cada ejemplo es
 - **Verde, rojo, amarillo** = estados (success, alert, warning)
 - **No confundir rojo de "alerta" con rojo de "link clickeado"** (los links visited pueden ser rojos pero NO son alert)
 
+### 11. **Acción subrayada = `button` transparente, no `link`**
+
+Un texto subrayado en semibold (a menudo con flecha ← o →) que **es una acción de la página** es el componente `button` en su variante `transparente` (`c-button c-button--transparent`), no `link`. Se ve casi igual que un enlace, pero tiene el padding del botón: el texto empieza unos 8–10 px más adentro que el borde del bloque.
+
+Es `button` transparente:
+- «Volver» / «Atrás», encima del título o al final de la página (con flecha ←).
+- «Cancelar», «Saltar», junto a un botón primario («Guardar», «Siguiente paso»).
+- «Ver más →», «Ver todos», al pie de una sección de cards o de un listado.
+
+Es `link` (`c-link`) solo:
+- dentro de texto corrido («Acepto la política de privacidad»);
+- en listas de enlaces (`links-list`, pie de página, migas);
+- como título enlazado de una card.
+
+Si navega, el botón transparente es `<a href="…" class="c-button c-button--transparent">`; si actúa sobre el formulario, `<button type="button" class="c-button c-button--transparent">`. En la tabla de salida: `button | transparente | base`.
+
+### 12. **Cuadrado de color + texto en MAYÚSCULAS = estado del item**
+
+Un cuadrado pequeño de color seguido de una palabra en MAYÚSCULAS y semibold («PUBLICADO», «PENDIENTE», «RECHAZADO»), en la cabecera de un item o de una card, junto a una fecha, es el **estado del patrón `cabecera-item`**. No es `pill` ni un `span` con colores elegidos a ojo, y tampoco la macro `componentStatus` (esa pinta texto en negrita + icono, sin cuadrado). Marcado del patrón:
+
+```html
+<span class="inline-block w-base h-base mr-sm mt-1 lg:mt-0 bg-success-dark"></span>
+<span class="flex-1 lg:flex-initial font-semibold uppercase">Publicado</span>
+```
+
+El color da el estado: `bg-success-dark` (verde), `bg-alert-base` (rojo), `bg-warning-base` (amarillo), `bg-neutral-base` (gris). En la tabla de salida: `status | éxito | - | card, bajo el título | "PUBLICADO", marcado de cabecera-item`.
+
+### 13. **Botón que muestra u oculta un panel = `toggle`**
+
+Un botón «Mostrar filtros», «Mostrar filtros y ordenación» o «Ver más opciones» que abre y cierra un panel de la misma página es el componente `toggle` (`c-toggle`), no un `button` con `aria-expanded` hecho a mano. Lleva **dos iconos**, uno por estado, dentro de `c-button--is-not-pressed` y `c-button--is-pressed`; el tamaño lo da el botón (`c-button--sm` si es pequeño).
+
+En la tabla de salida: `toggle | 2 iconos | sm | main, sobre el listado | "Mostrar filtros y ordenación", controla el panel de filtros`.
+
 ## Limitaciones conocidas
 
 - **El catálogo es de `desy-html` (v16.x).** Los componentes de `desy-angular` o `desy-ionic` no están catalogados. Si el mockup usa Ionic (mobile-first, gesture-driven) o Angular Material, NO uses este skill.
@@ -237,16 +279,16 @@ Si 2+ checks fallan, re-evalúa el matching. Si todavía dudas, propón 2 candid
 **Output esperado:**
 
 ```markdown
-| Nº | Componente | Variante | Ubicación en imagen | Notas adicionales |
-|:--:|:-----------|:---------|:--------------------|:------------------|
-| 1 | skip-link | - | top, oculto hasta focus | "Saltar al contenido principal" |
-| 2 | header | mini | header | logo Aragón, sin nav (no logueado) |
-| 3 | link | primary | main, parte superior | "He olvidado mi contraseña" |
-| 4 | input-group | text | main, formulario | label "Usuario", hint con icono |
-| 5 | input-group | password | main, formulario | label "Contraseña", con ojito |
-| 6 | button | primary | main, final del form | "Acceder", ancho completo |
-| 7 | link | default | main, debajo del form | "Crear cuenta nueva" |
-| 8 | footer | - | footer | institucional con 3 logos |
+| Nº | Componente | Variante | Tamaño | Ubicación en imagen | Notas adicionales |
+|:--:|:-----------|:---------|:-------|:--------------------|:------------------|
+| 1 | skip-link | - | - | top, oculto hasta focus | "Saltar al contenido principal" |
+| 2 | header | mini | - | header | logo Aragón, sin nav (no logueado) |
+| 3 | link | primary | - | main, parte superior | "He olvidado mi contraseña" |
+| 4 | input-group | text | - | main, formulario | label "Usuario", hint con icono |
+| 5 | input-group | password | - | main, formulario | label "Contraseña", con ojito |
+| 6 | button | primary | base | main, final del form | "Acceder", ancho completo |
+| 7 | link | default | - | main, debajo del form | "Crear cuenta nueva" |
+| 8 | footer | - | - | footer | institucional con 3 logos |
 ```
 
 ## Validación con gold estándar
@@ -254,6 +296,7 @@ Si 2+ checks fallan, re-evalúa el matching. Si todavía dudas, propón 2 candid
 Si tienes un screenshot gold oficial (ej: `https://desy.aragon.es/componente-X-codigo.html.md`), compáralo con tu identificación:
 - **Componentes:** ¿coinciden? (debería ser 100% para mocks del mismo sistema)
 - **Variantes:** ¿coinciden? (debería ser 100% para mocks exactos)
+- **Tamaños:** ¿coinciden? (`sm` en barras de acciones y cards; `base` en formularios y acciones de página)
 - **Ubicación:** ¿coincide la posición relativa? (puede variar en mocks rediseñados)
 
 Las discrepancias en mocks rediseñados son SEÑALES de mejora (ej: el usuario migró de variant `default` a variant `primary`, eso es información valiosa).
