@@ -120,16 +120,17 @@ El legend SIEMPRE va con `class="sr-only"`:
 
 ## Grid responsivo del formulario
 
-### Grid madre: solo desktop
+### Grid madre: las columnas y el gap salen de la referencia
 
 ```html
-<div class="grid lg:grid-cols-4 gap-x-base">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-lg">
   <!-- items del grid -->
 </div>
 ```
 
-- **Solo `lg:grid-cols-N`** (no `grid-cols-*` mobile explícito). En mobile cada item va a su propia fila.
-- **`gap-x-base`** (1rem horizontal, el token base de `desy-styles-reference`). NO `gap-lg` (es para layouts más amplios) ni la escala numérica de Tailwind (`gap-x-4`).
+- **Las columnas de mobile son las de la referencia.** Si la página oficial apila los campos a una columna, se omite `grid-cols-*` y cada item va a su fila; si los pone a dos —el paso 1 del formulario de identidad—, se escribe `grid-cols-2`. En desktop manda `lg:grid-cols-N`.
+- **El gap es el de la referencia, medido con `desy-design-match`.** 28 px entre columnas → `gap-lg` (1.75rem), como en el paso 1 del formulario oficial; 16 px → `gap-x-base` (1rem), como en el formulario denso y en el grid anidado de campos cortos. Los dos son tokens de `desy-styles-reference`; nunca `gap-x-4` ni un valor arbitrario.
+- **No inventes una rejilla para la intro.** En el gold oficial, la intro y los campos comparten la rejilla madre: la intro es un hijo `col-span-2 lg:col-span-3`. Una rejilla extra delante se convierte en la primera rejilla de la página y rompe la fidelidad.
 - Separación vertical entre filas viene de `gap-y-*` del form padre (no del grid).
 
 ### Selección de `lg:grid-cols-N`
@@ -275,8 +276,8 @@ El patrón `mt-base mb-base lg:mt-0 lg:mb-0` solo aplica cuando los inputs está
     <p class="c-paragraph-base mb-0 text-neutral-dark">Paso 3 de 3</p>
   </div>
 
-  {# Intro opcional #}
-  <div class="grid lg:grid-cols-4 gap-x-base mb-base">
+  {# Intro y campos comparten la rejilla madre (como en el gold oficial) #}
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-lg">
     <div class="col-span-2 lg:col-span-3">
       <p class="-mt-base c-paragraph-base lg:c-paragraph-lg">
         Necesitamos estos datos para enviarte avisos puntuales sobre tus trámites y notificaciones.
