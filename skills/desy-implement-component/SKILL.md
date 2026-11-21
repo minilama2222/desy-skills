@@ -455,10 +455,11 @@ Aplica a cada componente que generes:
 
 ### Botones
 - [ ] Elemento `<button>` (no `<div>` ni `<a>` salvo que enlace)
+- [ ] Submit nunca deshabilitado para bloquear la validación (no ligues `disabled` a la invalidez del formulario): deja enviar y muestra los errores. Contra el doble envío, `preventDoubleClick` (MWG `forms`)
 - [ ] Etiqueta clara (verbo en infinitivo, 1-2 palabras, no mayúsculas)
 - [ ] Si lleva icono + texto: `aria-hidden=true` en SVG, texto describe la acción
-- [ ] Si lleva solo icono: `role=img` + `aria-label` que describe la acción
-- [ ] Si `target=_blank`: atributo `title` avisando
+- [ ] Si lleva solo icono: `aria-label` en el `<button>` que describe la acción, y el SVG con `aria-hidden="true"` (el nombre lo lleva el botón, no el icono)
+- [ ] Si abre en ventana nueva (`target="_blank"`): avísalo dentro del enlace, con texto visible o con `<span class="sr-only">(se abre en ventana nueva)</span>`. No uses el atributo `title` para avisar: solo se ve al pasar el ratón y no llega por teclado (MWG `accessibility`)
 
 ### Inputs / Formularios
 - [ ] `<label>` visible y único, apunta al `id` del input
@@ -467,8 +468,9 @@ Aplica a cada componente que generes:
 - [ ] `autocomplete` cuando aplique (navegador puede autocompletar)
 - [ ] `type` correcto (`text`, `email`, `tel`, `date`, etc.)
 - [ ] Si tiene hint: `<p id="hint">` + `aria-describedby` en el input
-- [ ] Si tiene error: `<p id="error">` con `<span class="sr-only">Error:</span>` + `aria-errormessage` en el input + `aria-invalid=true`
-- [ ] Foco al error-summary al submit con errores
+- [ ] Si tiene error, sigue el patrón de errores:
+
+  > Con error de servidor: la macro emite `aria-invalid="true"` y `aria-errormessage`; el mensaje va con la macro `errorMessage` (prefijo `<span class="sr-only">Error:</span>`); arriba del formulario, un resumen de errores con enlaces a cada campo; al recargar, foco en el resumen o en el primer campo con error. Validación en el cliente: consulta MWG `accessible-error-announcement` y `validate-input-after-interaction` (`aria-invalid="false"` hasta `:user-invalid`). No se fija `aria-invalid="true"` a mano en el marcado.
 - [ ] `<form>` con `aria-label` o `aria-labelledby`
 
 ### Tablas
@@ -486,14 +488,17 @@ Aplica a cada componente que generes:
 - [ ] Click fuera del contenedor cierra el modal
 - [ ] Icono de cierre con `aria-label`
 - [ ] Variante destructiva: botón principal a la derecha, color `alert`
+- [ ] Variante destructiva: foco inicial en Cancelar (la acción segura), en lugar del encabezado. Dale un `id` al botón Cancelar y pásalo como tercer argumento (`focusFirst`) de `openDialog`. En desy-html, en el botón que abre el modal: `"onclick": "openDialog('modal-eliminar', this, 'boton-cancelar-eliminar')"`.
+
+> Choque con MWG `dialog`: MWG recomienda `<dialog>` nativo sin `role`/`aria-modal`. Los componentes `modal` y `dialog` de DESY son `<div>` gestionados por `dialog.js`, que exige `role="dialog"`; por eso aquí sí se pide. Mejora pendiente en la librería: migrar a `<dialog>` nativo.
 
 ### Imágenes
 - [ ] `alt` descriptivo (o `alt=""` si decorativa)
-- [ ] Si SVG personalizado: `role=img` + `aria-label`
+- [ ] Si es un SVG informativo suelto (no dentro de un botón ni de un enlace): `role="img"` + `aria-label`
 
 ### Iconos
 - [ ] Si acompañan texto: `aria-hidden=true` (el texto ya describe la acción)
-- [ ] Si van solos: `role=img` + `aria-label` que describa la acción, no el icono
+- [ ] Si van solos dentro de un botón o enlace: `aria-hidden="true"` en el SVG y `aria-label` en el botón o enlace, que describa la acción, no el icono
 
 ### Contraste
 - [ ] Texto sobre fondo blanco: usar colores `neutral-base` o más oscuros
@@ -510,7 +515,6 @@ Aplica a cada componente que generes:
 - Texto: "Enviar"
 - type: submit
 - preventDoubleClick: true
-- disabled dinámico: `formulario.invalid`
 
 **Snippet generado (template):**
 
@@ -518,7 +522,6 @@ Aplica a cada componente que generes:
 <desy-button
   [type]="'submit'"
   [text]="'Enviar'"
-  [disabled]="formulario.invalid"
   [preventDoubleClick]="true"
   (clickEvent)="onSubmit()">
 </desy-button>
@@ -526,13 +529,12 @@ Aplica a cada componente que generes:
 
 ```typescript
 // app/formulario.component.ts
+// Se declara en un NgModule que importa DesyButtonsModule y ReactiveFormsModule
 import { Component } from '@angular/core';
-import { DesyButtonComponent } from 'desy-angular';
 
 @Component({
   selector: 'app-formulario',
-  standalone: true,
-  imports: [DesyButtonComponent, ReactiveFormsModule],
+  standalone: false,
   templateUrl: './formulario.component.html',
 })
 export class FormularioComponent {
@@ -544,7 +546,7 @@ export class FormularioComponent {
 
 **Accesibilidad verificada:**
 - ✅ Elemento `<desy-button>` renderiza `<button type="submit">`
-- ✅ `aria-disabled` automático cuando `disabled=true`
+- ✅ Submit sin `disabled`: aunque el formulario sea inválido, se deja enviar y `onSubmit()` muestra los errores
 - ✅ `preventDoubleClick` evita doble submit
 - ✅ El texto describe la acción ("Enviar")
 - ✅ Contraste OK (variant default)
@@ -658,6 +660,7 @@ export class FormularioComponent {
 - ✅ Esc cierra el modal
 - ✅ Botón destructivo (`color="danger"`) a la derecha
 - ✅ Botón secundario (`fill="clear"`) a la izquierda
+- ⚠️ Foco inicial en Cancelar (checklist de modales): este snippet no lo fija; hay que añadirlo antes de dar el modal por bueno.
 
 ## Gotchas
 
@@ -666,7 +669,7 @@ export class FormularioComponent {
 - **Si te piden una PÁGINA COMPLETA (no un componente suelto), primero clona el starter o trabaja dentro de uno.** Pasos: (1) `git clone https://bitbucket.org/sdaragon/desy-html-starter.git` a un dir temporal, (2) `npm install` para tener la librería `desy-html` en `node_modules/`, (3) generar el `.njk` en `src/templates/pages/`, (4) `npm run build` para compilar, (5) servir el `dist/` resultante. Revisa la sección `## Estructura de directorios del proyecto (modelo librería/starter/build)` de `desy-scaffold-project` para paths reales.
 - **El CSS que recibe el navegador es CSS compilado del proyecto, no de la librería.** Tailwind 4 escanea el proyecto y solo incluye las clases USADAS. Si el agente inventa una clase que no se usa en Nunjucks, no aparecerá en el CSS compilado y la página se verá rota. Paths inventados (observados en benchmarks con IA) que NO debes usar: `/assets/css/main.css`, `/assets/img/logo-X.svg`. Paths reales: `src/css/styles.css`, `public/images/<archivo>`, inline SVG para logos.
 - **No saltarse atributos ARIA.** DESY los incluye por defecto en sus ejemplos. Si los quitas, rompes accesibilidad.
-- **En Angular/Ionic, importar el componente.** Olvidar el import en `imports: []` es el error más común.
+- **En Angular/Ionic, importar el componente.** Olvidarlo es el error más común. En desy-angular, los componentes son `standalone: false`: importa el módulo (`DesyButtonsModule`, `DesyFormsModule`…) en el NgModule que declara tu componente (ver `desy-angular-translator`).
 - **En desy-html, usar `params.classes` del macro Nunjucks, no escribir `class="..."` en el HTML directamente.**
 - **No mezclar librerías.** Un proyecto no debería tener desy-html y desy-angular al mismo tiempo para el mismo componente.
 - **El `autocomplete` no es opcional.** Es accesibilidad: el navegador autocompleta, el usuario no tiene que recordar. Usar `autocomplete="email"`, `autocomplete="tel"`, `autocomplete="postal-code"`, etc.

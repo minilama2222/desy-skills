@@ -40,7 +40,7 @@ Antes de aplicar el skill, confirma con el equipo:
 2. **Plantilla de página** (ver `desy-choose-page-template` — por ejemplo: `with-header-advanced` para portales, `logged-selector` para webapps autenticadas, `logged-out` para páginas públicas). Las plantillas son agnósticas a la librería (existen como `_template.X.njk` en `desy-html` y como `X-layout` en `desy-angular`).
 3. **Nombre del proyecto** (sin espacios, kebab-case: `mi-app-tramites`)
 4. **Node version target** (NVM, .nvmrc) — recomendado: LTS más reciente
-5. **¿LTS o latest?** Para desy-angular, hay LTS (v13 = Angular 16) o latest (v19)
+5. **¿LTS o latest?** Para desy-angular, hay LTS (v13 = Angular 16) o latest (v18 = Angular 20)
 
 ## Workflow general (las 3 librerías)
 
@@ -111,7 +111,7 @@ git add . && git commit -m "feat: scaffold from desy-html-starter"
 
 ### 🟧 desy-angular (webapps, intranets)
 
-**Stack:** Angular 19 + esbuild + TypeScript + RxJS + Tailwind utility classes
+**Stack:** Angular 20 (desy-angular 18.x) + esbuild + TypeScript + RxJS + Tailwind utility classes
 
 **Comandos:**
 
@@ -129,7 +129,7 @@ node --version  # verificar
 echo "lts/*" > .nvmrc
 
 # 4. Clonar starter (con latest o LTS)
-# Latest (Angular 19):
+# Latest (Angular 20, desy-angular 18.x):
 git clone https://bitbucket.org/sdaragon/desy-angular-starter.git mi-app
 # LTS (Angular 16, v13):
 # git clone --branch v13 https://bitbucket.org/sdaragon/desy-angular-starter.git mi-app
@@ -180,10 +180,9 @@ git add . && git commit -m "feat: scaffold from desy-angular-starter (renamed to
 - `https://desy.aragon.es/plantillas-con-sesion-iniciada.html.md` (con auth)
 - `https://desy.aragon.es/plantillas-edicion.html.md` (CRUD)
 
-**Convención de desy-angular v19:**
-- Componentes standalone por defecto (`standalone: true`)
-- Imports en cada componente (no NgModules)
-- Signals para estado local
+**Convención del starter (desy-angular 18.2.0 + Angular 20.3):**
+- Componentes con `standalone: false`, registrados en un NgModule (en `bitbucket.org/sdaragon/desy-angular-starter`, `src/app/app.component.ts`; en la librería `gorilas/desy-angular`, todos los de `projects/desy-angular/src/lib`, p. ej. `desy-buttons/components/button/button.component.ts`). Mismo valor que `desy-angular-translator`
+- Arranque con `platformBrowserDynamic().bootstrapModule(AppModule)` (`src/main.ts` del starter); los componentes DESY llegan por `DesyAngularModule` en los `imports` de `app.module.ts`
 - Inputs con `[input]="value"`, outputs con `(outputEvent)="handler()"`
 
 ---
@@ -447,7 +446,7 @@ npm run dev
 
 ```bash
 # 1. Decisión
-# Webapp de gestión, equipo Angular 19 → desy-angular latest
+# Webapp de gestión, equipo Angular 20 → desy-angular latest
 
 # 2. Setup
 git clone https://bitbucket.org/sdaragon/desy-angular-starter.git webapp-expedientes

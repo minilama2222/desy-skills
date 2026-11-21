@@ -50,7 +50,7 @@ Después del paso 5 de la secuencia de `desy-preflight-check` — solo si target
 | **Eventos** | NO emite (HTML estático) | `(clickEvent)="handler($event)"` (Output TS) |
 | **Estado disabled** | `disabled: true` (bool en macro) | `[disabled]="true"` o `[disabled]="isDisabled"` |
 | **Atributos a11y** | Los pone automáticamente la macro | Inputs explícitos: `ariaLabel`, `ariaDescribedBy`, `ariaLabelledBy`, etc. |
-| **Aria/role/tabindex** | Implícitos en el HTML generado | Explícitos como inputs (más control, más verboso) |
+| **Aria/role/tabindex** | Implícitos en el HTML generado | Disponibles como inputs, pero solo cuando el elemento renderizado no los da (`<desy-button>` ya renderiza `<button>`/`<a>`: sin `role` ni `tabindex`) |
 
 ## Parámetros que SOLO existen en desy-angular (no en desy-html)
 
@@ -60,7 +60,7 @@ Después del paso 5 de la secuencia de `desy-preflight-check` — solo si target
 | `routerLinkActiveClasses` | Clases CSS cuando la ruta está activa |
 | `fragment` | Fragmento de URL (`#seccion`) |
 | **Outputs / eventos** | `(clickEvent)`, `(change)`, etc. |
-| Atributos a11y explícitos | `ariaLabel`, `ariaDescribedBy`, `role`, `tabindex`, etc. |
+| Atributos a11y explícitos | `ariaLabel`, `ariaDescribedBy`, `role`, `tabindex`, etc. Solo cuando el elemento renderizado no los da (ver fila «Aria/role/tabindex») |
 | `clickCount`, `clickName`, `clickValue` | Métricas de tracking de clicks (no en desy-html) |
 
 ## Parámetros que están en AMBAS librerías (con la misma semántica)
@@ -155,16 +155,15 @@ export class MyComponent {
   ...
   [routerLink]="'/url'"           <!-- solo si necesitas router interno -->
   [routerLinkActiveClasses]="'active'"
-  ariaLabel="Click me"
-  role="button"
-  [tabindex]="0"
 >
 ```
 
+Sin `role` ni `tabindex`: `<desy-button>` ya renderiza un `<button>` o un `<a>` nativo, con su rol y su foco.
+
 ### Paso 6: Verificar accesibilidad
 
-Angular hace explícitas las opciones a11y que HTML hace implícitas. Revisa:
-- `ariaLabel` vs `<label>`: en Angular se prefiere `ariaLabel` (es label interno del componente)
+Angular expone como inputs opciones a11y que HTML hace implícitas, pero solo se usan cuando el elemento renderizado no las da. Revisa:
+- Nombre accesible: primero el texto o el label visible (`text` en botones, `labelData` en campos). `ariaLabel` solo si no hay texto visible (botón de solo icono); no sustituye a un label que ya se ve
 - `ariaDescribedBy`: conecta con el id del elemento que describe
 - `ariaDisabled` vs `disabled`: el primero es semántico, el segundo es comportamiento
 
@@ -467,16 +466,16 @@ El código usa `@if`/`@for`/`@switch`/`@case`, **NO** las directivas viejas `*ng
 La directiva `desyAppAccessibility` es un detalle interno de la librería. La doc oficial **no la muestra** en sus ejemplos. Los ejemplos de la doc usan el patrón estándar:
 
 ```html
+<!-- Botón de solo icono: no hay texto visible, así que el nombre accesible va en ariaLabel -->
 <desy-button
-  [attr.aria-label]="ariaLabel"
-  [attr.aria-describedby]="ariaDescribedBy"
-  [attr.aria-labelledby]="ariaLabelledby"
+  [ariaLabel]="'Cerrar'"
+  [ariaDescribedBy]="'ayuda-cierre'"
   ...>
   ...
 </desy-button>
 ```
 
-**Implicación:** al implementar páginas con desy-angular, **usa el patrón de la doc** (`[attr.aria-*]` explícitos), no la directiva interna. La directiva es solo un detalle de implementación de los componentes de la librería que tú no necesitas reproducir.
+**Implicación:** al implementar páginas con desy-angular, **usa los inputs del componente** (`ariaLabel`, `ariaDescribedBy`, `ariaLabelledBy`, heredados de `AccessibilityComponent`), no la directiva interna ni `[attr.aria-*]`: `[attr.aria-*]` pone el atributo en el host `<desy-button>`, no en el `<button>` que renderiza. `ariaLabel` solo cuando no hay texto visible (ver Paso 6). La directiva es solo un detalle de implementación de los componentes de la librería que tú no necesitas reproducir.
 
 ### 5. Transformaciones automáticas de clases (ej: button → `c-button--disabled`)
 

@@ -18,7 +18,7 @@ Paso **1** de la secuencia de `desy-preflight-check` — SOLO si hay imagen de r
 ## Errores típicos que evita
 - ❌ **Saltarse esta skill cuando hay imagen** y asumir "a ojo": sesión OCX julio 2026 (maqueta 404 Portal Salud) improvisó placeholders para el footer institucional porque el agente cargó 5 skills pero NO esta. El catálogo tiene 57 componentes + 653 ejemplos con `visualDescription` escrita por SDA.
 - ❌ **Confundir `alert` con `notification`**: `alert` es wrapper; `notification` es lo visible (icono + texto + X).
-- ❌ **`modal` vs `dialog` vs `drawer`**: modal bloquea UI con overlay; dialog usa `<dialog>` nativo; drawer es panel lateral (offcanvas).
+- ❌ **`modal` vs `dialog` vs `drawer`**: modal es la caja centrada (icono, título, acciones); dialog es la capa oscura que la muestra encima (los dos son `<div>` gestionados por `dialog.js`, no `<dialog>` nativo); drawer es panel lateral (offcanvas).
 - ❌ **`input` vs `input-group` vs `date-input` vs `datepicker`**: atómico vs compuesto vs formato fecha vs popup calendario.
 - ❌ **`table` vs `table-advanced`**: filtros/checkboxes/paginación → `table-advanced`.
 - ❌ **`header-mini` vs `header` vs `header-advanced`**: 1 banda fina solo logo vs 1 banda con nav vs 3 bandas (logo / nombre portal / nav).
@@ -129,11 +129,12 @@ Estas son las confusiones más comunes — revísalas SIEMPRE antes de proponer 
 
 ### 2. **"modal" vs "dialog" vs "drawer"**
 
-- `modal`: bloquea toda la UI, fondo oscuro overlay, contenido centrado. Es el "modal tradicional"
-- `dialog`: similar al modal pero más semántico, usa el `<dialog>` nativo de HTML. Para confirmaciones
+- `modal`: la caja centrada con icono, título, texto y botones de acción (p. ej. una confirmación). Es un `<div>`
+- `dialog`: la capa oscura semitransparente que muestra encima de la página otro componente (un `modal` o el menú móvil de la cabecera). Es el botón que lo abre más un `<div>` (`desy-html/src/templates/components/dialog/_template.dialog.njk`)
+- Ninguno de los dos usa `<dialog>` nativo. Los dos son `<div>` gestionados por `dialog.js`; el contenedor lleva `role="dialog"` (y `aria-modal`), que se pasa por `attributes` y que `dialog.js` exige
 - `drawer`: panel lateral que entra desde un lado (derecha/izquierda/abajo). NO bloquea toda la UI
 
-Si ves overlay oscuro cubriendo la página → modal o dialog. Si ves panel lateral → drawer (que es un pattern de offcanvas en DESY, no un componente directo).
+Si ves capa oscura con una caja centrada → `modal` dentro de un `dialog` (identifica los dos). Si ves panel lateral → drawer (que es un pattern de offcanvas en DESY, no un componente directo).
 
 ### 3. **"input" vs "input-group" vs "date-input" vs "datepicker"**
 
