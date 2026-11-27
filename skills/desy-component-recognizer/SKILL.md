@@ -99,8 +99,8 @@ Devuelve SIEMPRE en este formato (es el que espera el sistema, según `desy-iden
 | Nº | Componente | Variante | Tamaño | Ubicación en imagen | Notas adicionales |
 |:--:|:-----------|:---------|:------:|:--------------------|:------------------|
 | 1 | button | primario | base | header, derecha | "Acceder" |
-| 2 | input-group | text | - | main, formulario | label "Nombre"; fieldset + legend sr-only «Datos de identidad» |
-| 3 | input-group | text | - | main, formulario | label "NIF", pattern NIF/NIE; mismo fieldset que 2 |
+| 2 | input | text | - | main, formulario | label "Nombre"; fieldset + legend sr-only «Datos de identidad» |
+| 3 | input | text | - | main, formulario | label "NIF", pattern NIF/NIE; mismo fieldset que 2 |
 | 4 | error-message | alert | - | main, debajo del input NIF | "Formato no válido" |
 | 5 | button | primario | base | main, final del form | "Siguiente" |
 | 6 | button | transparente | base | main, final del form | "Cancelar" (regla 11) |
@@ -109,7 +109,7 @@ Devuelve SIEMPRE en este formato (es el que espera el sistema, según `desy-iden
 
 **Reglas para la tabla:**
 - **Numerar secuencialmente** (1, 2, 3...) de arriba a abajo, izquierda a derecha
-- **Una fila por componente** (no por subelemento). Ej: si ves un `input-group` con 2 inputs + 1 botón, UNA sola fila para `input-group` (no 3 filas)
+- **Una fila por componente** (no por subelemento). Ej: si ves un `input-group` con un select y dos inputs, UNA sola fila para `input-group` (no 3 filas)
 - **Solo descomponer en atómicos** (button, input, label) cuando NO haya un compuesto (input-group, date-input, checkboxes, modal) que coincida
 - **Variante:** la del catálogo (`primario`, `alerta`, `default`, `text`, etc.). El tamaño NO va aquí.
 - **Tamaño:** obligatorio en `button`, `dropdown`, `checkboxes`, `radios` y `menubar` (`sm`, `base` o `lg`); `-` en el resto. Mídelo por la altura del control en la referencia a 1280 px: **~30 px → `sm`**, **~42 px → `base`**, **~54 px → `lg`**. Dos controles de la misma fila con la misma altura tienen el mismo tamaño.
@@ -137,12 +137,12 @@ Si ves overlay oscuro cubriendo la página → modal o dialog. Si ves panel late
 
 ### 3. **"input" vs "input-group" vs "date-input" vs "datepicker"**
 
-- `input` (componente atómico): UN solo input. Default de la librería
-- `input-group`: composición de label + input + hint + error-message. Lo que ves el 90% de las veces en formularios
-- `date-input`: input de fecha con formato dd/mm/yyyy, validación específica
+- `input` (componente atómico): UN solo control con su label. Default de la librería. Un campo con label, hint o error **no** lo convierte en `input-group`.
+- `input-group`: agrupación **semántica de N controles** (`input` y/o `select`) presentados como una unidad en la misma línea. Se renderiza con `componentInputGroup`, cuyo `items[]` contiene cada control (un `input`, o un `select` si el ítem lleva `isSelect`); el grupo puede llevar `hint`, `errorMessage`, `fieldset` y separadores (`divider`).
+- `date-input`: campo de **fecha o de hora** (horas/minutos/segundos) con formato y validación específicos
 - `datepicker`: calendario popup que aparece al hacer click en un date-input
 
-**Si ves un campo con label, input y (opcionalmente) hint debajo:** probablemente es `input-group`. Si el input tiene formato de fecha con calendario → `date-input`. Si ves un popup calendario abierto → `datepicker`.
+**Cómo distinguirlos: busca la unidad semántica, no el número de labels.** Un campo suelto con su label —aunque tenga hint o error— es `input`. Si dos o más controles forman **una sola unidad** en la misma línea, es `input-group`: el caso típico es un `select` y un `input` que se leen juntos («Tipo de vía» + «Vía», «Prefijo» + «Teléfono», «Importe» + «Divisa»). Una fila de campos independientes del mismo tipo, cada uno con su propio label y su propio valor (Número / Escalera / Piso / Puerta), es una **rejilla de atómicos**, no un `input-group`. Si el campo es de fecha **o de hora** → `date-input`, no un `input-group`. Si ves un popup calendario abierto → `datepicker`.
 
 ### 4. **"table" vs "table-advanced"**
 
@@ -267,8 +267,8 @@ Después de hacer el matching, pregúntate:
 
 1. **¿El componente identificado existe en el catálogo?** (búscalo en `catalog.json`)
 2. **¿La variante coincide con un ejemplo conocido?** (compara con `visual_description` del ejemplo)
-3. **¿Hay un componente compuesto más apropiado?** (input-group en vez de input solo)
-4. **¿El contexto de uso tiene sentido?** (un input-group con label "Fecha de nacimiento" → date-input sería más específico que input genérico)
+3. **¿Hay un componente compuesto más apropiado?** (¿los controles forman una agrupación semántica en una línea? → `input-group`; si es un solo campo → `input`)
+4. **¿El contexto de uso tiene sentido?** (un `input` con label "Fecha de nacimiento" → `date-input` sería más específico que `input` genérico)
 
 Si 2+ checks fallan, re-evalúa el matching. Si todavía dudas, propón 2 candidatos y deja al usuario elegir.
 
@@ -284,8 +284,8 @@ Si 2+ checks fallan, re-evalúa el matching. Si todavía dudas, propón 2 candid
 | 1 | skip-link | - | - | top, oculto hasta focus | "Saltar al contenido principal" |
 | 2 | header | mini | - | header | logo Aragón, sin nav (no logueado) |
 | 3 | link | primary | - | main, parte superior | "He olvidado mi contraseña" |
-| 4 | input-group | text | - | main, formulario | label "Usuario", hint con icono |
-| 5 | input-group | password | - | main, formulario | label "Contraseña", con ojito |
+| 4 | input | text | - | main, formulario | label "Usuario" |
+| 5 | input | password | - | main, formulario | label "Contraseña", con ojito |
 | 6 | button | primary | base | main, final del form | "Acceder", ancho completo |
 | 7 | link | default | - | main, debajo del form | "Crear cuenta nueva" |
 | 8 | footer | - | - | footer | institucional con 3 logos |
