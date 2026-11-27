@@ -142,7 +142,7 @@ Si ves overlay oscuro cubriendo la página → modal o dialog. Si ves panel late
 - `date-input`: input de fecha con formato dd/mm/yyyy, validación específica
 - `datepicker`: calendario popup que aparece al hacer click en un date-input
 
-**Cómo distinguirlos: cuenta controles, no labels.** Un campo suelto con su label —aunque tenga hint o error— es `input`. Si ves **dos o más** controles de formulario que forman una unidad semántica en la misma línea (p. ej. un select de prefijo telefónico y un input de número como un solo grupo), es `input-group`. Si cada control tiene su propio label y su propio bloque en la rejilla, son componentes atómicos separados aunque compartan fila. Si el input tiene formato de fecha con calendario → `date-input`. Si ves un popup calendario abierto → `datepicker`.
+**Cómo distinguirlos: busca la unidad semántica, no el número de labels.** Un campo suelto con su label —aunque tenga hint o error— es `input`. Si dos o más controles forman **una sola unidad** en la misma línea, es `input-group`: el caso típico es un `select` y un `input` que se leen juntos («Tipo de vía» + «Vía», «Prefijo» + «Teléfono»), y también una serie de inputs que componen un dato (p. ej. partes de una fecha). Una fila de campos independientes del mismo tipo, cada uno con su propio label y su propio valor (Número / Escalera / Piso / Puerta), es una **rejilla de atómicos**, no un `input-group`. Si el input tiene formato de fecha con calendario → `date-input`. Si ves un popup calendario abierto → `datepicker`.
 
 ### 4. **"table" vs "table-advanced"**
 
