@@ -92,7 +92,7 @@ Después del paso 5 de la secuencia de `desy-preflight-check` — solo si target
 | `<desy-tree>` | `{{ componentTree({...}) }}` | Jerárquico |
 | `<desy-textarea>` | `{{ componentTextarea({...}) }}` | — |
 | `<desy-character-count>` | `{{ componentCharacterCount({...}) }}` | Contador |
-| `<desy-input-group>` | `{{ componentInputGroup({...}) }}` | Compuesto: label + input + hint + error |
+| `<desy-input-group>` | `{{ componentInputGroup({...}) }}` | Agrupación de N controles (input/select) en una línea |
 | `<desy-date-input>` | `{{ componentDateInput({...}) }}` | Fecha con validación |
 | `<desy-radios>` | `{{ componentRadios({...}) }}` | — |
 | `<desy-datepicker>` | `{{ componentDatepicker({...}) }}` | Calendario popup |
@@ -666,7 +666,7 @@ Total: ~30+ componentes donde el patrón general (macro → selector + [bindings
 - **`datepicker`:** botón + popup → componente con estado interno + servicio de fechas
 - **`combobox`:** input + datalist nativo → componente con filtrado + servicios de estado
 - **`listbox`:** select nativo → componente con multiselect + servicios
-- **`input-group`:** label + input + hint + error (composición HTML) → ng-content + binding de 4 sub-componentes
+- **`input-group`:** agrupación de N controles (`items[]`, input o select) en una línea → un componente con `items` + label/hint/error, no 4 sub-componentes fijos
 - **`fieldset`:** fieldset + legend (HTML) → TemplateRef + componentes legend/hint/errorMessage
 - **`header-advanced`:** estructura HTML → sub-componentes para cada banda + nav con template
 
