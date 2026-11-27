@@ -19,16 +19,20 @@ Verifica el estado del proyecto antes de planificar cualquier tarea DESY. Es la 
 
 Paso **0** y **orquestador** de la cadena. Esta skill no termina al detectar el proyecto: decide qué skills se cargan después y en qué orden. Cada paso de la tabla es una **invocación de la herramienta `Skill`**, no un recordatorio: leer el nombre de una skill no la carga.
 
-**Secuencia obligatoria para maquetar una página DESY:**
+**Si la tarea pide un componente suelto** (un botón, un input, una tabla, un modal: no una página), la ruta es `preflight-check` → `desy-implement-component`. `desy-choose-page-template` **no aplica**: no hay página que vestir. `desy-implement-component` se invoca **antes** de leer los `_examples` de `node_modules` o de escribir código; si no, el agente acaba copiando la librería a ojo.
+
+**Secuencia obligatoria si la tarea pide una página DESY:**
 
 | # | Invoca | Cuándo | Por qué |
 |---|---|---|---|
 | 1 | `desy-component-recognizer` | Si hay imagen de referencia | Decide componente, variante, tamaño y fieldsets antes de escribir código |
-| 2 | `desy-choose-page-template` | Siempre | La plantilla trae header, footer y el espacio superior del contenido |
-| 3 | `desy-implement-pattern`, `desy-implement-layout-patterns`, `desy-implement-component` | Según la tabla del recognizer: patrón, estructura (fieldset, grid, acciones) o componente suelto | Las reglas de fieldset, acciones de página, tamaños y anchos están ahí |
+| 2 | `desy-choose-page-template` | Siempre que la tarea pida una página | La plantilla trae header, footer y el espacio superior del contenido |
+| 3 | `desy-implement-pattern`, `desy-implement-layout-patterns`, `desy-implement-component` | Según la tabla del recognizer: patrón, estructura (fieldset, grid, acciones) o el componente que use la página | Las reglas de fieldset, acciones de página, tamaños y anchos están ahí |
 | 4 | `desy-design-match` | Siempre que haya imagen, antes de dar la página por terminada | Mide tipografía, anchos y márgenes contra la referencia y los lleva al token |
 | 5 | `desy-validate-accessibility` | Siempre, al final | Checklist sin servidor: fieldsets, un solo h1, labels, skip-link |
 | — | `desy-styles-reference` | Cada vez que vayas a escribir una clase de utilidad que no sale de una macro (`mb-`, `gap-`, `w-`, `max-w-`, `grid-cols-`, `text-`) | Evita Tailwind por defecto y valores arbitrarios en px |
+
+Para un **componente suelto** no se recorre esta tabla: va la ruta de arriba.
 
 Si `PROYECTO_NO_EXISTE`, antes va `desy-scaffold-project` (Paso 2). `desy-choose-library` solo si la librería no está decidida. Si el destino es `desy-angular`, `desy-angular-translator` va después del paso 5.
 
@@ -74,14 +78,16 @@ Devuelve al usuario:
 
 ### Paso 4: Encadena las skills con `Skill`
 
-Con el proyecto identificado, invoca con la herramienta `Skill` las skills de la secuencia de «Posición en el workflow DESY», en ese orden:
+Con el proyecto identificado, elige la ruta **antes** de invocar o de leer los `_examples`:
 
-1. Si hay imagen (screenshot, mockup, `referencia.png`): `desy-component-recognizer` **antes** de escribir código. Su tabla de salida (componente, variante, tamaño, fieldset) es la lista de trabajo.
-2. `desy-choose-page-template`.
-3. Las skills de implementación que pida la tabla del recognizer.
-4. `desy-design-match` y `desy-validate-accessibility` al final, aunque la página «se vea bien».
+- **Componente suelto** (un botón, un input, una tabla, un modal; no una página): invoca `desy-implement-component` antes de escribir. No pases por `desy-choose-page-template`.
+- **Página**: invoca con la herramienta `Skill` las skills de la secuencia de «Posición en el workflow DESY», en ese orden:
+  1. Si hay imagen (screenshot, mockup, `referencia.png`): `desy-component-recognizer` **antes** de escribir código. Su tabla de salida (componente, variante, tamaño, fieldset) es la lista de trabajo.
+  2. `desy-choose-page-template`.
+  3. Las skills de implementación que pida la tabla del recognizer.
+  4. `desy-design-match` y `desy-validate-accessibility` al final, aunque la página «se vea bien».
 
-Si NO hay imagen, empieza en el punto 2.
+  Si NO hay imagen, empieza en el punto 2.
 
 ### Paso 5: Checklist de salida (antes de decir «terminado»)
 
@@ -117,7 +123,8 @@ grep -oE '(class=|"classes": )"[^"]*"' src/<pagina>.html | grep -E '\[[^]]+\]|(^
 
 ## Siguiente skill típica
 → Si preflight = NO_EXISTE: `desy-scaffold-project` → volver a invocar `desy-preflight-check` para re-verificar.
-→ Si preflight OK: la secuencia de «Posición en el workflow DESY», empezando por `desy-component-recognizer` si hay imagen y terminando **siempre** en `desy-design-match` + `desy-validate-accessibility`.
+→ Si preflight OK y la tarea es un **componente suelto**: `desy-implement-component` (sin `desy-choose-page-template`), y el cierre de siempre con `desy-validate-accessibility`.
+→ Si preflight OK y la tarea es una **página**: la secuencia de «Posición en el workflow DESY», empezando por `desy-component-recognizer` si hay imagen y terminando **siempre** en `desy-design-match` + `desy-validate-accessibility`.
 
 ## Anti-patterns
 
@@ -126,11 +133,14 @@ grep -oE '(class=|"classes": )"[^"]*"' src/<pagina>.html | grep -E '\[[^]]+\]|(^
 - ❌ En monorepos, asumir que la raíz es el proyecto DESY. Preguntar.
 - ❌ Continuar planificando 5 pasos de implementación cuando preflight devolvió NO_EXISTE. La cadena se rompe en ese punto — bifurcar a scaffold.
 - ❌ Confundir "directorio con archivos sueltos" (ej. solo `attached_assets/` o `README.md`) con proyecto DESY. El criterio es `package.json` + `node_modules/<librería>`.
+- ❌ Meter un componente suelto en la secuencia de página: `desy-choose-page-template` no aplica a un botón; la ruta es `desy-implement-component` y se invoca antes de leer la librería.
 
 ## Related
 
 - **Skill: `desy-scaffold-project`** — siguiente paso si preflight = NO_EXISTE.
-- **Skill: `desy-choose-library`** — siguiente paso si preflight OK y no hay imagen.
+- **Skill: `desy-implement-component`** — siguiente paso si preflight OK y la tarea es un componente suelto.
+- **Skill: `desy-choose-page-template`** — siguiente paso si preflight OK y la tarea es una página.
+- **Skill: `desy-choose-library`** — solo si la librería no está decidida.
 - **Skill: `desy-component-recognizer`** — siguiente paso si preflight OK y hay imagen.
 - **Mapa del ecosistema DESY:** `docs/ecosystem-map.md` (en este repo).
 - **Doc oficial:** https://desy.aragon.es/como-empezar-tutorial.html.md
