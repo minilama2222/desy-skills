@@ -139,10 +139,10 @@ Si ves overlay oscuro cubriendo la página → modal o dialog. Si ves panel late
 
 - `input` (componente atómico): UN solo control con su label. Default de la librería. Un campo con label, hint o error **no** lo convierte en `input-group`.
 - `input-group`: agrupación **semántica de N controles** (`input` y/o `select`) presentados como una unidad en la misma línea. Se renderiza con `componentInputGroup`, cuyo `items[]` contiene cada control (un `input`, o un `select` si el ítem lleva `isSelect`); el grupo puede llevar `hint`, `errorMessage`, `fieldset` y separadores (`divider`).
-- `date-input`: input de fecha con formato dd/mm/yyyy, validación específica
+- `date-input`: campo de **fecha o de hora** (horas/minutos/segundos) con formato y validación específicos
 - `datepicker`: calendario popup que aparece al hacer click en un date-input
 
-**Cómo distinguirlos: busca la unidad semántica, no el número de labels.** Un campo suelto con su label —aunque tenga hint o error— es `input`. Si dos o más controles forman **una sola unidad** en la misma línea, es `input-group`: el caso típico es un `select` y un `input` que se leen juntos («Tipo de vía» + «Vía», «Prefijo» + «Teléfono»), y también una serie de inputs que componen un dato (p. ej. partes de una fecha). Una fila de campos independientes del mismo tipo, cada uno con su propio label y su propio valor (Número / Escalera / Piso / Puerta), es una **rejilla de atómicos**, no un `input-group`. Si el input tiene formato de fecha con calendario → `date-input`. Si ves un popup calendario abierto → `datepicker`.
+**Cómo distinguirlos: busca la unidad semántica, no el número de labels.** Un campo suelto con su label —aunque tenga hint o error— es `input`. Si dos o más controles forman **una sola unidad** en la misma línea, es `input-group`: el caso típico es un `select` y un `input` que se leen juntos («Tipo de vía» + «Vía», «Prefijo» + «Teléfono», «Importe» + «Divisa»). Una fila de campos independientes del mismo tipo, cada uno con su propio label y su propio valor (Número / Escalera / Piso / Puerta), es una **rejilla de atómicos**, no un `input-group`. Si el campo es de fecha **o de hora** → `date-input`, no un `input-group`. Si ves un popup calendario abierto → `datepicker`.
 
 ### 4. **"table" vs "table-advanced"**
 
