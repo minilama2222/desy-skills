@@ -128,7 +128,17 @@ El legend SIEMPRE va con `class="sr-only"`:
 </div>
 ```
 
-- **Las columnas de mobile son las de la referencia.** Si la página oficial apila los campos a una columna, se omite `grid-cols-*` y cada item va a su fila; si los pone a dos —el paso 1 del formulario de identidad—, se escribe `grid-cols-2`. En desktop manda `lg:grid-cols-N`.
+- **Las columnas de mobile y desktop son las de la referencia.** En el paso 1 del formulario de identidad el Gold oficial usa `grid grid-cols-2 lg:grid-cols-4 gap-lg`: se escriben las tres clases, no `grid-cols-1`, no se omite `grid-cols-2` y no se cambia `lg:grid-cols-4` por una rejilla de 12. Omitir o cambiar una de las tres deja la página fuera del Gold. En una página cuya referencia apile los campos, se omite `grid-cols-*` y cada item va a su fila; no es una regla general.
+
+  En este patrón, la rejilla se escribe **literalmente** así. No la reconstruyas con otras columnas:
+
+  ```html
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-lg">
+  ```
+
+  ❌ `grid grid-cols-2 gap-lg` — falta `lg:grid-cols-4`.
+  ❌ `grid grid-cols-2 lg:grid-cols-12 gap-lg` — la columna de desktop no es la del Gold.
+
 - **El gap es el de la referencia, medido con `desy-design-match`.** 28 px entre columnas → `gap-lg` (1.75rem), como en el paso 1 del formulario oficial; 16 px → `gap-x-base` (1rem), como en el formulario denso y en el grid anidado de campos cortos. Los dos son tokens de `desy-styles-reference`; nunca `gap-x-4` ni un valor arbitrario.
 - **No inventes una rejilla para la intro.** En el gold oficial, la intro y los campos comparten la rejilla madre: la intro es un hijo `col-span-2 lg:col-span-3`. Una rejilla extra delante se convierte en la primera rejilla de la página y rompe la fidelidad.
 - Separación vertical entre filas viene de `gap-y-*` del form padre (no del grid).
