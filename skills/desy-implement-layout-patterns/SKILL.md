@@ -128,30 +128,32 @@ El legend SIEMPRE va con `class="sr-only"`:
 </div>
 ```
 
-- **Las columnas de mobile y desktop se leen de la referencia.** Si muestra dos columnas en mobile y cuatro en desktop, se escriben las tres clases: `grid-cols-2 lg:grid-cols-4`. No omitas la columna de mobile, no uses `grid-cols-1` si la referencia pone dos y no cambies el número de columnas de desktop por otro. Si la referencia apila los campos, se omite `grid-cols-*` y cada item va a su fila.
+- **La retícula DESY es de 4 columnas en escritorio (`lg`) y 2 en móvil.** La rejilla madre se escribe siempre `grid grid-cols-2 lg:grid-cols-4 gap-lg`; no se elige un número de columnas distinto por página. Los hijos se reparten con `col-span-*` / `lg:col-span-*` sobre esas 4 columnas:
+  - 100%: `col-span-2 lg:col-span-4`.
+  - 50 / 50: `col-span-1 lg:col-span-2` en cada hijo.
+  - 75 / 25: `col-span-2 lg:col-span-3` + `col-span-2 lg:col-span-1`.
+  - Cuatro cuartos: `col-span-1 lg:col-span-1` en cada hijo.
+  - Mixto (1 corto + 2 largos): `col-span-2 lg:col-span-1` + `col-span-2 lg:col-span-1` + `col-span-2 lg:col-span-2`.
 
-  La rejilla se escribe con las clases que salen de la referencia; no la reconstruyas con otras columnas:
+  En móvil sólo hay dos combinaciones: una columna (`col-span-2`) o dos (`col-span-1`). No uses `grid-cols-1`, no omitas `grid-cols-2` y no cambies `lg:grid-cols-4` por `lg:grid-cols-5`, `lg:grid-cols-12` ni ninguna otra rejilla.
 
-  ```html
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-lg">
-  ```
-
-  ❌ `grid grid-cols-2 gap-lg` — falta la columna de desktop.
-  ❌ `grid grid-cols-2 lg:grid-cols-12 gap-lg` — el número de columnas de desktop no es el de la referencia.
-
-- **El gap es el de la referencia, medido con `desy-design-match`.** 28 px entre columnas → `gap-lg` (1.75rem); 16 px → `gap-x-base` (1rem). Los dos son tokens de `desy-styles-reference`; nunca `gap-x-4` ni un valor arbitrario.
+- **El gap de la retícula es `gap-lg`** (1.75rem, 28 px). En una rejilla anidada de campos cortos puede ser `gap-x-base` (1rem, 16 px) si la referencia separa eso; nunca `gap-x-4` ni un valor arbitrario. `gap-base` no es el gap de la retícula madre.
 - **No inventes una rejilla para la intro.** Si la referencia pone la intro y los campos en la misma rejilla, la intro es un hijo con `col-span-*`; una rejilla extra delante se convierte en la primera de la página y rompe la fidelidad.
 - Separación vertical entre filas viene de `gap-y-*` del form padre (no del grid).
 
-### Selección de `lg:grid-cols-N`
+Fuente: [Retícula — DESY](https://desy.aragon.es/estilos-reticula.html).
 
-| Caso de uso | Columnas | Razón |
+### Reparto de la retícula (siempre 4 columnas en `lg`)
+
+| Reparto | Rejilla | Hijos |
 |---|---|---|
-| 2 campos lado a lado en desktop | `lg:grid-cols-2` | Inputs variables (email + confirmar) |
-| Formulario denso (4 campos cortos) | `lg:grid-cols-4` | Cuatro columnas de igual peso |
-| Grid mixto (1 corto + 2 largos) | `lg:grid-cols-5` | El campo corto ocupa una columna y los largos el resto |
+| 100% | `grid-cols-2 lg:grid-cols-4` | `col-span-2 lg:col-span-4` |
+| 50 / 50 | `grid-cols-2 lg:grid-cols-4` | `col-span-1 lg:col-span-2` cada uno |
+| 75 / 25 | `grid-cols-2 lg:grid-cols-4` | `col-span-2 lg:col-span-3` + `col-span-2 lg:col-span-1` |
+| Cuatro cuartos | `grid-cols-2 lg:grid-cols-4` | `col-span-1 lg:col-span-1` cada uno |
+| 1 corto + 2 largos | `grid-cols-2 lg:grid-cols-4` | `col-span-2 lg:col-span-1` + `col-span-2 lg:col-span-1` + `col-span-2 lg:col-span-2` |
 
-**Regla práctica:** cuenta cuántas columnas CABEN en el contenido más ancho. Si tus inputs más anchos ocupan 3 de 4 columnas (e.g. Vía), los demás ocupan el resto (Tipo de vía = 1 col).
+**Regla práctica:** el número de columnas no cambia; cambia el reparto. Si tus inputs más anchos ocupan 3 de 4 columnas, los demás ocupan el resto.
 
 ### Items del grid: `col-span-*`
 
