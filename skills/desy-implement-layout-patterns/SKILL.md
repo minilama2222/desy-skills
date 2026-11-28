@@ -25,7 +25,7 @@ Paso **3** de la secuencia de `desy-preflight-check` — en paralelo con `desy-i
 - ❌ **Olvidar `<fieldset><legend class="sr-only">`** en grupos de inputs: WCAG 2.2 AA obligatorio.
 - ❌ **`<div role="group">` en lugar de `<fieldset>`**: `role="group"` no es estándar, usar fieldset siempre.
 - ❌ **`mb-sm` en h1 sin verificar `-mt-X` del siguiente**: causa overlap (benchmark 2026-06-08). El `c-h1` sin override + `-mt-base` en el lead es idiomático.
-- ❌ **Skip-link como `<button>`**: debe ser `<a href="#content">` (navega, no ejecuta).
+- ❌ **Skip-link como elemento `button`**: debe ser `<a href="#content">` (navega, no ejecuta).
 - ❌ **Cards con altura fija** (`height: 200px`): usar `h-full` para igualar altura en grid.
 - ❌ **Notificaciones sin `role="status"` o `role="alert"`**: sin live region, los screen readers no las anuncian.
 - ❌ **Cards con `<div>` en lugar de `<ul>/<li>`**: la semántica de lista es importante.
@@ -201,7 +201,7 @@ Cuando necesitas 4 inputs cortos (Número, Escalera, Piso, Puerta) en una sola f
   <h2 id="acciones-de-pagina-3" class="sr-only">Acciones de página</h2>
   <ul class="flex flex-wrap gap-sm">
     <li><button type="submit" class="c-button c-button--primary">Siguiente paso</button></li>
-    <li><button class="c-button c-button--transparent">Saltar</button></li>
+    <li><button type="button" class="c-button c-button--transparent">Saltar</button></li>
   </ul>
 </section>
 ```
@@ -271,7 +271,7 @@ El patrón `mt-base mb-base lg:mt-0 lg:mb-0` solo aplica cuando los inputs está
 ## Putting it together: estructura de wizard step
 
 ```html
-<form action="proximo-paso.html">
+<form action="proximo-paso.html" method="post">
   <div class="my-base">
 
     {# Botón volver (atrás) #}
@@ -327,13 +327,14 @@ El patrón `mt-base mb-base lg:mt-0 lg:mb-0` solo aplica cuando los inputs está
     <h2 id="acciones-de-pagina-3" class="sr-only">Acciones de página</h2>
     <ul class="flex flex-wrap gap-sm">
       <li><button type="submit" class="c-button c-button--primary">Siguiente paso</button></li>
-      <li><button class="c-button c-button--transparent">Saltar</button></li>
+      <li><button type="button" class="c-button c-button--transparent">Saltar</button></li>
     </ul>
   </section>
 </form>
 ```
 
 **Notas finales:**
+- `method="post"` siempre que el formulario lleve datos personales (dirección, identidad, contacto): con GET acaban en la URL, el historial y los logs (MWG `forms`).
 - Cada input individual usa los patrones de `w-full` / `lg:w-full` / `w-44 lg:w-full` documentados en `desy-implement-component` (PR paralelo).
 - Los headings (H1, H2) dentro de grid también llevan `w-full`.
 - Los párrafos intro pueden usar `col-span-*` para indicar columnas a ocupar en lugar de `w-full`.
@@ -362,9 +363,9 @@ Convención oficial de DESY (ver `_pattern.cabecera-editar.njk` y `_pattern.cabe
       <section aria-labelledby="acciones-de-cabecera">
         <h2 id="acciones-de-cabecera" class="sr-only">Menú de acciones</h2>
         <ul class="flex flex-wrap flex-col-reverse lg:flex-row-reverse gap-sm lg:items-center lg:ml-auto lg:pl-base">
-          <li><button class="c-button c-button--primary c-button--sm">Guardar y salir</button></li>
-          <li><button class="c-button c-button--sm">Guardar</button></li>
-          <li><button class="c-button c-button--sm">Salir</button></li>
+          <li><button type="button" class="c-button c-button--primary c-button--sm">Guardar y salir</button></li>
+          <li><button type="button" class="c-button c-button--sm">Guardar</button></li>
+          <li><button type="button" class="c-button c-button--sm">Salir</button></li>
         </ul>
       </section>
       <!-- /headerActionsBlock -->
@@ -380,6 +381,7 @@ Convención oficial de DESY (ver `_pattern.cabecera-editar.njk` y `_pattern.cabe
 * `container mx-auto px-base` alinea el contenido al ancho del container de DESY.
 * Skip-link **SIEMPRE PRIMERO** dentro del header (accesibilidad WCAG 2.4.1).
 * Acciones a la derecha en desktop con `lg:ml-auto lg:pl-base`.
+* La cabecera queda fuera del `form`: sus botones llevan `type="button"`. Si uno debe enviar el formulario de la página, `type="submit"` con `form="<id-del-form>"`.
 
 ### Cards grid (misma altura)
 
@@ -429,13 +431,13 @@ Convención oficial de DESY (ver `_pattern.errores-estaticos.njk` y `_pattern.er
 ```html
 <div role="alert" class="border border-error-base bg-error-lighter rounded-sm p-base mb-base">
   <div class="flex items-start">
-    <svg class="w-5 h-5 text-error-base mr-base flex-shrink-0" aria-label="Error" viewBox="0 0 140 140">
+    <svg class="w-5 h-5 text-error-base mr-base flex-shrink-0" aria-hidden="true" focusable="false" viewBox="0 0 140 140">
       <!-- icono de error (X o triángulo) -->
     </svg>
     <div class="flex-1">
       <h3 class="c-h3 text-error-base">Ha ocurrido un error</h3>
       <p class="c-paragraph-base mt-xs">No se ha podido procesar la solicitud. Inténtalo de nuevo.</p>
-      <button class="c-button c-button--primary mt-base">Reintentar</button>
+      <button type="button" class="c-button c-button--primary mt-base">Reintentar</button>
     </div>
   </div>
 </div>
@@ -444,7 +446,7 @@ Convención oficial de DESY (ver `_pattern.errores-estaticos.njk` y `_pattern.er
 **Reglas:**
 
 * `role="alert"` es **obligatorio** (live region — los screen readers lo anuncian automáticamente).
-* `aria-labelledby` o `aria-label` en el icono SVG para accesibilidad.
+* Icono SVG: si el texto de al lado ya dice lo mismo (aquí, «Ha ocurrido un error»), `aria-hidden="true"`. Si el icono es lo único que lo dice, `role="img"` + `aria-label`; un `aria-label` sin `role="img"` no se anuncia de forma fiable.
 * Color semántico: `text-error-base` y `bg-error-lighter` (o `bg-warning-lighter` para warnings).
 * Icono + mensaje + acción correctiva (botón Reintentar, enlace Reportar error, etc.).
 
@@ -455,7 +457,7 @@ Convención oficial de DESY (ver `_pattern.notificacion-identificado.njk`):
 ```html
 <div class="c-notification c-notification--success mt-base" role="status" aria-live="polite">
   <div class="h-full mr-base">
-    <svg class="w-5 h-5 text-success-dark" aria-label="Éxito" viewBox="0 0 140 140">
+    <svg class="w-5 h-5 text-success-dark" role="img" aria-label="Éxito" focusable="false" viewBox="0 0 140 140">
       <!-- icono de check -->
     </svg>
   </div>
@@ -481,51 +483,63 @@ Convención oficial de DESY (ver `_pattern.notificacion-identificado.njk`):
 * `role="status" aria-live="polite"` para notificaciones de éxito (no interrumpe al screen reader).
 * `role="alert"` SOLO para errores que requieren atención inmediata.
 * `c-notification c-notification--success` (o `--error`, `--warning`, `--info`) para variante visual.
+* Icono de estado con `role="img"` + `aria-label="Éxito"`, como lo emite la macro oficial `notification`.
 * Botón de cerrar con `aria-label="Cerrar notificación"`.
 * `tabindex="-1"` en el título para que screen readers puedan enfocarlo programáticamente.
 
 ### FAQs acordeón
 
-Convención oficial de DESY (ver `_pattern.faqs-acordeon.njk`):
+Usa las macros oficiales de desy-html: `components/details` (una pregunta por `<details>`) o, si cada pregunta tiene que ser un heading navegable, `components/accordion`.
 
-```html
-<h2 class="c-h3">Preguntas frecuentes</h2>
-<div class="c-accordion" data-module="c-accordion">
-  <details>
-    <summary>
-      <h3 class="c-h4 flex-1">¿Qué hacer si surge un error?</h3>
-      <svg class="w-4 h-4" aria-hidden="true"><!-- chevron --></svg>
-    </summary>
-    <div class="py-base">
-      <p class="c-paragraph-base">Respuesta de la FAQ...</p>
-    </div>
-  </details>
-  <details>
-    <summary>
-      <h3 class="c-h4 flex-1">¿Cómo dar permisos a una persona?</h3>
-      <svg class="w-4 h-4" aria-hidden="true"><!-- chevron --></svg>
-    </summary>
-    <div class="py-base">
-      <p class="c-paragraph-base">Otra respuesta...</p>
-    </div>
-  </details>
-</div>
+**Por defecto, macro `details`:**
+
+```njk
+{% from "components/details/_macro.details.njk" import componentDetails %}
+
+<section aria-labelledby="preguntas-frecuentes">
+  <h2 id="preguntas-frecuentes" class="c-h3">Preguntas frecuentes</h2>
+  {% call componentDetails({ "summary": { "text": "¿Qué hacer si surge un error?" } }) %}
+    <p class="c-paragraph-base">Respuesta de la FAQ...</p>
+  {% endcall %}
+  {% call componentDetails({ "summary": { "text": "¿Cómo dar permisos a una persona?" } }) %}
+    <p class="c-paragraph-base">Otra respuesta...</p>
+  {% endcall %}
+</section>
 ```
+
+La macro emite `<summary>` con un `<span class="c-link">` dentro y el marcador del navegador; no añadas heading, chevron ni envoltorio `c-accordion`.
+
+**Si cada pregunta debe ser heading, macro `accordion`:**
+
+```njk
+{% from "components/accordion/_macro.accordion.njk" import componentAccordion %}
+
+{{ componentAccordion({
+  "idPrefix": "faq",
+  "heading": { "text": "Preguntas frecuentes", "classes": "c-h3" },
+  "headingLevel": 2,
+  "allowMultiple": true,
+  "items": [
+    { "headerText": "¿Qué hacer si surge un error?", "html": "<p class='c-paragraph-base'>Respuesta de la FAQ...</p>" },
+    { "headerText": "¿Cómo dar permisos a una persona?", "html": "<p class='c-paragraph-base'>Otra respuesta...</p>" }
+  ]
+}) }}
+```
+
+La macro pinta el título en `<h2>` y cada pregunta como `<button type="button" aria-expanded>` dentro de un `<h3>` (un nivel por debajo de `headingLevel`).
 
 **Reglas:**
 
-* Usar `<details>` + `<summary>` HTML nativo (sin JavaScript).
-* `<h3>` dentro del `<summary>` para que screen readers anuncien correctamente.
-* Chevron (SVG) al final del `<summary>` con `aria-hidden="true"` (decorativo).
-* `allowMultiple` solo si la pregunta del usuario lo requiere (normalmente un solo acordeón abierto a la vez).
-* Si necesitas un comportamiento más complejo (e.g. analítica de apertura), usa `componentAccordion` con JS.
+* Nunca un heading dentro de `<summary>`: JAWS y TalkBack exponen `summary` como botón y descartan el heading, así que no se puede saltar de pregunta en pregunta (MWG `accordion`). Si hace falta navegar por headings, usa `componentAccordion`.
+* Varias preguntas abiertas a la vez por defecto: con `details` ya es así (no añadas un `name` común por `attributes`, que las haría exclusivas); con `accordion`, pasa `"allowMultiple": true` (sin él, abrir una cierra las demás). Solo hazlo exclusivo si el usuario lo pide.
+* El título del bloque es un heading visible antes de las preguntas; ajusta su nivel a la jerarquía de la página.
 
 ## Convención de bloques `<!-- blockName -->`
 
-En las páginas oficiales del sitio DESY, las secciones dentro de `<form>` o del layout principal están delimitadas por comentarios HTML con el formato `<!-- blockName -->` y `<!-- /blockName -->`. Esta convención es usada por el `markdown-generator` (script de `markdown-generator.config.js`) para extraer secciones al generar la documentación.
+En las páginas oficiales del sitio DESY, las secciones dentro de un `form` o del layout principal están delimitadas por comentarios HTML con el formato `<!-- blockName -->` y `<!-- /blockName -->`. Esta convención es usada por el `markdown-generator` (script de `markdown-generator.config.js`) para extraer secciones al generar la documentación.
 
 ```html
-<form>
+<form action="#" method="post">
   <!-- notificationHeaderBlock -->
   <!-- /notificationHeaderBlock -->
 
@@ -556,7 +570,7 @@ Además de los anti-patterns ya documentados al inicio:
 
 ❌ **`<div>` con `role="group"` en lugar de `<fieldset>`.** Para agrupar inputs relacionados semánticamente, usa `<fieldset><legend>` (con legend sr-only si no debe verse). `role="group"` no es estándar y no lo reconoce screen readers consistentemente.
 
-❌ **Skip-link fuera del header o como `<button>`.** Debe ser `<a href="#content">` dentro del `<header>` (o antes del `<main>`). Como `<button>` no funciona porque no tiene href.
+❌ **Skip-link fuera del header o como elemento `button`.** Debe ser `<a href="#content">` dentro del `<header>` (o antes del `<main>`). Un `button` no navega porque no tiene href.
 
 ❌ **Cards con altura fija (`height: 200px`) en lugar de `h-full`.** Las cards en grid deben tener `h-full` para que igualen altura con las demás. Altura fija rompe en mobile y con contenido variable.
 

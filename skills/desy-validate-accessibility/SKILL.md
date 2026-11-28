@@ -22,7 +22,7 @@ Paso **5** de la secuencia de `desy-preflight-check` — después de `desy-imple
 ## Errores típicos que evita
 - ❌ **Mergear UI sin pasar axe-core**: el primer escaneo encuentra 5-15 issues triviales (labels sin `for`, contraste < 4.5:1, headings sin jerarquía).
 - ❌ **Confiar solo en automáticas**: axe-core y pa11y detectan ~30-40% de issues. El resto requiere test manual (teclado, lector de pantalla).
-- ❌ **Saltarse lector de pantalla**: `aria-invalid` faltante, `role="alert"` mal aplicado, landmarks duplicados son invisibles a axe pero críticos.
+- ❌ **Saltarse lector de pantalla**: mensaje de error no asociado al campo, `role="alert"` mal aplicado, landmarks duplicados son invisibles a axe pero críticos.
 - ❌ **No probar teclado en modales**: foco que escapa al hacer Tab, Esc que no cierra, foco que no vuelve al botón origen — pasa el scan pero rompe la experiencia.
 - ❌ **Auditar solo en desktop**: test responsive (375px, tablet) revela target size táctil, scroll horizontal, menús hamburguesa inaccesibles.
 
@@ -65,11 +65,22 @@ grep -c '<legend' "$P"
 for id in $(grep -oE '<(input|select|textarea)[^>]* id="[^"]+"' "$P" | grep -v 'type="hidden"' | sed -E 's/.* id="([^"]+)".*/\1/'); do grep -q "for=\"$id\"" "$P" || echo "sin label: $id"; done
 # 5. Skip-link → ≥ 1
 grep -c 'c-skip-link' "$P"
+# 6. <html> con lang → no imprime nada
+perl -0777 -ne 'print "falta lang en <html>\n" unless /<html\b[^>]*\slang=["\x27]?[a-z]/i' "$P"
+# 7. <title> no vacío → no imprime nada
+perl -0777 -ne 'print "falta <title> o está vacío\n" unless /<title>\s*[^<\s][^<]*<\/title>/i' "$P"
+# 8. <meta name="viewport"> → no imprime nada
+perl -0777 -ne 'print "falta <meta name=\"viewport\">\n" unless /<meta\b[^>]*\sname=["\x27]?viewport/i' "$P"
+# 9. Ningún submit deshabilitado (también <button> sin type, que envía) → no imprime nada
+perl -0777 -ne 'while (/<form\b.*?<\/form>/gs) { for (my @b = $& =~ /<(?:button|input)\b[^>]*>/g) { s/\s+/ /g; print "submit deshabilitado: $_\n" if / disabled(?:[ =>\/]|$)/ && (/^<button/ && !/ type="(?:button|reset)"/ || / type="submit"/) } }' "$P"
+# 10. Cada <button> dentro de un <form> con type explícito → no imprime nada
+perl -0777 -ne 'while (/<form\b.*?<\/form>/gs) { for (my @b = $& =~ /<button\b[^>]*>/g) { s/\s+/ /g; print "sin type: $_\n" unless / type="/ } }' "$P"
 ```
 
 - [ ] Los títulos visibles de sección son h2 (o h3) **fuera** del fieldset, y la `legend` los repite con `class="sr-only"`. Una `legend class="c-h2"` deja el `main` sin encabezados.
 - [ ] Los encabezados no saltan de nivel (h1 → h2 → h3).
 - [ ] Los iconos decorativos llevan `aria-hidden="true"`, y los botones que solo tienen icono, `aria-label`.
+- [ ] Los botones del formulario que no envían (Cancelar, Añadir, Ver contraseña) llevan `type="button"`: sin `type`, un `<button>` dentro de `<form>` envía el formulario (la macro `button` de desy-html no pone `type`, y en desy-angular el valor por defecto es `submit`). El submit no se deshabilita: se valida al enviar y se muestran los errores.
 
 ## Workflow
 
@@ -126,7 +137,7 @@ Manual, ~10 minutos. Recorre la página solo con teclado:
 | **Flechas en select** | Cambia la opción seleccionada |
 | **Flechas en tabs** | Cambia entre tabs (W3C APG) |
 | **Flechas en tablas** (role=grid) | Navega entre celdas |
-| **Foco al error-summary** | Al submit de formulario con errores, el foco va al título del resumen |
+| **Foco tras enviar con errores** | Al recargar la página con errores, el foco va al resumen de errores o al primer campo con error |
 
 **Si algo falla:** corregir el orden de focus, añadir skip-link, restaurar outline, etc.
 
@@ -143,11 +154,11 @@ Manual, ~15 minutos. Activa NVDA / VoiceOver / Orca y recorre la página:
 | Lectura de un botón con icono + texto | Lee SOLO el texto (icono es `aria-hidden=true`) |
 | Lectura de un botón solo con icono | Lee el `aria-label` (ej: "Eliminar, botón") |
 | Lectura de un input | Lee el label + el tipo (ej: "Nombre, edición, requerido") |
-| Lectura de un input con error | "Nombre, edición, requerido, error: el campo es obligatorio" |
+| Lectura de un input con error | "Nombre, no válido, edición, requerido, error: el campo es obligatorio" |
 | Lectura de un formulario completo | "Formulario de contacto" (por `aria-label` o `aria-labelledby`) |
 | Lectura de una tabla | "Tabla, 3 filas, 4 columnas. Encabezado: Mes, Pago 1, Pago 2" |
-| Lectura de un modal al abrirse | "Diálogo modal, ¿Eliminar expediente?, título" |
-| Lectura de un link que abre nueva ventana | Anuncia "enlace Se abre en ventana nueva" (por `title`) |
+| Lectura de un modal al abrirse | Anuncia el diálogo con su título (por `aria-labelledby`), p. ej. "¿Eliminar expediente?, diálogo"; en la variante destructiva, el foco cae en "Cancelar, botón" |
+| Lectura de un link que abre nueva ventana | Lee el aviso dentro del enlace, p. ej. "Informe anual (se abre en ventana nueva), enlace" (texto visible o `sr-only`, no `title`) |
 | Navegación por landmarks (D / L en NVDA) | Recorre `<header>`, `<nav>`, `<main>`, `<footer>` |
 
 **Si algo falla:** corregir `aria-label`s, roles, descripciones, etc.
@@ -172,15 +183,15 @@ Manual + herramientas:
 
 | Elemento | Ratio mínimo |
 |---|---|
-| Texto normal (≥18px o ≥14px bold) | 4.5:1 |
-| Texto grande (≥18px bold o ≥24px) | 3:1 |
-| Iconos UI (funcionales, no decorativos) | 3:1 |
-| Boundaries de inputs | 3:1 |
+| Texto normal (todo el que no es texto grande) | 4.5:1 |
+| Texto grande (≥24 px, o ≥18.66 px en negrita) | 3:1 |
+| Componentes de interfaz e iconos funcionales (no decorativos) | 3:1 |
+| Bordes de inputs | 3:1 |
 
 **Comprobar:**
 - Texto sobre fondo blanco
 - Texto sobre colores `light` (mensajes de estado)
-- Texto sobre colores `base` (botones, solo permitido si semibold ≥16px)
+- Texto sobre colores `base` (botones, solo permitido si semibold ≥16px; a ese tamaño sigue siendo texto normal y necesita 4.5:1)
 - Borders de inputs (1px) sobre fondo
 
 ### Paso 5: Test responsive (mobile + desktop)
@@ -238,7 +249,7 @@ Tras todos los tests, compila un reporte de accesibilidad:
 
 ## Contraste y color
 - [x] Texto principal: 4.5:1+
-- [x] Texto sobre base: 16px+ semibold
+- [x] Texto sobre base: 16px+ semibold y 4.5:1+
 - [x] Borders inputs: 3:1+
 - [ ] X falla: [detalle]
 
@@ -268,7 +279,8 @@ Tras todos los tests, compila un reporte de accesibilidad:
 - 2.1.2 No Keyboard Trap: [ok / falla]
 - 2.4.3 Focus Order: [ok / falla]
 - 2.4.7 Focus Visible: [ok / falla]
-- 2.5.5 Target Size (AAA, pero es best practice): [ok / falla]
+- 2.5.8 Target Size (Minimum): 24×24 px CSS como mínimo, o espaciado equivalente: [ok / falla]
+- 2.5.5 Target Size (Enhanced), AAA, recomendación: 44×44 px: [ok / falla]
 - 3.3.1 Error Identification: [ok / falla]
 - 3.3.2 Labels or Instructions: [ok / falla]
 - 4.1.2 Name, Role, Value: [ok / falla]
@@ -281,9 +293,9 @@ Tras todos los tests, compila un reporte de accesibilidad:
 - [ ] Elemento `<button>` (no `<div>` ni `<a>` salvo que enlace)
 - [ ] Etiqueta clara (verbo en infinitivo, 1-2 palabras, no mayúsculas)
 - [ ] Si lleva icono + texto: `aria-hidden=true` en SVG
-- [ ] Si lleva solo icono: `role=img` + `aria-label`
-- [ ] Si `target=_blank`: atributo `title` avisando
-- [ ] Disabled: `aria-disabled` automático, NO botón invisible
+- [ ] Si lleva solo icono: `aria-label` en el `<button>` que describe la acción, y el SVG con `aria-hidden="true"` (el nombre lo lleva el botón, no el icono)
+- [ ] Si abre en ventana nueva (`target="_blank"`): el aviso va dentro del enlace, con texto visible o con `<span class="sr-only">(se abre en ventana nueva)</span>`. No uses el atributo `title` para avisar: solo se ve al pasar el ratón y no llega por teclado (MWG `accessibility`)
+- [ ] Disabled: `aria-disabled` automático, NO botón invisible. El submit de un formulario no se deshabilita: se valida al enviar
 - [ ] Estados: default / loading / success / error
 - [ ] Contraste: border primary-base 1px sobre fondo blanco
 
@@ -294,8 +306,9 @@ Tras todos los tests, compila un reporte de accesibilidad:
 - [ ] `autocomplete` cuando aplique (`email`, `tel`, `postal-code`, etc.)
 - [ ] `type` correcto (`text`, `email`, `tel`, `date`, etc.)
 - [ ] Si tiene hint: `<p id="hint">` + `aria-describedby` en el input
-- [ ] Si tiene error: `<p id="error">` con `<span class="sr-only">Error:</span>` + `aria-errormessage` + `aria-invalid=true`
-- [ ] Foco al error-summary al submit con errores
+- [ ] Si tiene error, sigue el patrón de errores:
+
+  > Con error de servidor: la macro emite `aria-invalid="true"` y `aria-errormessage`; el mensaje va con la macro `errorMessage` (prefijo `<span class="sr-only">Error:</span>`); arriba del formulario, un resumen de errores con enlaces a cada campo; al recargar, foco en el resumen o en el primer campo con error. Validación en el cliente: consulta MWG `accessible-error-announcement` y `validate-input-after-interaction` (`aria-invalid="false"` hasta `:user-invalid`). No se fija `aria-invalid="true"` a mano en el marcado.
 - [ ] `<form>` con `aria-label` o `aria-labelledby`
 - [ ] Foco visible: NO `outline: none` sin alternativa
 - [ ] Border input error: 1px alert-dark
@@ -317,14 +330,18 @@ Tras todos los tests, compila un reporte de accesibilidad:
 - [ ] Foco al cerrarse vuelve al elemento que lo abrió
 - [ ] Icono de cierre con `aria-label`
 - [ ] Variante destructiva: botón principal a la derecha, color `alert`
+- [ ] Variante destructiva: foco inicial en Cancelar (la acción segura), en lugar del encabezado. El botón Cancelar tiene `id` y se pasa como tercer argumento (`focusFirst`) de `openDialog`. En desy-html, en el botón que abre el modal: `"onclick": "openDialog('modal-eliminar', this, 'boton-cancelar-eliminar')"`.
+
+> Choque con MWG `dialog`: MWG recomienda `<dialog>` nativo sin `role`/`aria-modal`. Los componentes `modal` y `dialog` de DESY son `<div>` gestionados por `dialog.js`, que exige `role="dialog"`; por eso aquí sí se pide. Mejora pendiente en la librería: migrar a `<dialog>` nativo.
 
 ### Imágenes
 - [ ] `alt` descriptivo (o `alt=""` si decorativa)
-- [ ] Si SVG personalizado: `role=img` + `aria-label`
+- [ ] Si SVG personalizado informativo, fuera de un botón o enlace: `role="img"` + `aria-label`
 
 ### Iconos
 - [ ] Si acompañan texto: `aria-hidden=true`
-- [ ] Si van solos: `role=img` + `aria-label` que describa la acción
+- [ ] Si van solos dentro de un botón o enlace: `aria-hidden="true"` en el icono y `aria-label` en el control, que describa la acción
+- [ ] Si van solos y transmiten información (estado, aviso) fuera de un control: `role="img"` + `aria-label`
 
 ### Navegación
 - [ ] Landmarks: `<header>`, `<nav>`, `<main>`, `<footer>`
@@ -335,7 +352,7 @@ Tras todos los tests, compila un reporte de accesibilidad:
 
 ### Contraste (recordatorio)
 - [ ] Texto sobre fondo blanco: usar colores `neutral-base` o más oscuros (4.5:1+)
-- [ ] Texto sobre colores `base` (botones): solo permitido si peso semibold y ≥16px (3:1+)
+- [ ] Texto sobre colores `base` (botones): solo permitido si peso semibold y ≥16px, y con 4.5:1 (16 px semibold no es texto grande)
 - [ ] Texto sobre colores `light`: en mensajes de estado, no en texto principal
 - [ ] Borders de inputs: 3:1+ sobre fondo
 
@@ -367,7 +384,7 @@ Tras todos los tests, compila un reporte de accesibilidad:
 2. **Test de teclado** (5 min):
    - Tab → foco al botón, outline visible ✅
    - Enter → activa la acción ✅
-   - Si hay confirmación, abre modal con foco en título ✅
+   - Si hay confirmación, abre el modal con el foco en Cancelar (`focusFirst` de `openDialog`) ✅
 
 3. **Test con lector de pantalla** (5 min):
    - Botón anuncia: "Eliminar, botón" (no "icono de papelera, botón")
@@ -414,39 +431,34 @@ Tras todos los tests, compila un reporte de accesibilidad:
    - Issues medios: corregir antes de próxima release
    - Issues bajos: backlog
 
-### Ejemplo: Detección de issue específico (aria-invalid faltante)
+### Ejemplo: Detección de issue específico (error que el lector no anuncia)
 
-**Contexto:** el equipo hizo un formulario de login sin `aria-invalid` en los inputs con error.
+**Contexto:** el equipo hizo un formulario de login con el `<input>` escrito a mano, sin la macro `input` de DESY, y el mensaje de error es un `<p>` suelto debajo del campo.
 
 **Test:**
-- Submit con campo vacío
-- axe-core detecta: "Form elements must have labels" — falso positivo (label existe)
+- Submit con el email mal escrito
+- axe-core no lo detecta: el campo tiene label y el mensaje se ve
 - **Test manual con lector de pantalla:**
-  - Introduce email mal
-  - Submit → focus al error summary
-  - Lector lee: "Email, edición" — **NO dice "error"**
-- **Issue:** falta `aria-invalid=true` y `aria-errormessage` con id del mensaje de error
+  - Tras recargar, el foco va al resumen de errores
+  - Al ir al campo, el lector lee: "Email, edición" — **NO dice "error"** ni lee el mensaje
+- **Issue:** el mensaje de error no está asociado al campo, porque el campo no sale de la macro
 
-**Fix** (en `componente-input-text-codigo.html`):
-```html
-<!-- ANTES -->
-<input type="email" id="email" name="email" />
+**Fix:** usar la macro `input` con `errorMessage` y seguir el patrón de errores (resumen de errores con enlace al campo, foco al recargar). No se añade `aria-invalid` a mano: la macro emite `aria-invalid` y `aria-errormessage` solo cuando recibe `errorMessage`, y deja de emitirlos cuando el campo es válido.
 
-<!-- DESPUÉS -->
-<input
-  type="email"
-  id="email"
-  name="email"
-  aria-invalid="true"
-  aria-errormessage="email-error"
-/>
-<p id="email-error" class="text-alert-dark text-sm">
-  <span class="sr-only">Error:</span>
-  El formato del email no es válido
-</p>
+```njk
+{{ componentInput({
+  "id": "email",
+  "name": "email",
+  "type": "email",
+  "autocomplete": "email",
+  "label": { "text": "Email" },
+  "errorMessage": { "text": "El formato del email no es válido" }
+}) }}
 ```
 
-**Re-test:** lector de pantalla ahora lee "Email, edición, error: el formato del email no es válido" ✅
+Si la validación se hace en el cliente, sin recargar, consulta MWG `accessible-error-announcement` y `validate-input-after-interaction`.
+
+**Re-test:** lector de pantalla ahora lee "Email, no válido, edición, error: el formato del email no es válido" ✅
 
 ## Recursos
 
